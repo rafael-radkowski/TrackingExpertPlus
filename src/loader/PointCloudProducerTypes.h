@@ -1,0 +1,24 @@
+
+#ifndef POINTCLOUDPRODUCERTYPES
+#define POINTCLOUDPRODUCERTYPES
+
+
+/*
+typedef enum _SensorType
+{
+	NONE,
+	KINECT_V1,
+	KINECT_V2,
+	STRUCTUR_IO,
+	P60U,
+	REC_KINECT_V1,
+	REC_STRUCTUR_IO,
+	REC_P60U,
+	REALSENSE
+
+}SensorType;
+
+*/
+
+
+#endif
