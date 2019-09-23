@@ -100,7 +100,7 @@ if(__find_version)
 	set(OpenCV_LIBVERSION "${OPENCV_VERSION_MAJOR}${OPENCV_VERSION_MINOR}${OPENCV_VERSION_PATCH}")
 
 	mark_as_advanced(OpenCV_VERSION)
-	message("[FindOpenCV] - Found OpenCV at " ${OpenCV_DIR} ", Version "  ${OpenCV_VERSION})
+	message(STATUS "[FindOpenCV] - Found OpenCV at " ${OpenCV_DIR} ", Version "  ${OpenCV_VERSION})
 endif()
 unset(__find_version CACHE)
 
@@ -123,7 +123,7 @@ if(__find_version)
 
 
 	mark_as_advanced(OpenCV_VERSION)
-	message("[FindOpenCV] - Found OpenCV at " ${OpenCV_DIR} ", Version "  ${OpenCV_VERSION})
+	message(STATUS "[FindOpenCV] - Found OpenCV at " ${OpenCV_DIR} ", Version "  ${OpenCV_VERSION})
 endif()
 unset(__find_version CACHE)
 
@@ -391,7 +391,7 @@ if(${OPENCV_VERSION_MAJOR} EQUAL "3")
 		endif ()
 
 	else()
-		message("[FindOpenCV] - ERROR - Did not find any OpenCV library")
+		message(STATUS "[FindOpenCV] - ERROR - Did not find any OpenCV library")
 	endif ()
 
 
