@@ -1,1 +1,12 @@
 .DS_Store
+ALL_BUILD.vcxproj
+ALL_BUILD.vcxproj.filters
+cmake_install.cmake
+ZERO_CHECK.vcxproj
+.vs/
+ZERO_CHECK.vcxproj.filters
+*.sln
+CMakeFiles/
+*.vcxproj
+*.filters
+CMakeCache.txt
