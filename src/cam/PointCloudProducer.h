@@ -1,5 +1,7 @@
 #pragma once
 /*
+class PointCloudProducer
+
 The class point cloud producer produces a point cloud from one or more camera images.
 It implements the interface to OpenNI cameras, provides sampling and filter algorithms, 
 and returns the complete point cloud. 
@@ -18,15 +20,16 @@ Rafael Radkowski
 Iowa State University
 rafael@iastate.edu
 Oct. 20, 2017
+MIT License
+---------------------------------------------------------------
 
-Edits:
+Last Changes:
 
 May 5th, 2018,RR
 - store the last depth image in _depth_16U 
 - added a api to access the location of the last depth image. 
 July 12, 2019
 - Removed a propriatory camera from the set.
-
 */
 
 #include <opencv2\opencv.hpp>

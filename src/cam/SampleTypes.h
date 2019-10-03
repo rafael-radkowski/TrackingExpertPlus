@@ -1,12 +1,15 @@
 #pragma once
 /*
+class SampleTypes
+
 File contains types for the class Sample.
 
 Rafael Radkowski
 Iowa State University
 rafael@iastate.edu
 Sep 4th, 2017
-All rights reserved
+MIT License 
+---------------------------------------------------------------
 */
 
 

@@ -1,3 +1,13 @@
+/*
+class FileUtils
+
+Rafael Radkowski
+Iowa State University
+rafael@iastate.edu
+MIT License
+---------------------------------------------------------------
+*/
+
 #ifndef __FILE_UTILS__
 #define __FILE_UTILS__
 

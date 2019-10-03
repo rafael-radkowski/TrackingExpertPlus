@@ -1,3 +1,13 @@
+/*
+class NoiseFilter
+
+Rafael Radkowski
+Iowa State University
+rafael@iastate.edu
+MIT License
+---------------------------------------------------------------
+*/
+
 #ifndef __GAUSSIAN_NOISE__
 #define __GAUSSIAN_NOISE__
 

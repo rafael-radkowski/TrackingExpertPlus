@@ -1,5 +1,7 @@
 #pragma once
-/******************************************************************************************
+/*
+class cuPCU
+
 The class cuPCU (point cloud utils) provides apis too transfer a depth image into
 a point cloud and to calculate normal vector for each point in this point clouud.
 The input is a pointer to the image memory. The output a vector with point cloud points. 
@@ -22,8 +24,9 @@ Rafael Radkowski
 Iowa State University
 rafael@iastate.edu
 September 27, 2017
-All rights reserved.
-********************************************************************************************/
+MIT License
+---------------------------------------------------------------
+*/
 
 // stl
 #include <stdio.h>

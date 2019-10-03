@@ -1,6 +1,8 @@
 #ifndef __FDTYPES__
 #define __FDTYPES__
 /*
+class FDTypes
+
 The class implements feature descriptors types which are required for PPF and CPF
 
 PPF is according to 
@@ -10,9 +12,9 @@ http://campar.in.tum.de/pub/drost2010CVPR/drost2010CVPR.pdf
 Rafael Radkowski
 Iowa State University
 rafael@iastate.edu
-All copyrights reserved.
+MIT License
 ---------------------------------------------------------------
-Last edits:
+Last Changes:
 
 
 */

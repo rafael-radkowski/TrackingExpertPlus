@@ -1,3 +1,13 @@
+/*
+class Types
+
+Rafael Radkowski
+Iowa State University
+rafael@iastate.edu
+MIT License
+---------------------------------------------------------------
+*/
+
 #ifndef __TYPES__
 #define __TYPES__
 

@@ -1,5 +1,13 @@
 #pragma once
+/*
+class Cuda_Helpers
 
+Rafael Radkowski
+Iowa State University
+rafael@iastate.edu
+MIT License
+---------------------------------------------------------------
+*/
 
 // cuda
 #include "cuda_runtime.h"

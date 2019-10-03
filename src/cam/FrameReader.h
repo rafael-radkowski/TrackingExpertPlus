@@ -1,10 +1,15 @@
-//
-//  FrameReader.h
-//  DenseModelTracking
-//
-//  Created by David Wehr on 10/29/14.
-//  Copyright (c) 2014 Dr. Rafael Radkowski. All rights reserved.
-//
+/*
+FrameReader.h
+DenseModelTracking
+
+Created by David Wehr on 10/29/14.
+
+Rafael Radkowski
+Iowa State University
+rafael@iastate.edu
+MIT License
+---------------------------------------------------------------
+*/
 
 #ifndef __DenseModelTracking__FrameReader__
 #define __DenseModelTracking__FrameReader__

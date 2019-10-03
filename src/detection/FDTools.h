@@ -1,5 +1,13 @@
 #pragma once
+/*
+class FDTools
 
+Rafael Radkowski
+Iowa State University
+rafael@iastate.edu
+Mit License
+---------------------------------------------------------------
+*/
 
 
 // stl

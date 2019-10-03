@@ -1,5 +1,7 @@
 #pragma once
-/******************************************************************************************
+/*
+class cuDeviceMemory
+
 This class manages all cuda memory that is required for image processing within the 
 TrackingExpert application. It is a global storage, which is integrated as a singleton to
 maintain global access to the cuda device memory from different locations of the application.
@@ -17,8 +19,9 @@ Rafael Radkowski
 Iowa State University
 rafael@iastate.edu
 September 27, 2017
-All rights reserved.
-********************************************************************************************/
+MIT License
+---------------------------------------------------------------
+*/
 
 // stl
 #include <stdio.h>

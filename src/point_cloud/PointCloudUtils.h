@@ -1,12 +1,13 @@
 #pragma once
 /*
-
+class PointCloudUtils
 
 Rafael Radkowski
 Iowa State University 
 Feb 2018
 rafael@iastate.edu
 MIT License
+---------------------------------------------------------------
 */
 
 #include <iostream>

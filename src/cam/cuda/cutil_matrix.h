@@ -1,3 +1,13 @@
+/*
+class cutil_matrix
+
+Rafael Radkowski
+Iowa State University
+rafael@iastate.edu
+MIT License
+---------------------------------------------------------------
+*/
+
 #pragma once
 // stl
 #include <stdio.h>

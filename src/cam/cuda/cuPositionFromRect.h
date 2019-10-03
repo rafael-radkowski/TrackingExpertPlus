@@ -1,5 +1,7 @@
 #pragma once
-/*************************************************************************************
+/*
+class cuPositionFromRect
+
 The class extract the 3D position of an object from the region or interest in an image.
 
 Input is an image with [x, y, z] points stored in an image grid. The PointCloudProducer
@@ -18,9 +20,9 @@ Rafael Radkowski
 Iowa State University
 rafael@iastate.edu
 May 5th, 2018
-All rights reserved.
-
-**************************************************************************************/
+MIT License
+---------------------------------------------------------------
+*/
 
 
 // stl

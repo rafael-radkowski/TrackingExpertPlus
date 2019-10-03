@@ -15,9 +15,9 @@ http://campar.in.tum.de/pub/drost2010CVPR/drost2010CVPR.pdf
 Rafael Radkowski
 Iowa State University
 rafael@iastate.edu
-All copyrights reserved.
+MIT License
 ---------------------------------------------------------------
-Latest edits
+Last Changes: 
 
 March 20, 2019, RR
 - Changed the variable g_dlg_ppf_nn = 9, to 9 since the kd-tree radius search is limited to 10 hits. 

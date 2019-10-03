@@ -1,5 +1,7 @@
 #pragma once
 /*
+class ICPTransform 
+
 This class implements an ICP point alignment from two set of points. 
 It only implements the transformation part of a point-to-point ICP algorithm.
 Means, the points in the input vectors points0 and points1 MUST be index aligned nearest neighbors
@@ -16,6 +18,8 @@ Rafael Radkowski
 Iowa State University
 rafael@iastate.edu
 Nov. 17, 2017
+MIT License
+---------------------------------------------------------------
 */
 
 

@@ -1,4 +1,13 @@
 #pragma once
+/*
+class sort 
+
+Rafael Radkowski
+Iowa State University
+rafael@iastate.edu
+MIT License
+---------------------------------------------------------------
+*/
 
 #include "Cuda_Helpers.h"
 #include "Cuda_Common.h"

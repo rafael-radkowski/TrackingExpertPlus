@@ -1,3 +1,12 @@
+/*
+class SensorConfig
+
+Rafael Radkowski
+Iowa State University
+rafael@iastate.edu
+MIT License
+---------------------------------------------------------------
+*/
 #include "ICP.h"
 #include "PointCloud.h"
 #include "ICPConfig.h"

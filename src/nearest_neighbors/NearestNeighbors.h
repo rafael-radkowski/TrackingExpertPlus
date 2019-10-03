@@ -1,5 +1,13 @@
 #pragma once
+/*
+class NearestNeighbors
 
+Rafael Radkowski
+Iowa State University
+rafael@iastate.edu
+MIT License
+---------------------------------------------------------------
+*/
 
 
 

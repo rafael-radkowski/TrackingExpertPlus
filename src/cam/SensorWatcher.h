@@ -1,10 +1,17 @@
-//
-//  SensorWatcher.h
-//  DenseModelTracking
-//
-//  Created by David Wehr on 11/7/14.
-//  Copyright (c) 2014 Dr. Rafael Radkowski. All rights reserved.
-//
+/*
+class SensorWatcher 
+
+SensorWatcher.h
+DenseModelTracking
+
+Created by David Wehr on 11/7/14.
+
+Rafael Radkowski
+Iowa State University
+rafael@iastate.edu
+MIT License
+---------------------------------------------------------------
+*/
 
 #ifndef __DenseModelTracking__SensorWatcher__
 #define __DenseModelTracking__SensorWatcher__

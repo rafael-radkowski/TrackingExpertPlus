@@ -1,3 +1,13 @@
+/*
+class Sampling 
+
+Rafael Radkowski
+Iowa State University
+rafael@iastate.edu
+MIT License
+---------------------------------------------------------------
+*/
+
 #ifndef __SAMPLING__
 #define __SAMPLING__
 

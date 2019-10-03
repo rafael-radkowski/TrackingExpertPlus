@@ -16,7 +16,7 @@ rafael@iastate.edu
 Jan 2, 2015
 MIT License
 ------------------------------------------------------
-Last changes:
+Last Changes:
 
 */
 

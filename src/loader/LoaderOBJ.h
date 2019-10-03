@@ -1,3 +1,13 @@
+/*
+class LoaderObj
+
+Rafael Radkowski
+Iowa State University
+rafael@iastate.edu
+MIT License
+---------------------------------------------------------------
+*/
+
 #ifndef __LOADER_OBJ__
 #define __LOADER_OBJ__
 

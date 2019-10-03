@@ -1,3 +1,13 @@
+/*
+class SamplingTypes
+
+Rafael Radkowski
+Iowa State University
+rafael@iastate.edu
+MIT License
+---------------------------------------------------------------
+*/
+
 #ifndef __SAMPLING_TIMES__
 #define __SAMPLING_TIMES__
 

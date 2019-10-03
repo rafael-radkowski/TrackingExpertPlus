@@ -1,6 +1,7 @@
 #pragma once
 
 /*
+class cuPCUImpl
 This file contains cuda device code implementing different poinnt cloud utils functions
 
 Features:
@@ -12,6 +13,8 @@ Features:
  Ames, IA 50011
  rafael@iastate.edu
  Aug. 17, 2017
+ MIT License
+ ---------------------------------------------------------------
 */
 
 

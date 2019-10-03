@@ -1,6 +1,12 @@
 #pragma once
 /*
+class Cuda_KdTree
 
+Rafael Radkowski
+Iowa State University
+rafael@iastate.edu
+MIT License
+---------------------------------------------------------------
 */
 
 

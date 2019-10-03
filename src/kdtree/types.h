@@ -1,4 +1,14 @@
 #pragma once
+/*
+class types 
+
+Rafael Radkowski
+Iowa State University
+rafael@iastate.edu
+MIT License
+---------------------------------------------------------------
+*/
+
 #include <iostream>
 #include <vector>
 

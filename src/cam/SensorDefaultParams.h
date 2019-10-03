@@ -1,24 +1,21 @@
 #pragma once
 
 /*
+class SensorDefaultParams
+
 This file keeps the data for different sensor configurations such as the focal length, the projection parameters, etc.
-
-
 
 Focal length
 - Kinect V1: 520.0
 - Kinect V2: 361.1
 - P60U:
 
-
-
-
-
-
 Rafael Radkowski
 Iowa State University
 Aug. 1st, 2017
 rafael@iastate.edu
+MIT License
+---------------------------------------------------------------
 */
 
 typedef enum _SensorType

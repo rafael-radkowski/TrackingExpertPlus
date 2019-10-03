@@ -1,5 +1,5 @@
 /*
-LogMetaData
+class LogTypes
 
 This class is a part of the performance analysis example. 
 It is a helper object to pass meta information pertaining to a test to
@@ -17,7 +17,7 @@ rafael@iastate.edu
 July 19, 2019
 MIT License
 ----------------------------------------------------
-last edited:
+Last Changes:
 
 */
 #pragma once

@@ -1,4 +1,13 @@
 #pragma once
+/*
+class dequeue
+
+Rafael Radkowski
+Iowa State University
+rafael@iastate.edu
+MIT License
+---------------------------------------------------------------
+*/
 // cuda
 #include "cuda_runtime.h"
 

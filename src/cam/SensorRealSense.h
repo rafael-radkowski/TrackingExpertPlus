@@ -1,7 +1,15 @@
-//
-//  Created by Jiale Feng on 11/7/2018 for Rockwell Collins project.
-//  Copyright (c) 2018 Jiale Feng. All rights reserved.
-//
+/*
+class SensorRealSense
+
+Created by Jiale Feng on 11/7/2018 
+Copyright (c) 2018 Jiale Feng. All rights reserved.
+
+Rafael Radkowski
+Iowa State University
+rafael@iastate.edu
+MIT License
+---------------------------------------------------------------
+*/
 
 #include "ICP_Exports.h"
 #include <iostream>
