@@ -34,7 +34,7 @@ Last Changes:
 
 using namespace std;
 
-namespace isu_ar
+namespace texpert
 {
 
 typedef struct _Arguments
@@ -134,7 +134,7 @@ private:
 
 
 
-}// namespace arlab
+}// namespace texpert
 
 
 #endif

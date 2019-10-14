@@ -37,6 +37,7 @@ namespace tacuda
 
 
 using namespace tacuda;
+using namespace texpert; 
 
 /*
 Allocate device memory for an image of width x height x channels.

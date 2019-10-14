@@ -1,7 +1,7 @@
 #include "NoiseFilter.h"
 
 
-
+using namespace texpert; 
 
 /*
 Add Gaussian noise to a point cloud.  

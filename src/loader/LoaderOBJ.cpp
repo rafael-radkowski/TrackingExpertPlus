@@ -1,6 +1,6 @@
 #include "LoaderOBJ.h"
 
-
+using namespace texpert; 
 
 
 //Helper functions

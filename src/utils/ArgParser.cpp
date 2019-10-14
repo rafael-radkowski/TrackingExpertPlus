@@ -1,7 +1,7 @@
 #include "ArgParser.h"
 
 
-using namespace isu_ar;
+using namespace texpert;
 
 
 namespace ArgParserTypes{

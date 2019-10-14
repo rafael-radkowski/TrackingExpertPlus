@@ -1,7 +1,7 @@
 #include "PointCloudTransform.h"
 
 
-using namespace isu_ar;
+using namespace texpert;
 
 
 const float deg2rad = 3.141592653589793238463 / 180.0;

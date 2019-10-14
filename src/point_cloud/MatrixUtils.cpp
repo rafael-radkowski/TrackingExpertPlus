@@ -1,7 +1,7 @@
 #include "MatrixUtils.h"
 
 
-using namespace isu_ar;
+using namespace texpert;
 
 /*
 Converts an Eigen::AAffine3f transformation to a glm4 matrix

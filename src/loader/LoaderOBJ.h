@@ -29,6 +29,8 @@ MIT License
 using namespace std;
 
 
+namespace texpert {
+
 class LoaderObj{
 private:
 
@@ -49,4 +51,5 @@ public:
 	static bool Read(string file, vector<Eigen::Vector3f>* dst_points, vector<Eigen::Vector3f>* dst_normals, bool invert_z = true, bool verbose = false);
 };
 
+} //texpert 
 #endif

@@ -32,7 +32,7 @@ MIT License
 
 using namespace std;
 
-namespace isu_ar
+namespace texpert
 {
 
 	class MatrixUtils

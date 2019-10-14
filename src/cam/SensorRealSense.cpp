@@ -1,5 +1,7 @@
 #include "SensorRealSense.h"
 
+using namespace texpert; 
+
 SensorRealSense::SensorRealSense()
 {
 	_depth_height = -1;

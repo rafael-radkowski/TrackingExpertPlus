@@ -1,6 +1,6 @@
 #include "TimeUtils.h"
 
-
+using namespace texpert; 
 
 
 //const 

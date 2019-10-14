@@ -30,6 +30,7 @@ MIT License
 using namespace std;
 
 
+namespace texpert {
 
 class NoiseFilter
 {
@@ -61,4 +62,5 @@ public:
 
 };
 
+} //texpert 
 #endif

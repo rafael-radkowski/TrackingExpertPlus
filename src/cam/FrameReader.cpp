@@ -8,6 +8,8 @@
 #include "stdafx.h"
 #include "FrameReader.h"
 
+using namespace texpert; 
+
 DepthStreamListener::DepthStreamListener(std::function<void()> callback){
 	new_frame = false;
 	 focal_length_kinect=361.6;

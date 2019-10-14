@@ -36,6 +36,8 @@ MIT License
 using namespace Eigen;
 using namespace std;
 
+namespace texpert {
+
 class ICPTransform
 {
 public:
@@ -52,21 +54,36 @@ public:
 
 private:
 
-	/*	Calculate the rotation using the method from Arun et al. 1987	Arun, K., Huang, T.S., and Blostein, S.D., 1987. “Least - squares fitting of two 3 - d point sets”.	IEEE Transactions on Pattern Analysis and Machine Intel - ligence, PAMI - 9(5), Sept, pp. 698–700	@param pVec0 - first point array, each element needs to be a vector4 [[x, y, z, w], [x, y, z, w], ...]	@param pVec1 - second point array, each element needs to be a vector4 [[x, y, z, w], [x, y, z, w], ...]	@param return: 3x3 matrix with the delta rotation	*/	static Matrix3f CalcRotationArun( vector<Vector3f>& pVec0, vector<Vector3f>& pVec1);
+	/*
+	Calculate the rotation using the method from Arun et al. 1987
+	Arun, K., Huang, T.S., and Blostein, S.D., 1987. “Least - squares fitting of two 3 - d point sets”.
+	IEEE Transactions on Pattern Analysis and Machine Intel - ligence, PAMI - 9(5), Sept, pp. 698–700
+
+	@param pVec0 - first point array, each element needs to be a vector4 [[x, y, z, w], [x, y, z, w], ...]
+	@param pVec1 - second point array, each element needs to be a vector4 [[x, y, z, w], [x, y, z, w], ...]
+	@param return: 3x3 matrix with the delta rotation
+	*/
+	static Matrix3f CalcRotationArun( vector<Vector3f>& pVec0, vector<Vector3f>& pVec1);
 
 
 	/*
 	Calculates the translation delta between both point sets as mean.
-	@param pVec0 - first point array, each element needs to be a vector4 [[x, y, z, w], [x, y, z, w], ...]	@param pVec1 - second point array, each element needs to be a vector4 [[x, y, z, w], [x, y, z, w], ...]	@param return: Vec 3 with the delta translation
+	@param pVec0 - first point array, each element needs to be a vector4 [[x, y, z, w], [x, y, z, w], ...]
+	@param pVec1 - second point array, each element needs to be a vector4 [[x, y, z, w], [x, y, z, w], ...]
+	@param return: Vec 3 with the delta translation
 	*/
 	static Vector3f CalculateTranslation(vector<Vector3f>& pVec0, vector<Vector3f>& pVec1);
 
 	/*
 	Check the root mean square error between the two points sets. 
 	Do not forget to translate the reference point set before checking. 
-	@param pVec0 - first point array, each element needs to be a vector4 [[x, y, z, w], [x, y, z, w], ...]	@param pVec1 - second point array, each element needs to be a vector4 [[x, y, z, w], [x, y, z, w], ...]	@param return: float values representing the RMS
+	@param pVec0 - first point array, each element needs to be a vector4 [[x, y, z, w], [x, y, z, w], ...]
+	@param pVec1 - second point array, each element needs to be a vector4 [[x, y, z, w], [x, y, z, w], ...]
+	@param return: float values representing the RMS
 	*/
 	static float CheckRMS(vector<Vector3f>& pVec0, vector<Vector3f>& pVec1);
 
 
 };
+
+} //texpert 

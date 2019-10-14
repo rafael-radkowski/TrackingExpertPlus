@@ -26,6 +26,8 @@ using namespace osg;
 using namespace std;
 using namespace mycv;
 
+namespace texpert {
+
 class ICPTrackingLib_EXPORTS DepthStreamListener : public openni::VideoStream::NewFrameListener {
 private:
 	//Sensor data
@@ -81,5 +83,6 @@ public:
 	*/
 	vector<vector<uint16_t>>* readerGetFrames();
 };
+} //texpert
 
 #endif /* defined(__DenseModelTracking__FrameReader__) */

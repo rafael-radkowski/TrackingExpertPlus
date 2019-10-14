@@ -13,6 +13,7 @@ namespace Sampling_ns{
 
 
 using namespace Sampling_ns;
+using namespace texpert;
 
 /*
 Sample the point cloud with a uniform sampling filter. 

@@ -11,6 +11,7 @@
 using namespace  tacuda;
 #endif
 
+using namespace texpert; 
 
 // These are the variables of a plane with CP_A * x + CP_B * y + CP_C * z = CP_D
 // where a point gets removed if CP_D - current_D > CP_THRESHOLD

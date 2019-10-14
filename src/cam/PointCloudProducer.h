@@ -50,7 +50,7 @@ July 12, 2019
 
 using namespace std;
 
-namespace trex{
+namespace texpert{
 
 
 class PointCloudProducer
@@ -318,4 +318,4 @@ private:
 
 };
 
-} //trex
+} //texpert

@@ -38,7 +38,7 @@ MIT License
 #include <opencv2\core.hpp>
 
 
-namespace tacuda
+namespace texpert
 {
 
 
@@ -110,4 +110,4 @@ protected:
 
 };
 
-}//namespace tacuda
+}//namespace texpert

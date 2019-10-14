@@ -1,7 +1,7 @@
 #include "FDTools.h"
 
 
-using namespace isu_ar;
+using namespace texpert;
 
 // static
 float FDTools::angleBetween(const Eigen::Vector3f& a, const Eigen::Vector3f& b)

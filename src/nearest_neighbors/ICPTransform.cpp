@@ -2,6 +2,7 @@
 
 #include <cassert>
 
+using namespace texpert; 
 
 /*
 Computes the difference between two set of points

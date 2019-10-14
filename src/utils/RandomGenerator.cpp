@@ -1,6 +1,6 @@
 #include "RandomGenerator.h"
 
-
+using namespace texpert; 
 
 //static 
 std::vector<int> RandomGenerator::GenerateDataInt(size_t size)

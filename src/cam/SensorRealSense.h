@@ -17,6 +17,8 @@ MIT License
 // RealSense
 #include <librealsense2/rs.hpp> // Include RealSense Cross Platform API
 
+namespace texpert {
+
 class ICPTrackingLib_EXPORTS SensorRealSense
 {
 private:
@@ -67,3 +69,4 @@ public:
 	int color_h() { return _color_height; };
 };
 
+} //texpert 

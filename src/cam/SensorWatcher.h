@@ -19,6 +19,8 @@ MIT License
 #include <iostream>
 //#include "ICPTrackingSim.h"
 
+namespace texpert {
+
 class ICPTrackingSim;
 
 class SensorWatcher {
@@ -29,4 +31,5 @@ public:
     static void newFrame(void);
 };
 
+} //texpert 
 #endif /* defined(__DenseModelTracking__SensorWatcher__) */

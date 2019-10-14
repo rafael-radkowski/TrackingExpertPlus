@@ -26,15 +26,19 @@ Last Changes:
 
 using namespace std;
 
-class TimeUtils
-{
-public:
+namespace texpert {
 
-	/*
-	Return the current time as a string.
-	@return - a string containing the current data and time 
-	formated as year-month-day_hours-minutes-seconds
-	*/
-	static string GetCurrentDateTime(void);
+	class TimeUtils
+	{
+	public:
 
-}; 
+		/*
+		Return the current time as a string.
+		@return - a string containing the current data and time
+		formated as year-month-day_hours-minutes-seconds
+		*/
+		static string GetCurrentDateTime(void);
+
+	};
+
+} //texpert 

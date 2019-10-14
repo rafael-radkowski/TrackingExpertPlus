@@ -7,6 +7,7 @@
 //
 
 #include "SensorWatcher.h"
+using namespace texpert; 
 
 #ifdef WIN32
 ICPTrackingSim* g_the_simulation;

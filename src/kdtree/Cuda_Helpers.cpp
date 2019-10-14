@@ -1,7 +1,7 @@
 #include "Cuda_Helpers.h"
 
 #include<stdio.h>
-
+using namespace texpert; 
 
 //static 
 bool Cuda_Helpers::CudaSetDevice(int device)

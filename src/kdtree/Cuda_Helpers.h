@@ -22,7 +22,7 @@ MIT License
 
 using namespace std;
 
-
+namespace texpert {
 
 class Cuda_Helpers
 {
@@ -87,3 +87,5 @@ void Cuda_Helpers::HostToDevice(T* host_data, T * device_data, size_t size)
 		fprintf(stderr, "cudaMemcpy failed!\n");
 	}
 }
+
+} //texpert 

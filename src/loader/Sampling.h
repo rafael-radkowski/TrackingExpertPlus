@@ -45,6 +45,8 @@ March 20, 2019, RR
 
 using namespace std;
 
+namespace texpert {
+
 class Sampling
 {
 
@@ -78,4 +80,5 @@ private:
 
 };
 
+} //texpert 
 #endif

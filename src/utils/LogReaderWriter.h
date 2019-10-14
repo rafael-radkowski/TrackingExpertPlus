@@ -50,7 +50,7 @@ Last Changes:
 using namespace std;
 
 
-namespace isu_ar {
+namespace texpert {
 
 	class LogReaderWriter
 	{
@@ -126,4 +126,4 @@ namespace isu_ar {
 
 	};
 
-}
+} //texpert 

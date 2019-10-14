@@ -40,7 +40,7 @@ March 20, 2019, RR
 
 using namespace std;
 
-namespace isu_ar {
+namespace texpert {
 
 	class FDClustering
 	{

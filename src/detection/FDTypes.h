@@ -29,7 +29,7 @@ Last Changes:
 #include "Eigen/Dense"
 
 
-namespace isu_ar {
+namespace texpert {
 
 	/****************************************************************************
 

@@ -1,7 +1,7 @@
 #include "FDClustering.h"
 
 
-using namespace isu_ar;
+using namespace texpert;
 
 
 FDClustering::FDClustering()
