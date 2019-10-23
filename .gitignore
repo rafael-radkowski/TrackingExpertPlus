@@ -10,3 +10,10 @@ CMakeFiles/
 *.vcxproj
 *.filters
 CMakeCache.txt
+bin/
+lib/
+*.pdb
+src/trackingx.dir/
+*.user
+tests/test_trackingx_detect.dir/
+x64/

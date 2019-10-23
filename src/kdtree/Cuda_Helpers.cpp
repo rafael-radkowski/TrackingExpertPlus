@@ -3,6 +3,9 @@
 #include<stdio.h>
 using namespace texpert; 
 
+// local
+#include "CudaErrorCheck.cu"
+
 //static 
 bool Cuda_Helpers::CudaSetDevice(int device)
 {

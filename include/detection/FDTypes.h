@@ -94,8 +94,8 @@ hash for PPFDiscreet, this allows one to add it into a map.
 */
 namespace std {
 	template <>
-	struct hash<isu_ar::PPFDiscreet> {
-		std::size_t operator()(const isu_ar::PPFDiscreet& ppf) const {
+	struct hash<texpert::PPFDiscreet> {
+		std::size_t operator()(const texpert::PPFDiscreet& ppf) const {
 			return murmurppf(ppf.data);
 		}
 	}; // struct hash

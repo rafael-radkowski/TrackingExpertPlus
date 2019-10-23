@@ -9,6 +9,8 @@
 #include "sort.h"
 //#define SEQ_ONLY
 
+#include "CudaErrorCheck.cu"
+
 __constant__ int SORT_BASE;
 __constant__ int SORT_BASE_EXP;
 int HOST_SORT_BASE = -1;

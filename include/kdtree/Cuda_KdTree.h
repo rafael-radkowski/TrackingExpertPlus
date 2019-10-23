@@ -33,7 +33,7 @@ MIT License
 // local
 #include "Cuda_Helpers.h"
 #include "Cuda_Common.h"
-#include "types.h"
+#include "Cuda_Types.h"
 
 #define _WITH_PERFORMANCE
 

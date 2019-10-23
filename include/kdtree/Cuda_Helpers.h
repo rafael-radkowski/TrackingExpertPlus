@@ -17,8 +17,7 @@ MIT License
 #include <iostream>
 #include <vector>
 
-// local
-#include "CudaErrorCheck.cu"
+
 
 using namespace std;
 

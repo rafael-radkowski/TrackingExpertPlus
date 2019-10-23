@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <inttypes.h>
 
+#include "CudaErrorCheck.cu"
+
 #define EPSILON 0.01
 #define MAX_KD_DIM 3
 
@@ -18,6 +20,7 @@ int SORT_TPB = 128;
 const int POINT_RES = 1024; // Value to scale points by when converting to int
 
 
+using namespace texpert;
 
 //--------------------------------------------------------------------------------------
 // Cuda kernels

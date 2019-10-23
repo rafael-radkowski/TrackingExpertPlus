@@ -16,15 +16,22 @@
 #
 # Last edits:
 #
+# Oct 22, 2019, RR
+# - Added the CMAKE_TRY_COMPILE_TARGET_TYPE compiler option. 
 # 
 
 
 cmake_minimum_required(VERSION 2.6)
 
+# Note that this line must be added before project. 
+# The cuda compiler will not work properly otherwise. 
+set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
+
 # The project name
-project(TrackingExpertPlus)
+project(TrackingExpertPlus CUDA CXX)
 
 # set policies
+cmake_policy(SET CMP0015 NEW)
 cmake_policy(SET CMP0074 NEW)
 
 
@@ -48,3 +55,4 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/)
 ################################################################
 add_subdirectory(src)
 add_subdirectory(tests)
+add_subdirectory(external)

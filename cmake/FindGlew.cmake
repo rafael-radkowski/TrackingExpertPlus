@@ -111,7 +111,7 @@ if(GLEW_DIR)
 			list( APPEND GLEW_LIBS_LIST ${GLEW_LIBRARY_DEBUG})
 		endif()
 	else(__find_glew_lib)
-		message("[FindGLEW] - ERROR: cannot find glew32d.lib")
+		message( STATUS "[FindGLEW] - WARNING: cannot find glew32d.lib. Use glew32.lib instead.")
 		## add the release library to the debug config so that the debug config has an entry. 
 		set(GLEW_LIBRARY_DEBUG "debug" ${GLEW_LIBRARY_RELEASE})
 		list( APPEND GLEW_LIBS_LIST ${GLEW_LIBRARY_DEBUG})

@@ -13,12 +13,13 @@
 
 // local
 #include "ArgParser.h"
-#include "FMEvalApp.h"
+#include "registration_analysis.h"
 
 
+using namespace texpert;
 
 
-isu_ar::FMEvalApp*			app;
+texpert::FMEvalApp*			app;
 
 using namespace std;
 using namespace cs557;
@@ -57,7 +58,7 @@ int main(int argc, char** argv)
 	app->setSamplingMethod(SamplingMethod::UNIFORM, param);
 	app->setMatchingParameters(app_params.distance_step, app_params.angle_step);
 	app->setClusteringThreshold(app_params.cluster_dist_th, app_params.cluster_ang_th);
-	app->setLogFile(app_params.ref_model_path_and_file, app_params.log_output_path);
+	app->setLogFile(app_params.log_output_path);
 	app->init(app_params.test_model_path_and_file);
 	app->setNumAutoTestRuns(app_params.test_runs);
 	app->setVerbose(app_params.verbose);

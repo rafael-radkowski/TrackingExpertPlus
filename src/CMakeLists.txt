@@ -24,16 +24,18 @@ cmake_minimum_required(VERSION 2.6)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 # set policies
+cmake_policy(SET CMP0015 NEW)
 cmake_policy(SET CMP0074 NEW)
+cmake_policy(SET CMP0010 NEW)
+
 
 
 #----------------------------------------------------------------------
 # Compiler standards
 
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
+
+
 
 # Check for CUDA support
 include(CheckLanguage)
@@ -43,10 +45,9 @@ find_package(Cuda REQUIRED)
 
 #if(WIN32)
 #	if (NOT CMAKE_CUDA_COMPILER)
-#		set(CMAKE_CUDA_COMPILER "$ENV{PROGRAMFILES}/NVIDIA GPU Computing Toolkit/CUDA/v9.0/bin/nvcc.exe")
+#		set(CMAKE_CUDA_COMPILER "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v9.0/bin/nvcc.exe")
 #	endif()
 #endif()
-
 
 # Make CUDA optional, even if supported on host
 if (CMAKE_CUDA_COMPILER OR CUDA_NVCC_EXECUTABLE)
@@ -54,7 +55,14 @@ if (CMAKE_CUDA_COMPILER OR CUDA_NVCC_EXECUTABLE)
 else()
 	message(STATUS "CUDA compiler not found")
 endif()
+
 option(ENABLE_CUDA "Enable CUDA support" ON)
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
 
 # Enable CUDA if selected
 if(ENABLE_CUDA)
@@ -84,14 +92,13 @@ include_directories(${GLM_INCLUDE_DIR})
 include_directories(${GLFW3_INCLUDE_DIR})
 
 # local 
-include_directories(./loader)
-include_directories(./detection)
-include_directories(./kdtree)
-include_directories(./cuda)
-include_directories(./camera)
-include_directories(./graphics)
-include_directories(./utils)
-include_directories(./point_cloud)
+include_directories(${PROJECT_SOURCE_DIR}/include/camera)
+include_directories(${PROJECT_SOURCE_DIR}/include/detection)
+include_directories(${PROJECT_SOURCE_DIR}/include/kdtree)
+include_directories(${PROJECT_SOURCE_DIR}/include/loader)
+include_directories(${PROJECT_SOURCE_DIR}/include/nearest_neighbors)
+include_directories(${PROJECT_SOURCE_DIR}/include/pointcloud)
+include_directories(${PROJECT_SOURCE_DIR}/include/utils)
 
 
 # All output files are copied to bin
@@ -105,63 +112,73 @@ set("CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE" "${CMAKE_SOURCE_DIR}/bin")
 # Source code
 
 
+set(Header_SRC
+	${PROJECT_SOURCE_DIR}/include/detection/FDTypes.h
+	${PROJECT_SOURCE_DIR}/include/detection/FDTools.h
+	${PROJECT_SOURCE_DIR}/include/detection/FDMatching.h
+	${PROJECT_SOURCE_DIR}/include/detection/FDClustering.h
+	${PROJECT_SOURCE_DIR}/include/detection/nurmur.h
+	${PROJECT_SOURCE_DIR}/include/kdtree/sort.h
+	${PROJECT_SOURCE_DIR}/include/kdtree/dequeue.h
+	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_KdTree.h
+	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Helpers.h
+	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Common.h
+	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Types.h
+	${PROJECT_SOURCE_DIR}/include/loader/Types.h
+	${PROJECT_SOURCE_DIR}/include/loader/SamplingTypes.h
+	${PROJECT_SOURCE_DIR}/include/loader/Sampling.h
+	${PROJECT_SOURCE_DIR}/include/loader/PointCloudProducerTypes.h
+	${PROJECT_SOURCE_DIR}/include/loader/NoiseFilter.h
+	${PROJECT_SOURCE_DIR}/include/loader/LoaderOBJ.h
+	${PROJECT_SOURCE_DIR}/include/loader/FileUtils.h
+	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/NearestNeighbors.h
+	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/ICPTransform.h
+	${PROJECT_SOURCE_DIR}/include/pointcloud/PointCloudUtils.h
+	${PROJECT_SOURCE_DIR}/include/pointcloud/PointCloudTransform.h
+	${PROJECT_SOURCE_DIR}/include/pointcloud/PointCloudEval.h
+	${PROJECT_SOURCE_DIR}/include/pointcloud/MatrixUtils.h
+	${PROJECT_SOURCE_DIR}/include/pointcloud/Utils.h
+	${PROJECT_SOURCE_DIR}/include/utils/TimeUtils.h
+	${PROJECT_SOURCE_DIR}/include/utils/RandomGenerator.h
+	${PROJECT_SOURCE_DIR}/include/utils/LogTypes.h
+	${PROJECT_SOURCE_DIR}/include/utils/LogReaderWriter.h
+	${PROJECT_SOURCE_DIR}/include/utils/ArgParser.h
+)
+
+
 set(Detection_SRC
 	detection/FDTypes.cpp
-	detection/FDTypes.h
 	detection/FDTools.cpp
-	detection/FDTools.h
-	detection/FDMatching.h
 	detection/FDMatching.cpp
-	detection/FDClustering.h
 	detection/FDClustering.cpp
-	detection/nurmur.h
 )
 
 set(Cuda_kdtree_SRC
-	kdtree/sort.h
 	kdtree/sort.cu
-	kdtree/dequeue.h
 	kdtree/dequeue.cu
 	kdtree/CudaErrorCheck.cu
-	kdtree/Cuda_KdTree.h
 	kdtree/Cuda_KdTree.cu
-	kdtree/Cuda_Helpers.h
 	kdtree/Cuda_Helpers.cpp
-	kdtree/Cuda_Common.h
 )
 
 set(Loader_SRC
-	loader/Types.h
-	loader/SamplingTypes.h
-	loader/Sampling.h
 	loader/Sampling.cpp
-	loader/PointCloudProducerTypes.h
-	loader/NoiseFilter.h
 	loader/NoiseFilter.cpp
-	loader/LoaderOBJ.h
 	loader/LoaderOBJ.cpp
-	loader/FileUtils.h
 	loader/FileUtils.cpp
 )
 
 
 set(NN_SRC
-	nearest_neighbors/NearestNeighbors.h
 	nearest_neighbors/NearestNeighbors.cpp
-	nearest_neighbors/ICPTransform.h
 	nearest_neighbors/ICPTransform.cpp
 )
 
 set( PointCloud_SRC
-	point_cloud/PointCloudUtils.h
 	point_cloud/PointCloudUtils.cpp
-	point_cloud/PointCloudTransform.h
 	point_cloud/PointCloudTransform.cpp
-	point_cloud/PointCloudEval.h
 	point_cloud/PointCloudEval.cpp
-	point_cloud/MatrixUtils.h
 	point_cloud/MatrixUtils.cpp
-	point_cloud/Utils.h
 )
 
 
@@ -173,14 +190,9 @@ set( Shader_SRC
 )
 
 set( Utils_SRC
-	utils/TimeUtils.h
 	utils/TimeUtils.cpp
-	utils/RandomGenerator.h
 	utils/RandomGenerator.cpp
-	utils/LogTypes.h
-	utils/LogReaderWriter.h
 	utils/LogReaderWriter.cpp
-	utils/ArgParser.h
 	utils/ArgParser.cpp
 )
 
@@ -191,11 +203,11 @@ set( Utils_SRC
 
 source_group(Detection FILES ${Detection_SRC})
 source_group(Cuda kd-tree FILES ${Cuda_kdtree_SRC})
-source_group(Loader_SRC FILES ${Loader_SRC})
+source_group(Loader FILES ${Loader_SRC})
 source_group(NN_SRC FILES ${NN_SRC})
-source_group(PointCloud_SRC FILES ${PointCloud_SRC})
-source_group(Shader_SRC FILES ${Shader_SRC})
-source_group(Utils_SRC FILES ${Utils_SRC})
+source_group(PointCloud FILES ${PointCloud_SRC})
+source_group(Shader FILES ${Shader_SRC})
+source_group(Utils FILES ${Utils_SRC})
 
 
 #----------------------------------------------------------------------
@@ -207,6 +219,7 @@ add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
 # Create the tracking expert library
 
 add_library(trackingx
+	${Header_SRC}
 	${Detection_SRC}
 	${Cuda_kdtree_SRC}
 	${Loader_SRC}
@@ -216,14 +229,12 @@ add_library(trackingx
 	${Utils_SRC}
 )
 
-
 # preporcessor properties
 
 target_link_libraries(trackingx  ${OpenCV_LIBS})
 target_link_libraries(trackingx  ${TBB_LIBS})
 target_link_libraries(trackingx  ${GLEW_LIBS})
 target_link_libraries(trackingx  ${GLFW3_LIBS})
-
 
 #----------------------------------------------------------------------
 # Pre-processor definitions

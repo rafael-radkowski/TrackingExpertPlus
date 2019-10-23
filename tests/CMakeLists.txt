@@ -76,16 +76,17 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${TBB_INCLUDE_DIR})
 include_directories(${GLM_INCLUDE_DIR})
 include_directories(${GLFW3_INCLUDE_DIR})
+include_directories(${GLEW_INCLUDE_DIR})
 
 # local 
-include_directories(../src/loader)
-include_directories(../src/detection)
-include_directories(../src/kdtree)
-include_directories(../src/cuda)
-include_directories(../src/camera)
-include_directories(../src/graphics)
-include_directories(../src/utils)
-include_directories(../src/point_cloud)
+include_directories(${PROJECT_SOURCE_DIR}/include/camera)
+include_directories(${PROJECT_SOURCE_DIR}/include/detection)
+include_directories(${PROJECT_SOURCE_DIR}/include/kdtree)
+include_directories(${PROJECT_SOURCE_DIR}/include/loader)
+include_directories(${PROJECT_SOURCE_DIR}/include/nearest_neighbors)
+include_directories(${PROJECT_SOURCE_DIR}/include/pointcloud)
+include_directories(${PROJECT_SOURCE_DIR}/include/utils)
+include_directories(${PROJECT_SOURCE_DIR}/external/gl_support/include)
 
 
 # All output files are copied to bin
@@ -133,6 +134,10 @@ target_link_libraries(test_trackingx_detect  ${TBB_LIBS})
 target_link_libraries(test_trackingx_detect  ${GLEW_LIBS})
 target_link_libraries(test_trackingx_detect  ${GLFW3_LIBS})
 target_link_libraries(test_trackingx_detect  ${PROJECT_SOURCE_DIR}/lib/trackingx.lib)
+target_link_libraries(test_trackingx_detect debug  ${PROJECT_SOURCE_DIR}/lib/GLUtilsd.lib )
+target_link_libraries(test_trackingx_detect optimized  ${PROJECT_SOURCE_DIR}/lib/GLUtils.lib )
+target_link_libraries(test_trackingx_detect optimized  cudart.lib )
+target_link_libraries(test_trackingx_detect ${GLEW_LIBS} ${GLEW_LIBS} ${GLFW3_LIBS} ${OPENGL_LIBS} ${OPENGL_LIBRARIES} )
 
 #----------------------------------------------------------------------
 # Pre-processor definitions
@@ -151,6 +156,7 @@ if(ENABLE_CUDA)
 
 	target_link_libraries(test_trackingx_detect
 		CUB::CUB
+		 ${PROJECT_SOURCE_DIR}/lib/trackingx.lib
 	)
 	set_target_properties(test_trackingx_detect PROPERTIES
 		CUDA_SEPARABLE_COMPILATION ON
