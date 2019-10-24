@@ -1,7 +1,5 @@
 # TrackingExpert+ cmake file. 
-# /tests-files. 
-#
-# source and project build file for TrackingExpert+
+# /camera test cmake file. 
 #
 #
 #
@@ -25,7 +23,8 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 # set policies
 cmake_policy(SET CMP0074 NEW)
-
+cmake_policy(SET CMP0015 NEW)
+cmake_policy(SET CMP0010 NEW)
 
 #----------------------------------------------------------------------
 # Compiler standards
@@ -102,9 +101,7 @@ set("CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE" "${CMAKE_SOURCE_DIR}/bin")
 
 
 set(test_SRC
-	registration_test.cpp
-	registration_analysis.h
-	registration_analysis.cpp
+	main_camera_test.cpp
 )
 
 
@@ -112,7 +109,7 @@ set(test_SRC
 #-----------------------------------------------------------------
 #  SRC Groups, organize the tree
 
-source_group(main_tests FILES ${test_SRC})
+source_group(src FILES ${test_SRC})
 
 
 #----------------------------------------------------------------------
@@ -122,7 +119,7 @@ add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
 
 
 # Create the tracking expert library
-set(ProjectName test_detection)
+set( ProjectName test_camera)
 add_executable(${ProjectName}
 	${test_SRC}
 )
