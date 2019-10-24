@@ -150,7 +150,7 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/utils/ArgParser.h
 
 #if( ENABLE_STRUCTURE_CORE)
-	${PROJECT_SOURCE_DIR}/include/camera/StructureCoreCaptureDevice.h
+#	${PROJECT_SOURCE_DIR}/include/camera/StructureCoreCaptureDevice.h
 #endif()
 #if( ENABLE_REAL_SENSE)
 #	${PROJECT_SOURCE_DIR}/include/camera/SensorRealSense.h
@@ -192,7 +192,7 @@ set( PointCloud_SRC
 	point_cloud/PointCloudEval.cpp
 	point_cloud/MatrixUtils.cpp
 #if( ENABLE_STRUCTURE_CORE)
-	cam/StructureCoreCaptureDevice.cpp
+#	cam/StructureCoreCaptureDevice.cpp
 #endif()
 #if( ENABLE_REAL_SENSE)
 #	cam/SensorRealSense.cpp
