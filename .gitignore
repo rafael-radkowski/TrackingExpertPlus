@@ -19,3 +19,4 @@ tests/test_trackingx_detect.dir/
 x64/
 external/GLUtils.dir/
 external/GLUtils_Test.dir/
+tests/test_detection/test_trackingx_detect.dir/

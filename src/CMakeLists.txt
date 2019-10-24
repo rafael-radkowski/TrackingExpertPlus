@@ -107,6 +107,11 @@ set("CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG" "${CMAKE_SOURCE_DIR}/bin")
 set("CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE" "${CMAKE_SOURCE_DIR}/bin")
 
 
+#--------------------------------------------
+# Camera options
+option(ENABLE_REAL_SENSE "Enable Intel Real sense support" OFF)
+option(ENABLE_STRUCTURE_CORE "Enable Structure Core support" ON)
+
 
 #--------------------------------------------
 # Source code
@@ -143,6 +148,13 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/utils/LogTypes.h
 	${PROJECT_SOURCE_DIR}/include/utils/LogReaderWriter.h
 	${PROJECT_SOURCE_DIR}/include/utils/ArgParser.h
+
+#if( ENABLE_STRUCTURE_CORE)
+	${PROJECT_SOURCE_DIR}/include/camera/StructureCoreCaptureDevice.h
+#endif()
+#if( ENABLE_REAL_SENSE)
+#	${PROJECT_SOURCE_DIR}/include/camera/SensorRealSense.h
+#endif()
 )
 
 
@@ -179,6 +191,12 @@ set( PointCloud_SRC
 	point_cloud/PointCloudTransform.cpp
 	point_cloud/PointCloudEval.cpp
 	point_cloud/MatrixUtils.cpp
+#if( ENABLE_STRUCTURE_CORE)
+	cam/StructureCoreCaptureDevice.cpp
+#endif()
+#if( ENABLE_REAL_SENSE)
+#	cam/SensorRealSense.cpp
+#endif()
 )
 
 
