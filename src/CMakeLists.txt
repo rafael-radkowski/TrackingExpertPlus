@@ -58,7 +58,7 @@ endif()
 
 option(ENABLE_CUDA "Enable CUDA support" ON)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -130,7 +130,7 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/loader/PointCloudProducerTypes.h
 	${PROJECT_SOURCE_DIR}/include/loader/NoiseFilter.h
 	${PROJECT_SOURCE_DIR}/include/loader/LoaderOBJ.h
-	${PROJECT_SOURCE_DIR}/include/loader/FileUtils.h
+	${PROJECT_SOURCE_DIR}/include/loader/FileUtilsExt.h
 	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/NearestNeighbors.h
 	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/ICPTransform.h
 	${PROJECT_SOURCE_DIR}/include/pointcloud/PointCloudUtils.h
@@ -165,7 +165,7 @@ set(Loader_SRC
 	loader/Sampling.cpp
 	loader/NoiseFilter.cpp
 	loader/LoaderOBJ.cpp
-	loader/FileUtils.cpp
+	loader/FileUtilsExt.cpp
 )
 
 

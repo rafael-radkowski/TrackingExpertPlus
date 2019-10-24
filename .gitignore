@@ -17,3 +17,5 @@ src/trackingx.dir/
 *.user
 tests/test_trackingx_detect.dir/
 x64/
+external/GLUtils.dir/
+external/GLUtils_Test.dir/
