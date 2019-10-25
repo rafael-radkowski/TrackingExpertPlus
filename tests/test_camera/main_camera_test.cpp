@@ -17,7 +17,7 @@ int main(int argc, char* argv)
 {
 	afrl::StructureCoreCaptureDevice* camera =  new afrl::StructureCoreCaptureDevice();
 
-	camera->
+	
 
 	return 1;
 }

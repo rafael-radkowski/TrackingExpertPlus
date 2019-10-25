@@ -100,6 +100,9 @@ include_directories(${PROJECT_SOURCE_DIR}/include/nearest_neighbors)
 include_directories(${PROJECT_SOURCE_DIR}/include/pointcloud)
 include_directories(${PROJECT_SOURCE_DIR}/include/utils)
 
+include_directories(C:/SDK/StructureSDK/Libraries/Structure/Headers)
+
+
 
 # All output files are copied to bin
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
@@ -253,6 +256,9 @@ target_link_libraries(trackingx  ${OpenCV_LIBS})
 target_link_libraries(trackingx  ${TBB_LIBS})
 target_link_libraries(trackingx  ${GLEW_LIBS})
 target_link_libraries(trackingx  ${GLFW3_LIBS})
+
+target_link_libraries(trackingx  "C:/SDK/StructureSDK/Libraries/Structure/Windows/x86_64/Structure.lib")
+
 
 #----------------------------------------------------------------------
 # Pre-processor definitions
