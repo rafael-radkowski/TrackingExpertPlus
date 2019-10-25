@@ -133,6 +133,9 @@ set_target_properties (test_trackingx_detect PROPERTIES
 )
 
 
+add_dependencies(test_trackingx_detect trackingx)
+add_dependencies(test_trackingx_detect GLUtils)
+
 # preporcessor properties
 
 target_link_libraries(test_trackingx_detect  ${OpenCV_LIBS})

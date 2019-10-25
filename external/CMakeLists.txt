@@ -136,6 +136,8 @@ set(TEST_APP0 GLUtils_Test)
 # Create an executable
 add_executable(${TEST_APP0} ${Test_SRC} )
 
+# add a dependency
+add_dependencies(${TEST_APP0} GLUtils)
 
 
 # Add libraries
