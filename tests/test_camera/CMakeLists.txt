@@ -87,6 +87,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include/pointcloud)
 include_directories(${PROJECT_SOURCE_DIR}/include/utils)
 include_directories(${PROJECT_SOURCE_DIR}/external/gl_support/include)
 include_directories(${PROJECT_SOURCE_DIR}/external/gl_ext)
+include_directories("C:/SDK/StructureSDK/Libraries/Structure/Headers")
 
 
 # All output files are copied to bin
@@ -136,11 +137,15 @@ target_link_libraries(${ProjectName}  ${OpenCV_LIBS})
 target_link_libraries(${ProjectName}  ${TBB_LIBS})
 target_link_libraries(${ProjectName}  ${GLEW_LIBS})
 target_link_libraries(${ProjectName}  ${GLFW3_LIBS})
-target_link_libraries(${ProjectName}  ${PROJECT_SOURCE_DIR}/lib/trackingx.lib)
+target_link_libraries(${ProjectName}  optimized ${PROJECT_SOURCE_DIR}/lib/trackingx.lib)
+target_link_libraries(${ProjectName}  debug ${PROJECT_SOURCE_DIR}/lib/trackingxd.lib)
 target_link_libraries(${ProjectName} debug  ${PROJECT_SOURCE_DIR}/lib/GLUtilsd.lib )
 target_link_libraries(${ProjectName} optimized  ${PROJECT_SOURCE_DIR}/lib/GLUtils.lib )
 target_link_libraries(${ProjectName} optimized  cudart.lib )
+target_link_libraries(${ProjectName} debug  cudart.lib )
 target_link_libraries(${ProjectName} ${GLEW_LIBS} ${GLEW_LIBS} ${GLFW3_LIBS} ${OPENGL_LIBS} ${OPENGL_LIBRARIES} )
+target_link_libraries(${ProjectName} "C:/SDK/StructureSDK/Libraries/Structure/Windows/x86_64/Structure.lib" )
+
 
 #----------------------------------------------------------------------
 # Pre-processor definitions

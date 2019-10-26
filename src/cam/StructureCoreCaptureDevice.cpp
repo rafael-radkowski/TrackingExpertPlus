@@ -17,7 +17,7 @@
 #include "StructureCoreCaptureDevice.h"
 
 
-afrl::StructureCoreCaptureDevice::StructureCoreCaptureDevice()
+texpert::StructureCoreCaptureDevice::StructureCoreCaptureDevice()
 {
 
 
@@ -84,29 +84,40 @@ afrl::StructureCoreCaptureDevice::StructureCoreCaptureDevice()
 
 }
 
-afrl::StructureCoreCaptureDevice::~StructureCoreCaptureDevice() {
+texpert::StructureCoreCaptureDevice::~StructureCoreCaptureDevice() {
 	session.stopStreaming();
 }
 
-void afrl::StructureCoreCaptureDevice::getRGBFrame( cv::Mat &mFrame)
+void texpert::StructureCoreCaptureDevice::getRGBFrame( cv::Mat &mFrame)
 {
 	delegate.getLastColorFrame(mFrame);
 	return;
 }
 
-void afrl::StructureCoreCaptureDevice::getDepthFrame( cv::Mat &mFrame)
+void texpert::StructureCoreCaptureDevice::getDepthFrame( cv::Mat &mFrame)
 {
 	delegate.getLastDepthFrame(mFrame);
 	return;
 }
 
 
-bool afrl::StructureCoreCaptureDevice::isOpen()
+bool texpert::StructureCoreCaptureDevice::isOpen()
 {
 	return (delegate.depthValid && delegate.colorValid);
 }
 
-void afrl::StructureCoreCaptureDevice::SessionDelegate::captureSessionEventDidOccur(ST::CaptureSession *session, ST::CaptureSessionEventId event) {
+
+/*
+Set a callback to be invoked as soon as a frame arrives
+@param cb - function pointer for a callback. 
+*/
+void texpert::StructureCoreCaptureDevice::setCallbackPtr(std::function<void()> cb)
+{
+	delegate.callback_function = cb;
+}
+
+
+void texpert::StructureCoreCaptureDevice::SessionDelegate::captureSessionEventDidOccur(ST::CaptureSession *session, ST::CaptureSessionEventId event) {
 	switch (event) {
 		case ST::CaptureSessionEventId::Booting: break;
 		case ST::CaptureSessionEventId::Ready:
@@ -125,8 +136,10 @@ void afrl::StructureCoreCaptureDevice::SessionDelegate::captureSessionEventDidOc
 	}
 }
 
-void afrl::StructureCoreCaptureDevice::SessionDelegate::captureSessionDidOutputSample(ST::CaptureSession *, const ST::CaptureSessionSample& sample) {
+void texpert::StructureCoreCaptureDevice::SessionDelegate::captureSessionDidOutputSample(ST::CaptureSession *, const ST::CaptureSessionSample& sample) {
 	// Obtain lock so latestColorFrame and latestDepthFrame are not modified while being accessed elsewhere
+
+	frame_couter++;
 
 	switch (sample.type) {
 		case ST::CaptureSessionSample::Type::DepthFrame:
@@ -163,27 +176,43 @@ void afrl::StructureCoreCaptureDevice::SessionDelegate::captureSessionDidOutputS
 			//printf("Structure Core sample type unhandled\n");
 			break;
 	}
+
+	if (++frame_couter % 2 == 0) {
+		if(this->callback_function != NULL) callback_function();
+	}
+
 }
 
-void afrl::StructureCoreCaptureDevice::SessionDelegate::getLastColorFrame(cv::Mat& mFrame) 
+void texpert::StructureCoreCaptureDevice::SessionDelegate::getLastColorFrame(cv::Mat& mFrame) 
 {
+	frameMutex.lock();
 	mFrame = colorFrame;
+	frameMutex.unlock();
 }
 
-void afrl::StructureCoreCaptureDevice::SessionDelegate::getLastDepthFrame(cv::Mat& mFrame) {
+void texpert::StructureCoreCaptureDevice::SessionDelegate::getLastDepthFrame(cv::Mat& mFrame) {
+	depthMutex.lock();
 	mFrame = depthFrame;
+	depthMutex.unlock();
 }
 
 
-void afrl::StructureCoreCaptureDevice::SessionDelegate::copyColorToMat()
+void texpert::StructureCoreCaptureDevice::SessionDelegate::copyColorToMat()
 {
+	frameMutex.lock();
+
 	cv::Mat cameraFrame(latestColorFrame.height(), latestColorFrame.width(), CV_8UC3, (void*)latestColorFrame.rgbData());
 	cv::cvtColor(cameraFrame, colorFrame, cv::COLOR_RGB2BGR);
+
+	frameMutex.unlock();
 }
 			
-void afrl::StructureCoreCaptureDevice::SessionDelegate::copyDepthToMat()
+void texpert::StructureCoreCaptureDevice::SessionDelegate::copyDepthToMat()
 {
+	depthMutex.lock();
 
 	cv::Mat cameraFrame(latestDepthFrame.height(), latestDepthFrame.width(), CV_32F, (void*)latestDepthFrame.depthInMillimeters());
 	depthFrame = cameraFrame.clone();
+
+	depthMutex.unlock();
 }
