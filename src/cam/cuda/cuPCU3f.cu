@@ -1,4 +1,4 @@
-#include "../../../include/camera/cuda/cuPCU.h"
+#include "../../../include/camera/cuda/cuPCU3f.h"
 
 // To use the memory that is defined in cuDeviceMemory/
 // If this flag is not set, the device memory that is locally allocated is used. 
@@ -7,10 +7,8 @@
 
 // local
 #include "cutil_math.h"
-#include "cuDeviceMemory.h"
-
-//local
-#include "cuPCUImpl.h"
+#include "cuDeviceMemory3f.h"
+#include "cuPCUImpl3f.h"
 
 // stl
 #include <conio.h>
@@ -21,47 +19,53 @@ using namespace texpert;
 //#define DEBUG_CUPCU
 
 
-// The input image on the device
-unsigned short* image_dev;
+namespace texpert_cuPCU3f
+{
 
-// debug images to visualize the output
-float* image_output_dev = NULL;
-float* image_normals_out_dev = NULL;
+	// The input image on the device
+	float*	image_dev;
 
-// the points and normal vectors
-float3* point_output_dev = NULL;
-float3* normals_output_dev = NULL;
+	// debug images to visualize the output
+	float* image_output_dev = NULL;
+	float* image_normals_out_dev = NULL;
 
-
-// the points and normal vectors with all  NAN and [0,0,0] points removed. 
-float3* point_output_clean_dev = NULL;
-float3* normals_output_clean_dev = NULL;
-int* count_dev = NULL; // returns the number of NaN elements that were removed.
+	// the points and normal vectors
+	float3* point_output_dev = NULL;
+	float3* normals_output_dev = NULL;
 
 
-int* dev_index_list = NULL;
+	// the points and normal vectors with all  NAN and [0,0,0] points removed. 
+	float3* point_output_clean_dev = NULL;
+	float3* normals_output_clean_dev = NULL;
+	int* count_dev = NULL; // returns the number of NaN elements that were removed.
 
 
-// Memory for sampling pattern, for the uniform sample operation.
-// It stores the sample pattern with 0 and 1. 
-unsigned short* g_cu_sampling_dev = NULL;
-
-// The number of random pattern that should be used. 
-// The pattern are generated before the frame reader is started and 
-// changed to simulate "random"
-const int max_number_of_random_patterns = 10;
-
-// the index of the current random pattern in use
-int g_current_random_pattern_index = 0;
-
-// Memory for a random sampling pattern
-unsigned short* g_cu_random_sampling_dev[max_number_of_random_patterns];
+	int* dev_index_list = NULL;
 
 
-// 16 threads appears to be a few ms faster than 32 for a 640x480 image
-// due to a few simple runtime tests. 
-const int THREADS_PER_BLOCK = 32;
+	// Memory for sampling pattern, for the uniform sample operation.
+	// It stores the sample pattern with 0 and 1. 
+	unsigned short* g_cu_sampling_dev = NULL;
 
+	// The number of random pattern that should be used. 
+	// The pattern are generated before the frame reader is started and 
+	// changed to simulate "random"
+	const int max_number_of_random_patterns = 10;
+
+	// the index of the current random pattern in use
+	int g_current_random_pattern_index = 0;
+
+	// Memory for a random sampling pattern
+	unsigned short* g_cu_random_sampling_dev[max_number_of_random_patterns];
+
+
+	// 16 threads appears to be a few ms faster than 32 for a 640x480 image
+	// due to a few simple runtime tests. 
+	const int THREADS_PER_BLOCK = 32;
+
+}
+
+using namespace texpert_cuPCU3f;
 
 
 __global__ void pcu_cleanup_points(float3* src_points, float3* src_normals, int width, int height, int start, float3* dst_points, float3* dst_normals, int* good_points )
@@ -104,9 +108,15 @@ __device__ void pcu_project_point(float x, float y, float pixel_depth, float foc
 	// Conversion from millimeters to meters
 	static const float conv_fac = 0.001f;
 
-	float x_val = (float) x * pixel_depth * fl_const_x * conv_fac + cx;
-	float y_val = -(float)y * pixel_depth * fl_const_y * conv_fac + cy;
-	float z_val = pixel_depth *conv_fac;
+	float x_val = 0.0f;
+	float y_val = 0.0f;
+	float z_val = 0.0f;
+
+	if(!isnan(pixel_depth)){
+		x_val = -(float) x * pixel_depth * fl_const_x * conv_fac + cx;
+		y_val = -(float) y * pixel_depth * fl_const_y * conv_fac + cy;
+		z_val = pixel_depth *conv_fac;
+	}
 
 	(*px) = x_val;
 	(*py) = y_val;
@@ -237,7 +247,7 @@ Project all points into 3D space
 @param dst_iamge - image with three channels that store the [x, y, z] position of each point in an image frame [i, j]
 					The image is for debug purposes or visualization
 */
-__global__  void pcu_project_image_points(unsigned short *image, int width, int height, int channels, float focal_length_x, float focal_length_y, float cx, float cy, float3* dst_point, float* dst_image) {
+__global__  void pcu_project_image_points(float *image, int width, int height, int channels, float focal_length_x, float focal_length_y, float cx, float cy, float3* dst_point, float* dst_image) {
 
 	int i = (blockIdx.x * blockDim.x) + threadIdx.x;
 	int j = (blockIdx.y * blockDim.y) + threadIdx.y;
@@ -246,11 +256,6 @@ __global__  void pcu_project_image_points(unsigned short *image, int width, int 
 
 	int index = (j * width * channels) + (i * channels); 
 	int index_out = (j * width * 3) + (i * 3); // three channels for the output image
-
-	//dst_image[index_out] = 10.0*image[index];
-	//dst_image[index_out + 1] = 0;// image[index + 1];
-	//dst_image[index_out + 2] = 0;// image[index + 2];
-
 
 	float depth = (float)image[index];
 	float px = 0.0;
@@ -297,11 +302,25 @@ Minimum step_size is 1.
 NOTE, COPYING DATA REQUIRES A SIGNIFICANT AMOUNT OF TIME AND SHOULD ONLY BE EXECUTED AT THE VERY LAST STEP
 **********************************************************************************************************************************************************************************************/
 //static 
-int cuPCU::CreatePointCloud(unsigned short* src_image_ptr, int width, int height, int channels, float focal_length_x, float focal_length_y, float cx, float cy, int step_size, vector<float3>& points, vector<float3>& normals, bool to_host)
+int cuPCU3f::CreatePointCloud(float* src_image_ptr, int width, int height, int channels, float focal_length_x, float focal_length_y, float cx, float cy, int step_size, vector<float3>& points, vector<float3>& normals, bool to_host)
 {
+/*
+	std::ofstream off("test_cu.csv", std::ofstream::out);
+
+	cv::Mat img(480,640,CV_32FC1, src_image_ptr);
+	for (int i = 0; i < 480; i++) {
+		for (int j = 0; j < 640; j++) {
+			off << img.at<float>(i,j) << ",";
+		}
+		off << "\n";
+	}
+	off.close();
+*/
+
+
 	step_size = (step_size <= 0) ? 1 : step_size;
 
-	int input_size = width* height* channels * sizeof(unsigned short);
+	int input_size = width* height* channels * sizeof( float);
 	int output_size = width* height* 3 * sizeof(float);  // three channels
 
 	dim3 threads_per_block(THREADS_PER_BLOCK, THREADS_PER_BLOCK, 1);
@@ -323,8 +342,13 @@ int cuPCU::CreatePointCloud(unsigned short* src_image_ptr, int width, int height
 	// Copy memory
 
 	cudaError err = cudaMemcpy(image_dev, (float*)src_image_ptr, input_size, cudaMemcpyHostToDevice);
-	if (err != 0) { std::cout << "\n[KNN] - cudaMemcpy error.\n"; }
-
+	if (err != 0) { 
+		std::cout << "\n[KNN] - cudaMemcpy error.\n"; 
+	}
+	err = cudaGetLastError();
+	if (err != 0) {
+		std::cout << "\n[KNN] - cudaMemcpy error (2).\n"; 
+	}
 
 	//---------------------------------------------------------------------------------
 	// Process the image
@@ -385,6 +409,8 @@ int cuPCU::CreatePointCloud(unsigned short* src_image_ptr, int width, int height
 
 
 
+
+
 /*
 Init the device memory. The device memory can be re-used. So no need to always create new memory.
 @param width - the width of the image in pixels
@@ -392,70 +418,20 @@ Init the device memory. The device memory can be re-used. So no need to always c
 @param channels - the number of channels. A depth image should have only 1 channel.
 */
 //static 
-void cuPCU::AllocateDeviceMemory(int width, int height, int channels)
+void cuPCU3f::AllocateDeviceMemory(int width, int height, int channels)
 {
-#ifdef GLOBAL_CUDA_MEMORY
+
 
 	//---------------------------------------------------------------------------------
 	// Allocating memory
 
-	cuDevMem::AllocateDeviceMemory(width, height, channels);
+	cuDevMem3f::AllocateDeviceMemory(width, height, channels);
 
-	image_dev = cuDevMem::DevInImagePtr();
-	image_output_dev = cuDevMem::DevPointImagePtr();
-	image_normals_out_dev = cuDevMem::DevNormalsImagePtr();
-	point_output_dev = cuDevMem::DevPointPtr();
-	normals_output_dev = cuDevMem::DevNormalsPtr();
-
-#else
-
-	int input_size = width* height* channels * sizeof(unsigned short);
-	int output_size = width* height * 3 * sizeof(float);  // three channels
-
-	//---------------------------------------------------------------------------------
-	// Allocating memory
-
-	// image memory on device. It stores the input image, the depth values as array A(i) = {d0, d1, d2, ...., dN} as float
-	cudaError err = cudaMalloc((void **)&image_dev, (unsigned int)(input_size));
-	if (err != 0) { std::cout << "\n[KNN] - cudaMalloc error.\n"; }
-
-	// an output image array where each array element A(i) stores a point's components p ={x, y, z} -> x or y or z, the position of the point as float.
-	// This memory can be used to render the output as image. 
-	err = cudaMalloc((void **)&image_output_dev, (unsigned int)(output_size));
-	if (err != 0) { std::cout << "\n[KNN] - cudaMalloc error.\n"; }
-
-	// an output image gird where each array element A(i) stores the normal vector component of n = {nx, ny, nz} -> nx, ny, nz as float
-	// This memory can be used to render the output as image
-	err = cudaMalloc((void **)&image_normals_out_dev, (unsigned int)(output_size));
-	if (err != 0) { std::cout << "\n[KNN] - cudaMalloc error.\n"; }
-
-
-	// an output array where each array element A(i) = {p0, p1, p2, p3, ......, pN} stores a point p_i = {x,y,z} as float3
-	err = cudaMalloc((void **)&point_output_dev, (unsigned int)(output_size));
-	if (err != 0) { std::cout << "\n[KNN] - cudaMalloc error.\n"; }
-
-	// an output array where each array element A(i) = {n0, n1, n2, ...., nN } stores a nomral vector n_i = {nx, ny, nz} as float3
-	err = cudaMalloc((void **)&normals_output_dev, (unsigned int)(output_size));
-	if (err != 0) { std::cout << "\n[KNN] - cudaMalloc error.\n"; }
-
-
-	// out output array where each array element A(i) = {p0, p1, p2, p3, ......, pN} stores a point p_i = {x,y,z} as float3
-	// All NaN points are removed.
-	err = cudaMalloc((void **)&point_output_clean_dev, (unsigned int)(output_size));
-	if (err != 0) { std::cout << "\n[KNN] - cudaMalloc error.\n"; }
-
-	// an output array where each array element A(i) = {n0, n1, n2, ...., nN } stores a nomral vector n_i = {nx, ny, nz} as float3
-	// All NaN points are removed.
-	err = cudaMalloc((void **)&normals_output_clean_dev, (unsigned int)(output_size));
-	if (err != 0) { std::cout << "\n[KNN] - cudaMalloc error.\n"; }
-
-	// A counter that returns the number of points that have been removed due to NaN from a point set. 
-	err = cudaMalloc((void **)&count_dev, sizeof(int));
-	if (err != 0) { std::cout << "\n[KNN] - cudaMalloc error.\n"; }
-
-	
-
-#endif
+	image_dev = cuDevMem3f::DevInImagePtr();
+	image_output_dev = cuDevMem3f::DevPointImagePtr();
+	image_normals_out_dev = cuDevMem3f::DevNormalsImagePtr();
+	point_output_dev = cuDevMem3f::DevPointPtr();
+	normals_output_dev = cuDevMem3f::DevNormalsPtr();
 
 
 }
@@ -465,9 +441,9 @@ void cuPCU::AllocateDeviceMemory(int width, int height, int channels)
 Free all device memory
 */
 //static
-void cuPCU::FreeDeviceMemory(void)
+void cuPCU3f::FreeDeviceMemory(void)
 {
-#ifdef GLOBAL_CUDA_MEMORY
+
 	cudaFree(image_dev);
 	cudaFree(image_output_dev);
 	cudaFree(image_normals_out_dev);
@@ -476,13 +452,7 @@ void cuPCU::FreeDeviceMemory(void)
 	cudaFree(normals_output_clean_dev);
 	cudaFree(point_output_clean_dev);
 
-#else
 
-	cuDevMem::FreeAll();
-
-#endif
-
-	
 }
 
 
@@ -492,7 +462,7 @@ Copy the depth image from the device and return it as an openCV mat.
 @param depth_image - reference to the depth image as OpenCV Mat of type CV_32FC3
 */
 //static 
-void cuPCU::GetDepthImage(cv::Mat& depth_image)
+void cuPCU3f::GetDepthImage(cv::Mat& depth_image)
 {
 	int output_size = depth_image.rows* depth_image.cols * 3 * sizeof(float);
 	cv::Mat output_points = cv::Mat::zeros(depth_image.rows, depth_image.cols, CV_32FC3);
@@ -506,7 +476,7 @@ Copy the normal vectors encoded into a rgb image from the device and return it a
 @param depth_image - reference to the normal vector image as OpenCV Mat of type CV_32FC3
 */
 //static 
-void cuPCU::GetNormalImage(cv::Mat& normal_image)
+void cuPCU3f::GetNormalImage(cv::Mat& normal_image)
 {
 	int output_size = normal_image.rows* normal_image.cols * 3 * sizeof(float);
 	cv::Mat output_normals = cv::Mat::zeros(normal_image.rows, normal_image.cols, CV_32FC3);
@@ -524,7 +494,7 @@ Create a sample pattern to uniformly remove points from the point set
 @param sampling_steps - the number of pixels the pattern should step over in each frame
 */
 //static 
-void cuSample::CreateUniformSamplePattern(int width, int height, int sampling_steps)
+void cuSample3f::CreateUniformSamplePattern(int width, int height, int sampling_steps)
 {
 
 	//------------------------------------------------------------------------------
@@ -533,7 +503,7 @@ void cuSample::CreateUniformSamplePattern(int width, int height, int sampling_st
 	if (g_cu_sampling_dev != NULL) cudaFree(g_cu_sampling_dev);
 
 
-	int pattern_size = width* height * 1 * sizeof(unsigned short);
+	int pattern_size = width* height * 1 * sizeof(float);
 	// image memory on device. It stores the input image, the depth values as array A(i) = {d0, d1, d2, ...., dN} as float
 	cudaError err = cudaMalloc((void **)&g_cu_sampling_dev, (unsigned int)(pattern_size));
 	if (err != 0) { std::cout << "\n[KNN] - cudaMalloc error.\n"; }
@@ -588,12 +558,12 @@ Create a sample pattern to randomly remove points from the point set
 @param percentage - a percentage value between 0 and 1 with 1 = 100%
 */
 //static 
-void cuSample::CreateRandomSamplePattern(int width, int height, int max_points, float percentage)
+void cuSample3f::CreateRandomSamplePattern(int width, int height, int max_points, float percentage)
 {
 
 	if (g_cu_random_sampling_dev[0] != NULL) for(auto mem: g_cu_random_sampling_dev) cudaFree(mem);
 
-	int pattern_size = width* height * sizeof(unsigned short);
+	int pattern_size = width* height * sizeof(float);
 	// image memory on device. It stores the input image, the depth values as array A(i) = {d0, d1, d2, ...., dN} as float
 	
 	for (auto i = 0; i < max_number_of_random_patterns; i++) {
@@ -696,7 +666,7 @@ Minimum normal_radius is 1.
 NOTE, COPYING DATA REQUIRES A SIGNIFICANT AMOUNT OF TIME AND SHOULD ONLY BE EXECUTED AT THE VERY LAST STEP
 **********************************************************************************************************************************************************************************************/
 //static 
-void cuSample::UniformSampling(unsigned short* src_image_ptr, int width, int height, float focal_length_x, float focal_length_y, float cx, float cy, int normal_radius, bool cp_enabled, vector<float3>& points, vector<float3>& normals, bool to_host)
+void cuSample3f::UniformSampling(float* src_image_ptr, int width, int height, float focal_length_x, float focal_length_y, float cx, float cy, int normal_radius, bool cp_enabled, vector<float3>& points, vector<float3>& normals, bool to_host)
 {
 	// Uniform sample pattern must be initialized in advance. 
 	assert(g_cu_sampling_dev != NULL);
@@ -711,13 +681,13 @@ void cuSample::UniformSampling(unsigned short* src_image_ptr, int width, int hei
 	//-----------------------------------------------------------
 	// Create the point cloud
 
-	cuPCU::CreatePointCloud(src_image_ptr, width, height, 1, focal_length_x, focal_length_y, cx, cy, normal_radius, points, normals, false);
+	cuPCU3f::CreatePointCloud((float*)src_image_ptr, width, height, 1, focal_length_x, focal_length_y, cx, cy, normal_radius, points, normals, false);
 
 
 
 	//-----------------------------------------------------------
 	// Sampling
-	pcu_uniform_sampling << < blocks, threads_per_block >> > (point_output_dev, normals_output_dev, width, height, cp_enabled, cuDevMem::DevParamsPtr(),  g_cu_sampling_dev, point_output_dev, normals_output_dev);
+	pcu_uniform_sampling <<< blocks, threads_per_block >>> (point_output_dev, normals_output_dev, width, height, cp_enabled, cuDevMem3f::DevParamsPtr(),  g_cu_sampling_dev, point_output_dev, normals_output_dev);
 	cudaError err = cudaGetLastError();
 	if (err != 0) { std::cout << "\n[KNN] - points processing error.\n"; }
 
@@ -756,7 +726,7 @@ Minimum normal_radius is 1.
 NOTE, COPYING DATA REQUIRES A SIGNIFICANT AMOUNT OF TIME AND SHOULD ONLY BE EXECUTED AT THE VERY LAST STEP
 **********************************************************************************************************************************************************************************************/
 //static 
-void cuSample::RandomSampling(unsigned short* src_image_ptr, int width, int height, float focal_length, int normal_radius, bool cp_enabled, vector<float3>& points, vector<float3>& normals, bool to_host)
+void cuSample3f::RandomSampling(float* src_image_ptr, int width, int height, float focal_length, int normal_radius, bool cp_enabled, vector<float3>& points, vector<float3>& normals, bool to_host)
 {
 	// Uniform sample pattern must be initialized in advance. 
 	assert(g_cu_sampling_dev != NULL);
@@ -770,13 +740,13 @@ void cuSample::RandomSampling(unsigned short* src_image_ptr, int width, int heig
 
 	//-----------------------------------------------------------
 	// Create the point cloud
-	cuPCU::CreatePointCloud(src_image_ptr, width, height, 1, focal_length, focal_length, 0.0 ,0.0, normal_radius, points, normals, false);
+	cuPCU3f::CreatePointCloud((float*)src_image_ptr, width, height, 1, focal_length, focal_length, 0.0 ,0.0, normal_radius, points, normals, false);
 
 
 
 	//-----------------------------------------------------------
 	// Sampling
-	pcu_uniform_sampling << < blocks, threads_per_block >> > (point_output_dev, normals_output_dev, width, height, cp_enabled, cuDevMem::DevParamsPtr(),
+	pcu_uniform_sampling << < blocks, threads_per_block >> > (point_output_dev, normals_output_dev, width, height, cp_enabled, cuDevMem3f::DevParamsPtr(),
 		g_cu_random_sampling_dev[(g_current_random_pattern_index++)% max_number_of_random_patterns], point_output_dev, normals_output_dev);
 	cudaError err = cudaGetLastError();
 	if (err != 0) { std::cout << "\n[KNN] - points processing error.\n"; }
@@ -806,9 +776,9 @@ The plane is defined by A * x + B * y + C * z = D
 // where a point gets removed if D - current_D > CP_THRESHOLD
 */
 //static 
-void cuSample::SetCuttingPlaneParams(float a, float b, float c, float d, float threshold)
+void cuSample3f::SetCuttingPlaneParams(float a, float b, float c, float d, float threshold)
 {
-	float* params = cuDevMem::DevParamsPtr();
+	float* params = cuDevMem3f::DevParamsPtr();
 
 	float host_params[5];
 
