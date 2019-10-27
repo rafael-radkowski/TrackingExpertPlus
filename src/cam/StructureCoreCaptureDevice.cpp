@@ -20,6 +20,10 @@
 texpert::StructureCoreCaptureDevice::StructureCoreCaptureDevice()
 {
 
+	_color_height = -1;
+	_color_width = -1;
+	_depth_height = -1;
+	_depth_width = -1;
 
 
 	settings.source = ST::CaptureSessionSourceId::StructureCore;
@@ -40,7 +44,10 @@ texpert::StructureCoreCaptureDevice::StructureCoreCaptureDevice()
  //   settings.structureCore.imuUpdateRate = ST::StructureCoreIMUUpdateRate::AccelAndGyro_200Hz;
 
 
-
+	_color_height = 480;
+	_color_width = 640;
+	_depth_height = 480;
+	_depth_width = 640;
 
 
 	// Begin camera callbacks on delegate
@@ -117,6 +124,42 @@ Set a callback to be invoked as soon as a frame arrives
 void texpert::StructureCoreCaptureDevice::setCallbackPtr(std::function<void()> cb)
 {
 	delegate.callback_function = cb;
+}
+
+
+
+/*
+Return the number of image rows in pixel
+@param c - the requested camera component. 
+@return - number of image rows in pixel. -1 if the component does not exist.
+*/
+int texpert::StructureCoreCaptureDevice::getRows(CaptureDeviceComponent c)
+{
+	switch (c) {
+		case CaptureDeviceComponent::COLOR:
+			return _color_height;
+			break;
+		case CaptureDeviceComponent::DEPTH:
+			return _depth_height;
+	}
+	return -1;
+}
+
+/*
+Return the number of image colums in pixel
+@param c - the requested camera component. 
+@return - number of image columns in pixel. -1 if the component does not exist.
+*/
+int texpert::StructureCoreCaptureDevice::getCols(CaptureDeviceComponent c)
+{
+	switch (c) {
+		case CaptureDeviceComponent::COLOR:
+			return _color_width;
+			break;
+		case CaptureDeviceComponent::DEPTH:
+			return _depth_width;
+	}
+	return -1;
 }
 
 

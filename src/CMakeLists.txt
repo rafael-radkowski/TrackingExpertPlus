@@ -155,6 +155,10 @@ set(Header_SRC
 #if( ENABLE_STRUCTURE_CORE)
 	${PROJECT_SOURCE_DIR}/include/camera/StructureCoreCaptureDevice.h
 	${PROJECT_SOURCE_DIR}/include/camera/ICaptureDevice.h
+	${PROJECT_SOURCE_DIR}/include/camera/ICaptureDeviceTypes.h
+	${PROJECT_SOURCE_DIR}/include/camera/PointCloudProducer.h
+
+	
 #endif()
 #if( ENABLE_REAL_SENSE)
 #	${PROJECT_SOURCE_DIR}/include/camera/SensorRealSense.h
@@ -208,6 +212,7 @@ set( PointCloud_SRC
 	point_cloud/MatrixUtils.cpp
 #if( ENABLE_STRUCTURE_CORE)
 	cam/StructureCoreCaptureDevice.cpp
+	cam/PointCloudProducer.cpp
 #endif()
 #if( ENABLE_REAL_SENSE)
 #	cam/SensorRealSense.cpp

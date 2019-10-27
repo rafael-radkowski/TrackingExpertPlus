@@ -84,7 +84,7 @@ void GLViewer::draw_loop(void)
         glClearBufferfv(GL_COLOR, 0, _clear_color);
         glClearBufferfv(GL_DEPTH, 0, _clear_depth);
 
-		glm::mat4 rotated_view =    cs557::GetCamera().getViewMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f)) ;
+		glm::mat4 rotated_view =    cs557::GetCamera().getViewMatrix() ;//* glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f)) ;
 
 		// draw the coordinate frame
 		_cs.draw(_projMatrix, rotated_view, cs_modelMatrix);
