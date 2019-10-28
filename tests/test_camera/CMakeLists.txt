@@ -68,6 +68,7 @@ find_package(GLFW3 REQUIRED)
 FIND_PACKAGE(Cuda REQUIRED)
 FIND_PACKAGE(Cub REQUIRED)
 FIND_PACKAGE(OpenGL REQUIRED)
+FIND_PACKAGE(Structure REQUIRED)
 
 #include dir
 include_directories(${OpenCV_INCLUDE_DIR})
@@ -76,6 +77,7 @@ include_directories(${TBB_INCLUDE_DIR})
 include_directories(${GLM_INCLUDE_DIR})
 include_directories(${GLFW3_INCLUDE_DIR})
 include_directories(${GLEW_INCLUDE_DIR})
+include_directories(${STRUCTURE_INCLUDE_DIR})
 
 # local 
 include_directories(${PROJECT_SOURCE_DIR}/include/camera)
@@ -87,7 +89,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include/pointcloud)
 include_directories(${PROJECT_SOURCE_DIR}/include/utils)
 include_directories(${PROJECT_SOURCE_DIR}/external/gl_support/include)
 include_directories(${PROJECT_SOURCE_DIR}/external/gl_ext)
-include_directories("C:/SDK/StructureSDK/Libraries/Structure/Headers")
+
 
 
 # All output files are copied to bin
@@ -144,7 +146,7 @@ target_link_libraries(${ProjectName} optimized  ${PROJECT_SOURCE_DIR}/lib/GLUtil
 target_link_libraries(${ProjectName} optimized  cudart.lib )
 target_link_libraries(${ProjectName} debug  cudart.lib )
 target_link_libraries(${ProjectName} ${GLEW_LIBS} ${GLEW_LIBS} ${GLFW3_LIBS} ${OPENGL_LIBS} ${OPENGL_LIBRARIES} )
-target_link_libraries(${ProjectName} "C:/SDK/StructureSDK/Libraries/Structure/Windows/x86_64/Structure.lib" )
+target_link_libraries(${ProjectName} ${STRUCTURE_LIBRARY} )
 
 
 #----------------------------------------------------------------------
