@@ -23,3 +23,4 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 
 add_subdirectory(test_detection)
+add_subdirectory(test_camera)

@@ -17,9 +17,13 @@
 #include "StructureCoreCaptureDevice.h"
 
 
-afrl::StructureCoreCaptureDevice::StructureCoreCaptureDevice()
+texpert::StructureCoreCaptureDevice::StructureCoreCaptureDevice()
 {
 
+	_color_height = -1;
+	_color_width = -1;
+	_depth_height = -1;
+	_depth_width = -1;
 
 
 	settings.source = ST::CaptureSessionSourceId::StructureCore;
@@ -40,7 +44,10 @@ afrl::StructureCoreCaptureDevice::StructureCoreCaptureDevice()
  //   settings.structureCore.imuUpdateRate = ST::StructureCoreIMUUpdateRate::AccelAndGyro_200Hz;
 
 
-
+	_color_height = 480;
+	_color_width = 640;
+	_depth_height = 480;
+	_depth_width = 640;
 
 
 	// Begin camera callbacks on delegate
@@ -84,29 +91,79 @@ afrl::StructureCoreCaptureDevice::StructureCoreCaptureDevice()
 
 }
 
-afrl::StructureCoreCaptureDevice::~StructureCoreCaptureDevice() {
+texpert::StructureCoreCaptureDevice::~StructureCoreCaptureDevice() {
 	session.stopStreaming();
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+	
 }
 
-void afrl::StructureCoreCaptureDevice::getRGBFrame( cv::Mat &mFrame)
+void texpert::StructureCoreCaptureDevice::getRGBFrame( cv::Mat &mFrame)
 {
 	delegate.getLastColorFrame(mFrame);
 	return;
 }
 
-void afrl::StructureCoreCaptureDevice::getDepthFrame( cv::Mat &mFrame)
+void texpert::StructureCoreCaptureDevice::getDepthFrame( cv::Mat &mFrame)
 {
 	delegate.getLastDepthFrame(mFrame);
 	return;
 }
 
 
-bool afrl::StructureCoreCaptureDevice::isOpen()
+bool texpert::StructureCoreCaptureDevice::isOpen()
 {
 	return (delegate.depthValid && delegate.colorValid);
 }
 
-void afrl::StructureCoreCaptureDevice::SessionDelegate::captureSessionEventDidOccur(ST::CaptureSession *session, ST::CaptureSessionEventId event) {
+
+/*
+Set a callback to be invoked as soon as a frame arrives
+@param cb - function pointer for a callback. 
+*/
+void texpert::StructureCoreCaptureDevice::setCallbackPtr(std::function<void()> cb)
+{
+	delegate.callback_function = cb;
+}
+
+
+
+/*
+Return the number of image rows in pixel
+@param c - the requested camera component. 
+@return - number of image rows in pixel. -1 if the component does not exist.
+*/
+int texpert::StructureCoreCaptureDevice::getRows(CaptureDeviceComponent c)
+{
+	switch (c) {
+		case CaptureDeviceComponent::COLOR:
+			return _color_height;
+			break;
+		case CaptureDeviceComponent::DEPTH:
+			return _depth_height;
+	}
+	return -1;
+}
+
+/*
+Return the number of image colums in pixel
+@param c - the requested camera component. 
+@return - number of image columns in pixel. -1 if the component does not exist.
+*/
+int texpert::StructureCoreCaptureDevice::getCols(CaptureDeviceComponent c)
+{
+	switch (c) {
+		case CaptureDeviceComponent::COLOR:
+			return _color_width;
+			break;
+		case CaptureDeviceComponent::DEPTH:
+			return _depth_width;
+	}
+	return -1;
+}
+
+
+void texpert::StructureCoreCaptureDevice::SessionDelegate::captureSessionEventDidOccur(ST::CaptureSession *session, ST::CaptureSessionEventId event) {
 	switch (event) {
 		case ST::CaptureSessionEventId::Booting: break;
 		case ST::CaptureSessionEventId::Ready:
@@ -125,8 +182,10 @@ void afrl::StructureCoreCaptureDevice::SessionDelegate::captureSessionEventDidOc
 	}
 }
 
-void afrl::StructureCoreCaptureDevice::SessionDelegate::captureSessionDidOutputSample(ST::CaptureSession *, const ST::CaptureSessionSample& sample) {
+void texpert::StructureCoreCaptureDevice::SessionDelegate::captureSessionDidOutputSample(ST::CaptureSession *, const ST::CaptureSessionSample& sample) {
 	// Obtain lock so latestColorFrame and latestDepthFrame are not modified while being accessed elsewhere
+
+	frame_couter++;
 
 	switch (sample.type) {
 		case ST::CaptureSessionSample::Type::DepthFrame:
@@ -163,27 +222,43 @@ void afrl::StructureCoreCaptureDevice::SessionDelegate::captureSessionDidOutputS
 			//printf("Structure Core sample type unhandled\n");
 			break;
 	}
+
+	if (++frame_couter % 2 == 0) {
+		if(this->callback_function != NULL) callback_function();
+	}
+
 }
 
-void afrl::StructureCoreCaptureDevice::SessionDelegate::getLastColorFrame(cv::Mat& mFrame) 
+void texpert::StructureCoreCaptureDevice::SessionDelegate::getLastColorFrame(cv::Mat& mFrame) 
 {
+	frameMutex.lock();
 	mFrame = colorFrame;
+	frameMutex.unlock();
 }
 
-void afrl::StructureCoreCaptureDevice::SessionDelegate::getLastDepthFrame(cv::Mat& mFrame) {
+void texpert::StructureCoreCaptureDevice::SessionDelegate::getLastDepthFrame(cv::Mat& mFrame) {
+	depthMutex.lock();
 	mFrame = depthFrame;
+	depthMutex.unlock();
 }
 
 
-void afrl::StructureCoreCaptureDevice::SessionDelegate::copyColorToMat()
+void texpert::StructureCoreCaptureDevice::SessionDelegate::copyColorToMat()
 {
+	frameMutex.lock();
+
 	cv::Mat cameraFrame(latestColorFrame.height(), latestColorFrame.width(), CV_8UC3, (void*)latestColorFrame.rgbData());
 	cv::cvtColor(cameraFrame, colorFrame, cv::COLOR_RGB2BGR);
+
+	frameMutex.unlock();
 }
 			
-void afrl::StructureCoreCaptureDevice::SessionDelegate::copyDepthToMat()
+void texpert::StructureCoreCaptureDevice::SessionDelegate::copyDepthToMat()
 {
+	depthMutex.lock();
 
 	cv::Mat cameraFrame(latestDepthFrame.height(), latestDepthFrame.width(), CV_32F, (void*)latestDepthFrame.depthInMillimeters());
 	depthFrame = cameraFrame.clone();
+
+	depthMutex.unlock();
 }

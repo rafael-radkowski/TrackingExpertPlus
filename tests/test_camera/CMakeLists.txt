@@ -1,7 +1,5 @@
 # TrackingExpert+ cmake file. 
-# /tests-files. 
-#
-# source and project build file for TrackingExpert+
+# /camera test cmake file. 
 #
 #
 #
@@ -25,7 +23,8 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 # set policies
 cmake_policy(SET CMP0074 NEW)
-
+cmake_policy(SET CMP0015 NEW)
+cmake_policy(SET CMP0010 NEW)
 
 #----------------------------------------------------------------------
 # Compiler standards
@@ -69,6 +68,7 @@ find_package(GLFW3 REQUIRED)
 FIND_PACKAGE(Cuda REQUIRED)
 FIND_PACKAGE(Cub REQUIRED)
 FIND_PACKAGE(OpenGL REQUIRED)
+FIND_PACKAGE(Structure REQUIRED)
 
 #include dir
 include_directories(${OpenCV_INCLUDE_DIR})
@@ -77,6 +77,7 @@ include_directories(${TBB_INCLUDE_DIR})
 include_directories(${GLM_INCLUDE_DIR})
 include_directories(${GLFW3_INCLUDE_DIR})
 include_directories(${GLEW_INCLUDE_DIR})
+include_directories(${STRUCTURE_INCLUDE_DIR})
 
 # local 
 include_directories(${PROJECT_SOURCE_DIR}/include/camera)
@@ -88,6 +89,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include/pointcloud)
 include_directories(${PROJECT_SOURCE_DIR}/include/utils)
 include_directories(${PROJECT_SOURCE_DIR}/external/gl_support/include)
 include_directories(${PROJECT_SOURCE_DIR}/external/gl_ext)
+
 
 
 # All output files are copied to bin
@@ -102,9 +104,7 @@ set("CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE" "${CMAKE_SOURCE_DIR}/bin")
 
 
 set(test_SRC
-	registration_test.cpp
-	registration_analysis.h
-	registration_analysis.cpp
+	main_camera_test.cpp
 )
 
 
@@ -112,7 +112,7 @@ set(test_SRC
 #-----------------------------------------------------------------
 #  SRC Groups, organize the tree
 
-source_group(main_tests FILES ${test_SRC})
+source_group(src FILES ${test_SRC})
 
 
 #----------------------------------------------------------------------
@@ -122,7 +122,7 @@ add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
 
 
 # Create the tracking expert library
-set(ProjectName test_detection)
+set( ProjectName test_camera)
 add_executable(${ProjectName}
 	${test_SRC}
 )
@@ -133,20 +133,21 @@ set_target_properties (${ProjectName} PROPERTIES
 )
 
 
-add_dependencies(test_trackingx_detect trackingx)
-add_dependencies(test_trackingx_detect GLUtils)
-
 # preporcessor properties
 
 target_link_libraries(${ProjectName}  ${OpenCV_LIBS})
 target_link_libraries(${ProjectName}  ${TBB_LIBS})
 target_link_libraries(${ProjectName}  ${GLEW_LIBS})
 target_link_libraries(${ProjectName}  ${GLFW3_LIBS})
-target_link_libraries(${ProjectName}  ${PROJECT_SOURCE_DIR}/lib/trackingx.lib)
+target_link_libraries(${ProjectName}  optimized ${PROJECT_SOURCE_DIR}/lib/trackingx.lib)
+target_link_libraries(${ProjectName}  debug ${PROJECT_SOURCE_DIR}/lib/trackingxd.lib)
 target_link_libraries(${ProjectName} debug  ${PROJECT_SOURCE_DIR}/lib/GLUtilsd.lib )
 target_link_libraries(${ProjectName} optimized  ${PROJECT_SOURCE_DIR}/lib/GLUtils.lib )
 target_link_libraries(${ProjectName} optimized  cudart.lib )
+target_link_libraries(${ProjectName} debug  cudart.lib )
 target_link_libraries(${ProjectName} ${GLEW_LIBS} ${GLEW_LIBS} ${GLFW3_LIBS} ${OPENGL_LIBS} ${OPENGL_LIBRARIES} )
+target_link_libraries(${ProjectName} ${STRUCTURE_LIBRARY} )
+
 
 #----------------------------------------------------------------------
 # Pre-processor definitions

@@ -21,3 +21,7 @@ external/GLUtils.dir/
 external/GLUtils_Test.dir/
 tests/test_detection/test_trackingx_detect.dir/
 tests/test_detection/test_detection.dir/
+tests/test_camera/test_camera.dir/
+tests/test_camera/out.csv
+tests/test_camera/test.csv
+tests/test_camera/test_cu.csv

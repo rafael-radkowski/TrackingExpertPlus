@@ -17,11 +17,13 @@
 // StructureCore
 #include <ST/CaptureSession.h>
 
+// local
+#include "ICaptureDevice.h"
 
+namespace texpert {
 
-namespace afrl {
-
-	class StructureCoreCaptureDevice {
+class StructureCoreCaptureDevice : public ICaptureDevice
+{
 	public:
 		/**
 		 * @param loadFile The OCC file to load and play. If empty, runs camera
@@ -43,9 +45,33 @@ namespace afrl {
 		 */
 		bool isOpen();
 
+
+		/*
+		Return the number of image rows in pixel
+		@param c - the requested camera component. 
+		@return - number of image rows in pixel. -1 if the component does not exist.
+		*/
+		int getRows(CaptureDeviceComponent c);
+
+		/*
+		Return the number of image colums in pixel
+		@param c - the requested camera component. 
+		@return - number of image columns in pixel. -1 if the component does not exist.
+		*/
+		int getCols(CaptureDeviceComponent c);
+
+
+		/*
+		Set a callback to be invoked as soon as a frame arrives
+		@param cb - function pointer for a callback. 
+		*/
+		void setCallbackPtr(std::function<void()> cb);
+
 	private:
 		struct SessionDelegate : ST::CaptureSessionDelegate {
-			SessionDelegate() : sensorReady(false), colorValid(false), depthValid(false) {}
+			SessionDelegate() : sensorReady(false), colorValid(false), depthValid(false) {
+				frame_couter = 0;
+			}
 			virtual ~SessionDelegate() {}
 
 			void captureSessionEventDidOccur(ST::CaptureSession *session, ST::CaptureSessionEventId event) override;
@@ -59,6 +85,7 @@ namespace afrl {
 			void copyDepthToMat();
 
 			std::mutex frameMutex;
+			std::mutex depthMutex;
 			
 			ST::ColorFrame latestColorFrame;
 			ST::DepthFrame latestDepthFrame;
@@ -69,6 +96,10 @@ namespace afrl {
 			bool sensorReady;
 			bool colorValid;
 			bool depthValid;
+			int  frame_couter; // counts the number of frames that arrive
+
+
+			std::function<void()>	callback_function;
 		};
 
 
@@ -80,8 +111,10 @@ namespace afrl {
 		
 		int sensorConnectTimeout_ms = 6000; //!< Seconds to wait for sensor connecting
 
-		int _height; //!< Image height
-		int _width; //!< Image width
+		int _color_height; //!< Image height
+		int _color_width; //!< Image width
+		int _depth_height; //!< Image height
+		int _depth_width; //!< Image width
 
 	};
 }

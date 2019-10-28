@@ -33,6 +33,7 @@ MIT License
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <fstream>
 
 // cuda
 #include "cuda_runtime.h"
@@ -49,7 +50,7 @@ using namespace std;
 namespace texpert
 {
 
-class cuPCU
+class cuPCU3f
 {
 public:
 
@@ -70,7 +71,9 @@ public:
 	@param to_host - if true, the device normals and points are copied back to the host. If false, this is skipped and the  data in points and normals remains empty.
 					NOTE, COPYING DATA REQUIRES A SIGNIFICANT AMOUNT OF TIME AND SHOULD ONLY BE EXECUTED AT THE VERY LAST STEP
 	*/
-	static int CreatePointCloud(unsigned short* src_image_ptr, int width, int height, int chanels, float focal_length_x, float focal_length_y, float cx, float cy, int step_size, vector<float3>& points, vector<float3>& normals, bool to_host = true);
+	static int CreatePointCloud(float* src_image_ptr, int width, int height, int chanels, float focal_length_x, float focal_length_y, float cx, float cy, int step_size, vector<float3>& points, vector<float3>& normals, bool to_host = true);
+
+
 
 	/*
 	Init the device memory. The device memory can be re-used. So no need to always create new memory.
@@ -117,7 +120,7 @@ private:
 
 
 
-class cuSample
+class cuSample3f
 {
 public:
 
@@ -161,7 +164,7 @@ public:
 	@param to_host - if true, the device normals and points are copied back to the host. If false, this is skipped and the  data in points and normals remains empty.
 	NOTE, COPYING DATA REQUIRES A SIGNIFICANT AMOUNT OF TIME AND SHOULD ONLY BE EXECUTED AT THE VERY LAST STEP
 	*/
-	static void UniformSampling(unsigned short* src_image_ptr, int width, int height, float focal_length_x, float focal_length_y, float cx, float cy, int normal_radius, bool cp_enabled,  vector<float3>& points, vector<float3>& normals, bool to_host = true);
+	static void UniformSampling(float* src_image_ptr, int width, int height, float focal_length_x, float focal_length_y, float cx, float cy, int normal_radius, bool cp_enabled,  vector<float3>& points, vector<float3>& normals, bool to_host = true);
 
 
 
@@ -182,7 +185,7 @@ public:
 	@param to_host - if true, the device normals and points are copied back to the host. If false, this is skipped and the  data in points and normals remains empty.
 	NOTE, COPYING DATA REQUIRES A SIGNIFICANT AMOUNT OF TIME AND SHOULD ONLY BE EXECUTED AT THE VERY LAST STEP
 	*/ 
-	static void cuSample::RandomSampling(unsigned short* src_image_ptr, int width, int height, float focal_length, int normal_radius, bool cp_enabled, vector<float3>& points, vector<float3>& normals, bool to_host=true);
+	static void RandomSampling(float* src_image_ptr, int width, int height, float focal_length, int normal_radius, bool cp_enabled, vector<float3>& points, vector<float3>& normals, bool to_host=true);
 
 
 

@@ -93,12 +93,15 @@ include_directories(${GLFW3_INCLUDE_DIR})
 
 # local 
 include_directories(${PROJECT_SOURCE_DIR}/include/camera)
+include_directories(${PROJECT_SOURCE_DIR}/include/camera/cuda)
 include_directories(${PROJECT_SOURCE_DIR}/include/detection)
 include_directories(${PROJECT_SOURCE_DIR}/include/kdtree)
 include_directories(${PROJECT_SOURCE_DIR}/include/loader)
 include_directories(${PROJECT_SOURCE_DIR}/include/nearest_neighbors)
 include_directories(${PROJECT_SOURCE_DIR}/include/pointcloud)
 include_directories(${PROJECT_SOURCE_DIR}/include/utils)
+include_directories(C:/SDK/StructureSDK/Libraries/Structure/Headers)
+
 
 
 # All output files are copied to bin
@@ -150,11 +153,27 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/utils/ArgParser.h
 
 #if( ENABLE_STRUCTURE_CORE)
-#	${PROJECT_SOURCE_DIR}/include/camera/StructureCoreCaptureDevice.h
+	${PROJECT_SOURCE_DIR}/include/camera/StructureCoreCaptureDevice.h
+	${PROJECT_SOURCE_DIR}/include/camera/ICaptureDevice.h
+	${PROJECT_SOURCE_DIR}/include/camera/ICaptureDeviceTypes.h
+	${PROJECT_SOURCE_DIR}/include/camera/PointCloudProducer.h
+
+	
 #endif()
 #if( ENABLE_REAL_SENSE)
 #	${PROJECT_SOURCE_DIR}/include/camera/SensorRealSense.h
 #endif()
+)
+
+
+set( PointCloud_cuda_INC
+	#${PROJECT_SOURCE_DIR}/include/camera/cuda/cuDeviceMemory.h
+	#${PROJECT_SOURCE_DIR}/include/camera/cuda/cuPCU.h
+	#${PROJECT_SOURCE_DIR}/include/camera/cuda/cuPCUImpl.h
+	${PROJECT_SOURCE_DIR}/include/camera/cuda/cutil_math.h
+	${PROJECT_SOURCE_DIR}/include/camera/cuda/cuDeviceMemory3f.h
+	${PROJECT_SOURCE_DIR}/include/camera/cuda/cuPCU3f.h
+	${PROJECT_SOURCE_DIR}/include/camera/cuda/cuPCUImpl3f.h
 )
 
 
@@ -192,11 +211,21 @@ set( PointCloud_SRC
 	point_cloud/PointCloudEval.cpp
 	point_cloud/MatrixUtils.cpp
 #if( ENABLE_STRUCTURE_CORE)
-#	cam/StructureCoreCaptureDevice.cpp
+	cam/StructureCoreCaptureDevice.cpp
+	cam/PointCloudProducer.cpp
 #endif()
 #if( ENABLE_REAL_SENSE)
 #	cam/SensorRealSense.cpp
 #endif()
+)
+
+set( PointCloud_cuda_SRC
+	#cam/cuda/cuDeviceMemory.cpp
+	#cam/cuda/cuPCU.cu
+	#cam/cuda/cuPCUImpl.cu
+	cam/cuda/cuDeviceMemory3f.cpp
+	cam/cuda/cuPCU3f.cu
+	cam/cuda/cuPCUImpl3f.cu
 )
 
 
@@ -222,12 +251,12 @@ set( Utils_SRC
 source_group(Detection FILES ${Detection_SRC})
 source_group(Cuda kd-tree FILES ${Cuda_kdtree_SRC})
 source_group(Loader FILES ${Loader_SRC})
-source_group(NN_SRC FILES ${NN_SRC})
+source_group(NN FILES ${NN_SRC})
 source_group(PointCloud FILES ${PointCloud_SRC})
 source_group(Shader FILES ${Shader_SRC})
 source_group(Utils FILES ${Utils_SRC})
-
-
+source_group("PointCloud/Cuda" FILES ${PointCloud_cuda_SRC} )
+source_group(Cuda FILES ${PointCloud_cuda_INC})
 #----------------------------------------------------------------------
 # Compiler standards
 
@@ -245,6 +274,8 @@ add_library(trackingx
 	${PointCloud_SRC}
 	${Shader_SRC}
 	${Utils_SRC}
+	${PointCloud_cuda_SRC}
+	${PointCloud_cuda_INC}
 )
 
 # preporcessor properties
@@ -253,6 +284,9 @@ target_link_libraries(trackingx  ${OpenCV_LIBS})
 target_link_libraries(trackingx  ${TBB_LIBS})
 target_link_libraries(trackingx  ${GLEW_LIBS})
 target_link_libraries(trackingx  ${GLFW3_LIBS})
+
+target_link_libraries(trackingx  "C:/SDK/StructureSDK/Libraries/Structure/Windows/x86_64/Structure.lib")
+
 
 #----------------------------------------------------------------------
 # Pre-processor definitions

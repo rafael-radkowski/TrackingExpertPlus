@@ -48,7 +48,7 @@ typedef struct PointCloud
 
     void resize(int size)
     {
-        if(size <0) return;
+        if(size <0 && size == N ) return;
         points.resize(size);
         normals.resize(size);
     }

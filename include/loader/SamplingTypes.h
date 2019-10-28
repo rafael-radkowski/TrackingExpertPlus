@@ -35,12 +35,22 @@ typedef struct _SamplingParam
     float grid_y;
     float grid_z;
 
+	// step size for uniform sampling
+	int		uniform_step; 
+
+	int		random_max_points;
+	float	ramdom_percentage;
+
     _SamplingParam()
     {
         // Unit of the grid is the model unit. 
         grid_x = 0.01;
         grid_y = 0.01;
         grid_z = 0.01;
+
+		uniform_step = 0.0;
+		random_max_points = -1;
+		ramdom_percentage = 25;
     }
 
 }SamplingParam;
