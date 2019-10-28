@@ -133,8 +133,8 @@ set_target_properties (${ProjectName} PROPERTIES
 )
 
 
-add_dependencies(test_trackingx_detect trackingx)
-add_dependencies(test_trackingx_detect GLUtils)
+add_dependencies(${ProjectName} trackingx)
+add_dependencies(${ProjectName} GLUtils)
 
 # preporcessor properties
 
