@@ -26,3 +26,5 @@ tests/test_camera/out.csv
 tests/test_camera/test.csv
 tests/test_camera/test_cu.csv
 scripts/
+TrackingExpertPlus.VC.db
+external/gl_support/

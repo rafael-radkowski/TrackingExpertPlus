@@ -22,12 +22,12 @@ mark_as_advanced(
     CUB_INCLUDE_DIRS
 )
 
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(
-    CUB
-    DEFAULT_MSG
-    CUB_ROOT_DIR
-)
+#include(FindPackageHandleStandardArgs)
+#find_package_handle_standard_args(
+ #   CUB
+ #   DEFAULT_MSG
+ #   CUB_ROOT_DIR
+#)
 
 if(CUB_FOUND)
     set(CUB_INCLUDE_DIRS ${CUB_ROOT_DIR})

@@ -41,7 +41,7 @@ project(TrackingExpertPlus CUDA CXX)
 # set policies
 cmake_policy(SET CMP0015 NEW)
 cmake_policy(SET CMP0074 NEW)
-
+cmake_policy(SET CMP0028 NEW)
 
 # All cmake find files are managed locally. 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)

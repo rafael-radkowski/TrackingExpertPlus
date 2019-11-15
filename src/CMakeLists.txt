@@ -27,8 +27,8 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 cmake_policy(SET CMP0015 NEW)
 cmake_policy(SET CMP0074 NEW)
 cmake_policy(SET CMP0010 NEW)
-
-
+cmake_policy(SET CMP0028 NEW)
+ 
 
 #----------------------------------------------------------------------
 # Compiler standards

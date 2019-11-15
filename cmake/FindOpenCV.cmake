@@ -82,9 +82,10 @@ endif ()
 # Extract the version from a version file. 
 
 # OpenCV Version 3 support
-find_file(__find_version "version.hpp"  PATHS  "${OpenCV_DIR}/modules/core/include/opencv2/core/"  )
+find_file(__find_version "version.hpp"  PATHS  "${OpenCV_DIR}/modules/core/include/opencv2/core/" 
+												"${OpenCV_DIR}/sources/modules/core/include/opencv2/core/")
 if(__find_version)
-	SET(OPENCV_VERSION_FILE "${OpenCV_DIR}/modules/core/include/opencv2/core/version.hpp")
+	SET(OPENCV_VERSION_FILE "${__find_version}")
 	file(STRINGS "${OPENCV_VERSION_FILE}" OPENCV_VERSION_PARTS REGEX "#define CV_VERSION_[A-Z]+[ ]+" )
 
 	string(REGEX REPLACE ".+CV_VERSION_MAJOR[ ]+([0-9]+).*" "\\1" OPENCV_VERSION_MAJOR "${OPENCV_VERSION_PARTS}")
@@ -103,6 +104,9 @@ if(__find_version)
 	message(STATUS "[FindOpenCV] - Found OpenCV at " ${OpenCV_DIR} ", Version "  ${OpenCV_VERSION})
 endif()
 unset(__find_version CACHE)
+
+
+if(NOT OPENCV_VERSION_MAJOR)
 
 # OpenCV Version 2 support
 find_file(__find_version "version.hpp"  PATHS  "${OpenCV_DIR}/sources/modules/core/include/opencv2/core/"  )
@@ -126,6 +130,8 @@ if(__find_version)
 	message(STATUS "[FindOpenCV] - Found OpenCV at " ${OpenCV_DIR} ", Version "  ${OpenCV_VERSION})
 endif()
 unset(__find_version CACHE)
+
+endif() #if(NOT OPENCV_VERSION_MAJOR)
 
 # ----------------------------------------------------------------------------
 # Find the include directory
@@ -156,6 +162,8 @@ set(__LIBRARY_DIRS
 	${OpenCV_DIR}/builds/lib/Debug
 	${OpenCV_DIR}/build/lib/Release
 	${OpenCV_DIR}/build/lib/Debug
+	${OpenCV_DIR}/build/x64/vc15/lib
+	${OpenCV_DIR}/build/x64/vc15/lib
 )
 
 
@@ -749,6 +757,7 @@ if(${OPENCV_VERSION_MAJOR} EQUAL "3")
 	#endforeach(arg)
 	
 	set(OpenCV_LIBS
+		${OpenCV_WORLD}
 		${OpenCV_CALIB3D} ${OpenCV_CORE} ${OpenCV_CUDEV} 
 		${OpenCV_DNN} ${OpenCV_FEATURED2D} ${OpenCV_FLANN} ${OpenCV_HIGHGUI} ${OpenCV_IMGCODECS}
 		${OpenCV_IMGPROC} ${OpenCV_ML} ${OpenCV_OBJDETECT} ${OpenCV_PHOTO} ${OpenCV_SHAPE}
@@ -757,6 +766,7 @@ if(${OPENCV_VERSION_MAJOR} EQUAL "3")
 		${OpenCV_CUDA_CODEC} ${OpenCV_CUDA_FEATURES2D} ${OpenCV_CUDA_FILTERS}  ${OpenCV_CUDA_IMGPROC} 
 		${OpenCV_CUDA_LEGACY} ${OpenCV_CUDA_OBJDETECT} ${OpenCV_CUDA_OPTFLOW} ${OpenCV_CUDA_STEREO} 
 		${OpenCV_CUDA_WARPING}
+		${OpenCV_WORLD_DEBUG}
 		${OpenCV_CALIB3D_DEBUG} ${OpenCV_CORE_DEBUG} ${OpenCV_CUDEV_DEBUG}
 		${OpenCV_DNN_DEBUG} ${OpenCV_FEATURED2D_DEBUG} ${OpenCV_FLANN_DEBUG} ${OpenCV_HIGHGUI_DEBUG} 
 		${OpenCV_IMGCODECS_DEBUG} ${OpenCV_IMGPROC_DEBUG}  ${OpenCV_ML_DEBUG} ${OpenCV_OBJDETECT_DEBUG} 
