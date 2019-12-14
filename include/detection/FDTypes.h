@@ -36,7 +36,7 @@ namespace texpert {
 
 	*/
 	typedef struct _PPFDiscreet {
-
+		
 		std::uint32_t data[4];
 
 		bool operator==(const _PPFDiscreet& ppf) const {
@@ -51,7 +51,7 @@ namespace texpert {
 		std::uint32_t& operator[](const int i) { return data[i]; }
 
 		int point_index = -1;
-
+		
 	} PPFDiscreet; // struct PPFDiscreet
 
 
@@ -61,12 +61,13 @@ namespace texpert {
 	*/
 	typedef  struct _VotePair
 	{
+		
 		int				model_i;  // model point id
 		float			alpha_m;
 
 		_VotePair(const int m_i, const float a_m)
 			: model_i(m_i), alpha_m(a_m) {}
-
+			
 	}VotePair;
 
 
