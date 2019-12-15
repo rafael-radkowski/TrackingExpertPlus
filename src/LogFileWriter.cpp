@@ -1,23 +1,5 @@
 #include "LogFileWriter.h"
 
-#define _CRT_SECURE_NO_WARNINGS
-
-
-#include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <fstream>
-#include <filesystem>
-#include <string>
-#include <ctime>
-#include <chrono>
-#include <atlbase.h>
-#include <atlsecurity.h>
-#include <ShlObj.h>
-
-using namespace std;
-
-
 /*  ------------------------------------------------------------
 			LogFileWriter Function Definitions
 	-----------------------------------------------------------*/
