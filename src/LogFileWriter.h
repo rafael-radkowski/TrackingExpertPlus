@@ -10,8 +10,6 @@
 #include <string>
 #include <ctime>
 #include <chrono>
-#include <atlbase.h>
-#include <atlsecurity.h>
 #include <ShlObj.h>
 
 using namespace std;
