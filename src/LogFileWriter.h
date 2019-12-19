@@ -6,7 +6,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
-#include <filesystem>
+#if _MSVC_LANG==201703L
+	#include <filesystem>
+#else
+	#include <experimental/filesystem>
+#endif
+
 #include <string>
 #include <ctime>
 #include <chrono>
@@ -33,17 +38,23 @@ using namespace std;
 		logs to be written in
 	*/
 
+
+class LogAdmin; // prototype
+
 class LogFileWriter {
 private:
-	string filename;
-	bool write_log;
-	int nextPos;
+	friend class LogAdmin;
+
+	string 		_filename;
+	bool	 	_write_log;
+	int 		_nextPos;
 	bool fileExists();
 
-public:
-	LogFileWriter(string path);
+protect:
+	LogFileWriter(string path);	
 	LogFileWriter();
 	~LogFileWriter();
+public:
 	void enableLog(bool makeOpen);
 	bool addLog(string log);
 };
@@ -54,7 +65,7 @@ Log: the normal user's version of a LogFileWriter
 class Log
 {
 private:
-	static LogFileWriter myLog;
+	static  LogFileWriter& _myLog;
 public:
 	Log(string logName);
 	static bool write(string log);
@@ -69,6 +80,5 @@ class LogAdmin {
 private:
 	static bool isAdmin();
 public:
-	LogAdmin();
 	static bool startNewLog(string logName);
 };

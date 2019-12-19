@@ -114,6 +114,7 @@ bool FMEvalApp::setSamplingMethod(SamplingMethod method, SamplingParam param)
 {
 	_sampling_method = method;
 	_sampling_param = param;
+
 	return true;
 }
 
@@ -166,7 +167,7 @@ bool FMEvalApp::init_graphics(void)
 	int program0 = cs557::LoadAndCreateShaderProgram("../src/shaders/simple_point_renderer.vs", "../src/shaders/simple_point_renderer.fs");
 	int program1 = cs557::LoadAndCreateShaderProgram("../src/shaders/simple_point_renderer.vs", "../src/shaders/simple_point_renderer.fs");
 	int program2 = cs557::LoadAndCreateShaderProgram("../src/shaders/simple_point_renderer.vs", "../src/shaders/simple_point_renderer.fs");
-
+	// ToDo: Log the program values
 
 	_light0.pos = glm::vec3(0.0f, 5.0f, 3.0f);
 	_light0.dir = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -446,6 +447,8 @@ void FMEvalApp::start(Mode mode)
 	switch (mode) {
 
 	case Manual:
+
+		// ToDo: Log this case
 		_with_auto = false;
 		if (_renderer) {
 			_renderer->start();
@@ -453,9 +456,13 @@ void FMEvalApp::start(Mode mode)
 		else
 		{
 			cout << "[ERROR] - Cannot start renderer. Init the application first." << endl;
+
+			// ToDO: everytime you see an error, log the error. 
 		}
 		break;
 	case Auto:
+
+	// To Do Log this case
 		cout << "\n";
 		_with_auto = true;
 		
@@ -590,4 +597,18 @@ Default is false.
 void FMEvalApp::setVerbose(bool enable)
 {
 	_verbose = enable;
+}
+
+
+void FMEvalApp::LogData( float param_1, float param_2, float param_3, std::string text){
+
+#ifdef _WITH_LOG
+	string out = text;
+	out.append("\t");
+	out.append(std::to_string(param _1);
+	
+	//ToDO:: open the log and log the values
+
+#endif
+
 }
