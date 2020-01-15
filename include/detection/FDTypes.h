@@ -84,7 +84,6 @@ namespace texpert {
 		// model associations
 		int from_model_idx;
 		int to_scene_idx;
-
 	}Pose;
 
 }
@@ -93,6 +92,8 @@ namespace texpert {
 /*/****************************************************************************
 hash for PPFDiscreet, this allows one to add it into a map.
 */
+
+
 namespace std {
 	template <>
 	struct hash<texpert::PPFDiscreet> {

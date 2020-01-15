@@ -1,5 +1,5 @@
 #include "registration_analysis.h"
-
+#include "LogFileWriter.h"
 
 using namespace texpert;
 
@@ -155,6 +155,11 @@ Init the opengl graphics content
 */
 bool FMEvalApp::init_graphics(void)
 {
+	//Log File
+	LogAdmin::startNewLog("registration_analysis_log");
+	LogFileWriter lfwRegTest = LogFileWriter("registration_analysis_log");
+	lfwRegTest.enableLog(true);
+
 	// create the renderer
 	_renderer = new GLViewer();
 	_renderer->create(_window_width, _window_height, "Feature Matching test");
@@ -167,7 +172,12 @@ bool FMEvalApp::init_graphics(void)
 	int program0 = cs557::LoadAndCreateShaderProgram("../src/shaders/simple_point_renderer.vs", "../src/shaders/simple_point_renderer.fs");
 	int program1 = cs557::LoadAndCreateShaderProgram("../src/shaders/simple_point_renderer.vs", "../src/shaders/simple_point_renderer.fs");
 	int program2 = cs557::LoadAndCreateShaderProgram("../src/shaders/simple_point_renderer.vs", "../src/shaders/simple_point_renderer.fs");
-	// ToDo: Log the program values
+
+	lfwRegTest.addLog("Loading programs...");
+	lfwRegTest.addLog("program 0: " + program0);
+	lfwRegTest.addLog("program 1: " + program1);
+	lfwRegTest.addLog("program 2: " + program2);
+	lfwRegTest.addLog("programs loaded");
 
 	_light0.pos = glm::vec3(0.0f, 5.0f, 3.0f);
 	_light0.dir = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -198,6 +208,8 @@ bool FMEvalApp::init_graphics(void)
 	_mat_ref.specular_int = 0.2;
 	_mat_ref.specular_s = 12.0;
 	_mat_ref.apply(_gl_ref->getProgram());
+
+	lfwRegTest.addLog("Created reference point set for program0");
 	
 
 	// test point set is green
@@ -215,6 +227,8 @@ bool FMEvalApp::init_graphics(void)
 	_mat_test.specular_s = 12.0;
 	_mat_test.apply(_gl_test->getProgram());
 
+	lfwRegTest.addLog("Created test point set for program1");
+
 
 	_gl_check = new GLPointCloud();
 	_gl_check->create(_pc_test, program2);
@@ -230,6 +244,8 @@ bool FMEvalApp::init_graphics(void)
 	_mat_check.specular_int = 0.2;
 	_mat_check.specular_s = 12.0;
 	_mat_check.apply(_gl_check->getProgram());
+
+	lfwRegTest.addLog("Created test point set for program2");
 
 	return true;
 }
@@ -599,7 +615,7 @@ void FMEvalApp::setVerbose(bool enable)
 	_verbose = enable;
 }
 
-
+/*
 void FMEvalApp::LogData( float param_1, float param_2, float param_3, std::string text){
 
 #ifdef _WITH_LOG
@@ -612,3 +628,4 @@ void FMEvalApp::LogData( float param_1, float param_2, float param_3, std::strin
 #endif
 
 }
+*/

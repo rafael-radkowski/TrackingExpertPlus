@@ -48,6 +48,9 @@ Last edits:
 #include "GLPointCloud.h"
 #include "GLPointCloudRenderer.h"
 
+// logging
+#include "LogFileWriter.h"
+
 #define WITH_PERFORMANCE_MEASUREMENT
 
 using namespace texpert;
@@ -67,6 +70,9 @@ isu_ar::GLViewer* window;
 
 // the point cloud renderers
 isu_ar::GLPointCloudRenderer* gl_point_cloud;
+
+// The log file
+LogFileWriter lfwCamTest;
 
 
 #ifdef WITH_PERFORMANCE_MEASUREMENT
@@ -146,15 +152,25 @@ int main(int argc, char* argv)
 {
 
 	/*
+	Create and open log file
+	*/
+	LogAdmin::startNewLog("main_camera_test");
+	lfwCamTest = LogFileWriter("main_camera_test");
+	lfwCamTest.enableLog(true);
+
+	/*
 	Open a camera device. 
 	*/
 	camera =  new texpert::StructureCoreCaptureDevice();
+	lfwCamTest.addLog("Camera device opened");
+
 
 	/*
 	Create a point cloud producer. It creates a point cloud 
 	from a depth map. Assign a camera and the location to store the point cloud data. 
 	*/
 	producer = new texpert::PointCloudProducer(*camera, camera_point_cloud);
+	lfwCamTest.addLog("Point cloud producer created.");
 
 	/*
 	Set the sampling parameters. 
@@ -165,6 +181,7 @@ int main(int argc, char* argv)
 	sParam.uniform_step = 8;
 	sParam.random_max_points = 5000;
 	producer->setSampingMode(UNIFORM, sParam);
+	lfwCamTest.addLog("Sampling parameters set");
 
 
 	/*
@@ -177,12 +194,14 @@ int main(int argc, char* argv)
 	//window->addKeyboardCallback(std::bind(&FMEvalApp::keyboard_callback, this, _1, _2));
 	window->setViewMatrix(glm::lookAt(glm::vec3(1.0f, 0.0, -5.5f), glm::vec3(0.0f, 0.0f, 3.f), glm::vec3(0.0f, 1.0f, 0.0f)));
 	window->setClearColor(glm::vec4(1, 1, 1, 1));
+	lfwCamTest.addLog("Renderer created");
 
 	/*
 	Create an OpenGL 3D point cloud.
 	This instance draws a point cloud. 
 	*/
 	gl_point_cloud = new isu_ar::GLPointCloudRenderer(camera_point_cloud.points, camera_point_cloud.normals);
+	lfwCamTest.addLog("Point cloud drawn");
 
 
 	/*
@@ -190,15 +209,21 @@ int main(int argc, char* argv)
 	*/
 	if (!camera->isOpen()) {
 		std::cout << "\n[ERROR] - Cannot access camera." << std::endl;
+		lfwCamTest.addLog("Camera cannot be accessed");
 		return -1;
 	}
 
 	// start the window along with  point cloud processing
 	window->start();
+	lfwCamTest.addLog("Window started");
 
 	// delete all instances. 
 	delete window;
 	delete camera;
+	lfwCamTest.addLog("Instances deleted");
+
+	// close the log file
+	lfwCamTest.enableLog(false);
 
 	return 1;
 }

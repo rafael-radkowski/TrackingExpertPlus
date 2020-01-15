@@ -14,6 +14,7 @@
 // local
 #include "ArgParser.h"
 #include "registration_analysis.h"
+#include "LogFileWriter.h"
 
 
 using namespace texpert;
@@ -33,13 +34,16 @@ int main(int argc, char** argv)
 
 	Arguments app_params = ArgParser::Parse(argc, argv);
 
+	LogAdmin::startNewLog("registration_test_log");
+	LogFileWriter lfwRegTest = LogFileWriter("registration_test_log");
+	lfwRegTest.enableLog(true);
+
 	if (!app_params.valid) {
 		cout << "[ERROR] - Not enough arguments provided to run the application." << endl;
+		lfwRegTest.addLog("[ERROR] - Not enough arguments provided to run the application.");
 		ArgParser::Help();
 		return 1;
 	}
-
-
 
 	SamplingParam param;
 	param.grid_x = app_params.uniform_grid_size;
@@ -56,15 +60,24 @@ int main(int argc, char** argv)
 
 	app = new FMEvalApp(window_height, window_width);
 	app->setSamplingMethod(SamplingMethod::UNIFORM, param);
+	lfwRegTest.addLog("Sampling method set");
 	app->setMatchingParameters(app_params.distance_step, app_params.angle_step);
+	lfwRegTest.addLog("Matching parameters set");
 	app->setClusteringThreshold(app_params.cluster_dist_th, app_params.cluster_ang_th);
+	lfwRegTest.addLog("Clustering threshold set");
 	app->setLogFile(app_params.log_output_path);
+	lfwRegTest.addLog("Log file set");
 	app->init(app_params.test_model_path_and_file);
+	lfwRegTest.addLog("Test point cloud initialized");
 	app->setNumAutoTestRuns(app_params.test_runs);
+	lfwRegTest.addLog("Number of automatic test runs set");
 	app->setVerbose(app_params.verbose);
+	lfwRegTest.addLog("Verbose mode activated");
 	app->start(mode);
+	lfwRegTest.addLog("Application started");
 
 	delete app;
+	lfwRegTest.addLog("Application deleted");
 
 	return 1;
 

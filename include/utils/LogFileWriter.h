@@ -1,15 +1,17 @@
 #pragma once
 
 #define _CRT_SECURE_NO_WARNINGS
+#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
 
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
+
 #if _MSVC_LANG==201703L
-	#include <filesystem>
+#include <filesystem>
 #else
-	#include <experimental/filesystem>
+#include <experimental/filesystem>
 #endif
 
 #include <string>
@@ -38,25 +40,18 @@ using namespace std;
 		logs to be written in
 	*/
 
-
-class LogAdmin; // prototype
-
 class LogFileWriter {
 private:
-	friend class LogAdmin;
+	string strFilename;
+	bool bWriteLog;
 
-	string 		_filename;
-	bool	 	_write_log;
-	int 		_nextPos;
-	bool fileExists();
-
-protect:
-	LogFileWriter(string path);	
+public:
+	LogFileWriter(string path);
 	LogFileWriter();
 	~LogFileWriter();
-public:
 	void enableLog(bool makeOpen);
 	bool addLog(string log);
+	bool fileExists(string pathname);
 };
 
 /**
@@ -65,11 +60,12 @@ Log: the normal user's version of a LogFileWriter
 class Log
 {
 private:
-	static  LogFileWriter& _myLog;
+	LogFileWriter* lfwMyLog;
+	string logName;
 public:
-	Log(string logName);
-	static bool write(string log);
-	static void enableLog(bool open);
+	Log(string strlogName);
+	bool write(string log);
+	void enableLog(bool open);
 };
 
 /**
