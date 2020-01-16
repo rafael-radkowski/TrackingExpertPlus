@@ -145,7 +145,6 @@ bool Log::write(string strLog) {
 	@param logName - the name of the log file being created.
 	*/
 bool LogAdmin::startNewLog(string logName) {
-	if (isAdmin()) {
 		try {
 			ofstream file;
 
@@ -165,7 +164,7 @@ bool LogAdmin::startNewLog(string logName) {
 		catch (...) {
 			return false;
 		}
-	}
+	
 }
 
 bool LogAdmin::isAdmin() {
