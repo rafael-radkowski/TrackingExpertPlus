@@ -101,7 +101,7 @@ if( (NOT GLM_DIR) OR (NOT EXISTS ${GLM_DIR}))
 					CACHE PATH "glm dir" FORCE)
 
 
-		
+	set( ENV{GLM_DIR_LOCAL} ${CMAKE_CURRENT_SOURCE_DIR}/external/glm )	
 	
 else()
   # update the submodule to the latest version.
@@ -110,7 +110,21 @@ else()
 
 endif()
 
+#---------------------------------------------------------------------------------
+# Build local glfw version
+option(BUILD_GLFW "Build glfw library" ON)
+if(BUILD_GLFW)
+	#set GLFW_DIR_LOCAL
+	set( ENV{GLFW_DIR_LOCAL} ${CMAKE_CURRENT_SOURCE_DIR}/external/glfw )	
+endif()
 
+#---------------------------------------------------------------------------------
+# Build local glew version
+option(BUILD_GLEW "Build glew library" ON)
+if(BUILD_GLEW)
+	#set GLEW_DIR_LOCAL
+	set( ENV{GLEW_DIR_LOCAL} ${CMAKE_CURRENT_SOURCE_DIR}/external/glew )	
+endif()
 
 ################################################################
 add_subdirectory(src)

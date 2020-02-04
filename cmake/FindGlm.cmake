@@ -25,7 +25,9 @@ set( _glm_HEADER_SEARCH_DIRS
   
 # 1. Read the environment variable
 if (NOT _glm_DIR)
-  if (DEFINED ENV{GLM_DIR})
+  if (DEFINED ENV{GLM_DIR_LOCAL})
+    set (_glm_DIR "$ENV{GLM_DIR_LOCAL}" CACHE PATH "Installation prefix of OpenCV Library." FORCE)
+  elseif (DEFINED ENV{GLM_DIR})
     set (_glm_DIR "$ENV{GLM_DIR}" CACHE PATH "Installation prefix of OpenCV Library." FORCE)
   elseif (DEFINED ENV{glm_ROOT})
     set (_glm_DIR "$ENV{glm_ROOT}" CACHE PATH "Installation prefix of OpenCV Library." FORCE)

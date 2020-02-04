@@ -27,3 +27,6 @@ tests/test_camera/test.csv
 tests/test_camera/test_cu.csv
 scripts/
 *.un~
+external/glew/src/glew.dir/
+external/glew/src/Release/
+external/glfw/src/glfw.dir/

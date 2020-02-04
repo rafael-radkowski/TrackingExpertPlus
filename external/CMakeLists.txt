@@ -7,6 +7,25 @@ cmake_policy(SET CMP0015 NEW)
 cmake_policy(SET CMP0074 NEW)
 cmake_policy(SET CMP0010 NEW)
 
+
+#--------------------------------------------------------------
+# Build GLFW
+# Options
+if (BUILD_GLFW)
+    add_subdirectory(glfw)
+endif()
+#--------------------------------------------------------------
+
+
+#--------------------------------------------------------------
+# Build GLEW
+# Options
+if (BUILD_GLEW)
+    add_subdirectory(glew)
+endif()
+#--------------------------------------------------------------
+
+
 # enable visual studio folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -103,6 +122,15 @@ set(CMAKE_DEBUG_POSTFIX d)
 # Create an executable
 add_library(GLUtils  ${GLUtils_SRC} ${GLUtils_INC} )
 
+# glfw dependency
+if (BUILD_GLFW)
+	add_dependencies(GLUtils glfw)
+endif()
+
+# glew dependency
+if (BUILD_GLEW)
+    add_dependencies(GLUtils glew)
+endif()
 
 # Add libraries
 target_link_libraries(GLUtils   ${GLEW_LIBS} ${GLEW_LIBS} ${GLFW3_LIBS} ${OPENGL_LIBRARIES}   )
@@ -136,8 +164,16 @@ set(TEST_APP0 GLUtils_Test)
 # Create an executable
 add_executable(${TEST_APP0} ${Test_SRC} )
 
-# add a dependency
-add_dependencies(${TEST_APP0} GLUtils)
+
+# glfw dependency
+if (BUILD_GLFW)
+	add_dependencies(${TEST_APP0} glfw)
+endif()
+
+# glew dependency
+if (BUILD_GLEW)
+    add_dependencies(${TEST_APP0} glew)
+endif()
 
 
 # Add libraries
@@ -149,4 +185,7 @@ target_link_libraries(${TEST_APP0} optimized  GLUtils.lib )
 set_target_properties (GLUtils_Test PROPERTIES
     FOLDER External
 )
+
+
+
 

@@ -25,7 +25,8 @@
 #---------------------------------------------------------------------
 #
 # Last edits:
-#
+# Feb 5, 2020, RR
+# - Adapted the definitions so that the file works with a local glew copy
 # 
 
 set(GLEW_FOUND FALSE)
@@ -40,16 +41,22 @@ set( _glew_SEARCH_DIRS
   )
   
 
+set (GLEW_DIR_LOCAL_ FALSE)
+ 
+
 # 1. Read the environment variable
 if (NOT _glew_DIR)
-  if (DEFINED ENV{GLEW_DIR})
-    set (_glew_DIR "$ENV{GLEW_DIR}" CACHE PATH "Installation prefix of OpenCV Library." FORCE)
+   if (DEFINED ENV{GLEW_DIR_LOCAL})
+    set (_glew_DIR "$ENV{GLEW_DIR_LOCAL}" CACHE PATH "Installation prefix of Glew Library." FORCE)
+	set (GLEW_DIR_LOCAL_ TRUE)
+  elseif (DEFINED ENV{GLEW_DIR})
+    set (_glew_DIR "$ENV{GLEW_DIR}" CACHE PATH "Installation prefix of Glew Library." FORCE)
   elseif (DEFINED ENV{Glew_DIR})
-    set (_glew_DIR "$ENV{Glew_DIR}" CACHE PATH "Installation prefix of OpenCV Library." FORCE)
+    set (_glew_DIR "$ENV{Glew_DIR}" CACHE PATH "Installation prefix of Glew Library." FORCE)
   elseif (DEFINED ENV{GLEW_ROOT})
-    set (_glew_DIR "$ENV{GLEW_ROOT}" CACHE PATH "Installation prefix of OpenCV Library." FORCE)
+    set (_glew_DIR "$ENV{GLEW_ROOT}" CACHE PATH "Installation prefix of Glew Library." FORCE)
   elseif (DEFINED ENV{Glew_ROOT})
-    set (_glew_DIR "$ENV{Glew_ROOT}" CACHE PATH "Installation prefix of OpenCV Library." FORCE)
+    set (_glew_DIR "$ENV{Glew_ROOT}" CACHE PATH "Installation prefix of Glew Library." FORCE)
   endif ()
 endif ()
 
@@ -88,7 +95,7 @@ set( _glew_LIB_SEARCH_DIRS
   "${GLEW_DIR}/lib/Debug" 
   )
   
-if(GLEW_DIR)
+if(GLEW_DIR AND GLEW_DIR_LOCAL_ MATCHES FALSE)
 	set(GLEW_LIBS_LIST )
 
 	find_file(__find_glew_lib "glew32.lib" PATHS ${_glew_LIB_SEARCH_DIRS})
@@ -119,6 +126,8 @@ if(GLEW_DIR)
 	unset(__find_glew_lib CACHE)
 	
 	set(GLEW_LIBS ${GLEW_LIBS_LIST} CACHE STRING "Glew libs")
+else()
+	set(GLEW_LIBS ${GLEW_DIR}/lib/glew.lib CACHE STRING "Glew libs")
 endif ()
 
 

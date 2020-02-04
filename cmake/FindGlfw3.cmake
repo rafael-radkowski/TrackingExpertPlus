@@ -12,6 +12,13 @@
 #
 # C:\SDK\glfw-3.2.1\src\Debug\glfw3.lib
 # C:\SDK\glfw-3.2.1\src\Release\glfw3.lib
+#
+# ------------------------------------------------------------------------
+# Last edits:
+#
+# Feb 5, 2020, RR
+# - Adapted this file to work solely with tracking expert + and its local libs in external
+# 
 
 # default search dirs
 set(GLFW3_FOUND FALSE)
@@ -25,10 +32,14 @@ set( _glfw3_SEARCH_DIRS
   "C:/SDK/glfw/include"
   )
   
+set (GLFW_DIR_LOCAL_ FALSE)
 
 # 1. Read the environment variable
 if (NOT _glfw_DIR)
-  if (DEFINED ENV{GLFW_DIR})
+  if (DEFINED ENV{GLFW_DIR_LOCAL})
+    set (_glfw_DIR "$ENV{GLFW_DIR_LOCAL}" CACHE PATH "Installation prefix of glfw Library." FORCE)
+	set (GLFW_DIR_LOCAL_ TRUE)
+  elseif (DEFINED ENV{GLFW_DIR})
     set (_glfw_DIR "$ENV{GLFW_DIR}" CACHE PATH "Installation prefix of glfw Library." FORCE)
   elseif (DEFINED ENV{GLFW3_DIR})
     set (_glfw_DIR "$ENV{GLFW3_DIR}" CACHE PATH "Installation prefix of glfw Library." FORCE)
@@ -89,7 +100,7 @@ set( _glfw_LIB_SEARCH_DIRS
   "${GLFW3_DIR}/src/Debug/x64"  
   )
   
-if(GLFW3_DIR)
+if(GLFW3_DIR AND GLFW_DIR_LOCAL_ MATCHES FALSE)
 	set(GLFW3_LIBS_LIST )
 
 	find_file(__find_glfw_lib "glfw3.lib" PATHS ${_glfw_LIB_SEARCH_DIRS})
@@ -120,7 +131,9 @@ if(GLFW3_DIR)
 	unset(__find_glfw_lib CACHE)
 	
 	set(GLFW3_LIBS ${GLFW3_LIBS_LIST} CACHE STRING "Glfw3 libs")
-endif (GLFW3_DIR)
+else()
+	set(GLFW3_LIBS ${GLFW3_DIR}/lib/glfw3.lib CACHE STRING "Glfw3 libs")
+endif ()
 
 
 
