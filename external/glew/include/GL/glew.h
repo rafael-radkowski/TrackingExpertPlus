@@ -76,7 +76,7 @@
 ** TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 ** MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
 */
-
+#pragma once
 #ifndef __glew_h__
 #define __glew_h__
 #define __GLEW_H__

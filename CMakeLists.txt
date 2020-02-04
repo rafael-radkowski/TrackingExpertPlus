@@ -126,6 +126,10 @@ if(BUILD_GLEW)
 	set( ENV{GLEW_DIR_LOCAL} ${CMAKE_CURRENT_SOURCE_DIR}/external/glew )	
 endif()
 
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/tests/Test.cmd
+     DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/bin/)
+
 ################################################################
 add_subdirectory(src)
 add_subdirectory(tests)
