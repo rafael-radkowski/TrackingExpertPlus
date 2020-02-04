@@ -14,7 +14,8 @@
 #---------------------------------------------------------------------
 #
 # Last edits:
-#
+# Feb 5th, 2020, RR
+# - Added dependencies for GLUtils and TrackingX
 # 
 cmake_minimum_required(VERSION 2.6)
 
@@ -131,6 +132,9 @@ add_executable(${ProjectName}
 set_target_properties (${ProjectName} PROPERTIES
     FOLDER Tests
 )
+
+add_dependencies(${ProjectName} trackingx)
+add_dependencies(${ProjectName} GLUtils)
 
 
 # preporcessor properties

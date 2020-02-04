@@ -9,7 +9,8 @@ Latest edits:
 
 March 20, 2019, RR
 - Added a 'stop' function to close the window from code. 
-
+Feb 5, 2020, RR
+- Swapped window with and height to see the window nicely shaped. 
 */
 
 

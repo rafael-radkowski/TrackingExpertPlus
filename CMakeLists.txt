@@ -63,6 +63,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/)
 
 
 
+# GLUtils Submodule
 # create the directory for all dependencies and download the dependencies.
 find_path( GLSUPPORT_DIR NAMES external/gl_support/README.md)
 
@@ -85,6 +86,29 @@ else()
 
 endif()
 
+
+# GLM Submodule
+# create the directory for all dependencies and download the dependencies.
+find_path( GLM_DIR NAMES external/glm/readme.md)
+
+if( (NOT GLM_DIR) OR (NOT EXISTS ${GLM_DIR}))
+	file(MAKE_DIRECTORY "./external/glm")
+
+	execute_process(COMMAND git submodule update --init 
+					WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+	set(GLM_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/glm
+					CACHE PATH "glm dir" FORCE)
+
+
+		
+	
+else()
+  # update the submodule to the latest version.
+  #execute_process(COMMAND git submodule update --remote --merge
+  #	  				WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+endif()
 
 
 

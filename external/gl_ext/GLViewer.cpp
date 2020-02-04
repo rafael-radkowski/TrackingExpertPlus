@@ -37,7 +37,7 @@ bool GLViewer::create(int window_width, int window_height, string name)
 
 	
 	// Init the GLFW Window and glew
-    _window = cs557::initWindow(window_width, window_height, name);
+    _window = cs557::initWindow( window_height, window_width, name);
     cs557::initGlew();
 
 	// coordinate system
