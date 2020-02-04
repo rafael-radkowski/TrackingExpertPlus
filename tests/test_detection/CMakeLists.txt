@@ -69,6 +69,7 @@ find_package(GLFW3 REQUIRED)
 FIND_PACKAGE(Cuda REQUIRED)
 FIND_PACKAGE(Cub REQUIRED)
 FIND_PACKAGE(OpenGL REQUIRED)
+FIND_PACKAGE(Structure REQUIRED)
 
 #include dir
 include_directories(${OpenCV_INCLUDE_DIR})
@@ -77,6 +78,7 @@ include_directories(${TBB_INCLUDE_DIR})
 include_directories(${GLM_INCLUDE_DIR})
 include_directories(${GLFW3_INCLUDE_DIR})
 include_directories(${GLEW_INCLUDE_DIR})
+include_directories(${STRUCTURE_INCLUDE_DIR})
 
 # local 
 include_directories(${PROJECT_SOURCE_DIR}/include/camera)
@@ -142,11 +144,14 @@ target_link_libraries(${ProjectName}  ${OpenCV_LIBS})
 target_link_libraries(${ProjectName}  ${TBB_LIBS})
 target_link_libraries(${ProjectName}  ${GLEW_LIBS})
 target_link_libraries(${ProjectName}  ${GLFW3_LIBS})
-target_link_libraries(${ProjectName}  ${PROJECT_SOURCE_DIR}/lib/trackingx.lib)
+target_link_libraries(${ProjectName} optimized ${PROJECT_SOURCE_DIR}/lib/trackingx.lib)
+target_link_libraries(${ProjectName} debug ${PROJECT_SOURCE_DIR}/lib/trackingxd.lib)
 target_link_libraries(${ProjectName} debug  ${PROJECT_SOURCE_DIR}/lib/GLUtilsd.lib )
 target_link_libraries(${ProjectName} optimized  ${PROJECT_SOURCE_DIR}/lib/GLUtils.lib )
 target_link_libraries(${ProjectName} optimized  cudart.lib )
+target_link_libraries(${ProjectName} debug  cudart.lib )
 target_link_libraries(${ProjectName} ${GLEW_LIBS} ${GLEW_LIBS} ${GLFW3_LIBS} ${OPENGL_LIBS} ${OPENGL_LIBRARIES} )
+target_link_libraries(${ProjectName} ${STRUCTURE_LIBRARY} )
 
 #----------------------------------------------------------------------
 # Pre-processor definitions

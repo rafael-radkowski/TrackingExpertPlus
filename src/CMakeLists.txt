@@ -83,6 +83,7 @@ find_package(GLFW3 REQUIRED)
 FIND_PACKAGE(Cuda REQUIRED)
 FIND_PACKAGE(Cub REQUIRED)
 FIND_PACKAGE(OpenGL REQUIRED)
+FIND_PACKAGE(Structure REQUIRED)
 
 #include dir
 include_directories(${OpenCV_INCLUDE_DIR})
@@ -90,6 +91,7 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${TBB_INCLUDE_DIR})
 include_directories(${GLM_INCLUDE_DIR})
 include_directories(${GLFW3_INCLUDE_DIR})
+include_directories(${STRUCTURE_INCLUDE_DIR})
 
 # local 
 include_directories(${PROJECT_SOURCE_DIR}/include/camera)
@@ -101,6 +103,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include/nearest_neighbors)
 include_directories(${PROJECT_SOURCE_DIR}/include/pointcloud)
 include_directories(${PROJECT_SOURCE_DIR}/include/utils)
 include_directories(C:/SDK/StructureSDK/Libraries/Structure/Headers)
+
 
 
 
