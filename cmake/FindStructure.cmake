@@ -85,6 +85,6 @@ find_file(STRUCTURE_LIBRARY
 endif()
 	
 if(STRUCTURE_LIBRARY)
-	set(STRUCTURE_FOUND TRUE  CACHE DOC "Found strcture")
+	set(STRUCTURE_FOUND TRUE  CACHE STRING "Found strcture")
 	message(STATUS "[Structure] Found structure sdk at ${STRUCTURE_DIR}" )
 endif()

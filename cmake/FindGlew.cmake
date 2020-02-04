@@ -118,7 +118,7 @@ if(GLEW_DIR)
 	endif(__find_glew_lib)
 	unset(__find_glew_lib CACHE)
 	
-	set(GLEW_LIBS ${GLEW_LIBS_LIST} CACHE DOC "Glew libs")
+	set(GLEW_LIBS ${GLEW_LIBS_LIST} CACHE STRING "Glew libs")
 endif ()
 
 
@@ -137,7 +137,7 @@ endif()
 unset(__find_version CACHE)
 
 if(GLEW_DIR AND GLEW_LIBS ) 
-	set(GLEW_FOUND TRUE CACHE DOC "Found glew")
+	set(GLEW_FOUND TRUE CACHE STRING "Found glew")
 	message(STATUS "[FindGLEW] - Found GLEW at " ${GLEW_DIR} ", Version " ${GLEW_VERSION})
 endif()
 

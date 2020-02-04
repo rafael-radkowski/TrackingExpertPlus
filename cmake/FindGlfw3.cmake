@@ -119,13 +119,13 @@ if(GLFW3_DIR)
 	endif(__find_glfw_lib)
 	unset(__find_glfw_lib CACHE)
 	
-	set(GLFW3_LIBS ${GLFW3_LIBS_LIST} CACHE DOC "Glfw3 libs")
+	set(GLFW3_LIBS ${GLFW3_LIBS_LIST} CACHE STRING "Glfw3 libs")
 endif (GLFW3_DIR)
 
 
 
 if(GLFW3_DIR AND GLFW3_LIBS ) 
-	set(GLFW3_FOUND TRUE CACHE DOC "Found glfw3")
+	set(GLFW3_FOUND TRUE CACHE STRING "Found glfw3")
 	message(STATUS "[FindGLFW3] - Found GLFW3 at " ${GLFW3_DIR} )
 endif()
 

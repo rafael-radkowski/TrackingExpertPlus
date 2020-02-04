@@ -18,6 +18,8 @@
 #
 # Oct 22, 2019, RR
 # - Added the CMAKE_TRY_COMPILE_TARGET_TYPE compiler option. 
+# Feb 5, 2020, RR
+# - Added submodule support for glGLutils
 # 
 
 
@@ -59,6 +61,29 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/lib/)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/lib/)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/)
 
+
+
+# create the directory for all dependencies and download the dependencies.
+find_path( GLSUPPORT_DIR NAMES external/gl_support/README.md)
+
+if( (NOT GLSUPPORT_DIR) OR (NOT EXISTS ${GLSUPPORT_DIR}))
+	file(MAKE_DIRECTORY "./external/gl_support")
+
+	execute_process(COMMAND git submodule update --init 
+					WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+	set(GLSUPPORT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/gl_support
+					CACHE PATH "gl_support dir" FORCE)
+
+
+		
+	
+else()
+  # update the submodule to the latest version.
+  #execute_process(COMMAND git submodule update --remote --merge
+  #	  				WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+endif()
 
 
 
