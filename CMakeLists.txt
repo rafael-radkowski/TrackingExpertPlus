@@ -110,21 +110,30 @@ else()
 
 endif()
 
+
+
 #---------------------------------------------------------------------------------
 # Build local glfw version
-option(BUILD_GLFW "Build glfw library" ON)
-if(BUILD_GLFW)
-	#set GLFW_DIR_LOCAL
+option(TRAKINGX_BUILD_GLFW "TrackingExpert: Build glfw library" ON)
+if(TRAKINGX_BUILD_GLFW)
 	set( ENV{GLFW_DIR_LOCAL} ${CMAKE_CURRENT_SOURCE_DIR}/external/glfw )	
 endif()
 
 #---------------------------------------------------------------------------------
 # Build local glew version
-option(BUILD_GLEW "Build glew library" ON)
-if(BUILD_GLEW)
-	#set GLEW_DIR_LOCAL
+option(TRAKINGX_BUILD_GLEW "TrackingExpert: Build glew library" ON)
+if(TRAKINGX_BUILD_GLEW)
 	set( ENV{GLEW_DIR_LOCAL} ${CMAKE_CURRENT_SOURCE_DIR}/external/glew )	
 endif()
+
+
+#---------------------------------------------------------------------------------
+# Build with demo tool
+option(TRAKINGX_BUILD_DEMO "TrackingExpert: Build with examples" ON)
+
+
+#message(${CMAKE_CURRENT_SOURCE_DIR})
+set( TRACKINGX_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}) 
 
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/tests/Test.cmd
@@ -134,3 +143,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/tests/Test.cmd
 add_subdirectory(src)
 add_subdirectory(tests)
 add_subdirectory(external)
+
+if(TRAKINGX_BUILD_DEMO)
+	add_subdirectory(examples)
+endif()

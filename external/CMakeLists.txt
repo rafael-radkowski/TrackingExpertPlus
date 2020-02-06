@@ -11,7 +11,7 @@ cmake_policy(SET CMP0010 NEW)
 #--------------------------------------------------------------
 # Build GLFW
 # Options
-if (BUILD_GLFW)
+if (TRAKINGX_BUILD_GLFW)
     add_subdirectory(glfw)
 endif()
 #--------------------------------------------------------------
@@ -20,7 +20,7 @@ endif()
 #--------------------------------------------------------------
 # Build GLEW
 # Options
-if (BUILD_GLEW)
+if (TRAKINGX_BUILD_GLEW)
     add_subdirectory(glew)
 endif()
 #--------------------------------------------------------------

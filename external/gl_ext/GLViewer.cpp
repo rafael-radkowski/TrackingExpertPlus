@@ -86,6 +86,10 @@ void GLViewer::draw_loop(void)
 
 		glm::mat4 rotated_view =    cs557::GetCamera().getViewMatrix() ;//* glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f)) ;
 
+		if (!_camera_control) {
+			rotated_view = glm::lookAt(glm::vec3(0.0,0.0,0.0), glm::vec3(0.0,0.0,1.0), glm::vec3(0.0,1.0,0.0));
+		}
+
 		// draw the coordinate frame
 		_cs.draw(_projMatrix, rotated_view, cs_modelMatrix);
 
@@ -162,4 +166,15 @@ bool GLViewer::stop(void)
 		glfwSetWindowShouldClose(_window, 1);
 
 	return true;
+}
+
+
+/*
+Enable or disable the moveable camera. 
+@param enable - true enables the camera. 
+*/
+bool GLViewer::enableCameraControl(bool enable)
+{
+	_camera_control = enable;
+	return _camera_control;
 }
