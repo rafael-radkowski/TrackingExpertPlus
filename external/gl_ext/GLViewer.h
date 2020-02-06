@@ -98,6 +98,13 @@ namespace isu_ar {
 		bool stop(void);
 
 
+		/*
+		Enable or disable the moveable camera. 
+		@param enable - true enables the camera. 
+		*/
+		bool enableCameraControl(bool enable);
+
+
 	private:
 
 		/*
@@ -126,6 +133,7 @@ namespace isu_ar {
 
 		bool							_running;
 		bool							_init_ready;
+		bool							_camera_control;
 
 		// a coordinate system
 		cs557::CoordinateSystem			_cs;

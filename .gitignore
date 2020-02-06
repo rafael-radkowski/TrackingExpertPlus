@@ -30,3 +30,5 @@ scripts/
 external/glew/src/glew.dir/
 external/glew/src/Release/
 external/glfw/src/glfw.dir/
+examples/gear_demo/src/GearTransmissionDemo.dir/Release/GearTran.955025D4.tlog/CL.write.1.tlog
+examples/gear_demo/src/GearTransmissionDemo.dir/
