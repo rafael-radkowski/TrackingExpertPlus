@@ -35,7 +35,8 @@
 #---------------------------------------------------------------------
 #
 # Last edits:
-#
+# Feb 14, 2020, RR
+# - Changed Eigen_include_dir search path
 # 
 
 
@@ -77,12 +78,14 @@ find_file(_find_eigen_
 set(__INCLUDE_DIRS 
 	${EIGEN3_DIR}/Eigen
 	${EIGEN3_DIR}/eigen
-
+	${EIGEN3_DIR}
 )
+
+
 
 if(_find_eigen_)
 	find_path(
-		EIGEN3_INCLUDE_DIR eigen/Eigen
+		EIGEN3_INCLUDE_DIR Eigen/Eigen
 		PATHS ${__INCLUDE_DIRS}
 	)
 endif(_find_eigen_)

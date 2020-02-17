@@ -35,8 +35,9 @@
 #---------------------------------------------------------------------
 #
 # Last edits:
-#
-# 
+# Feb 14, 2020, RR
+# - Fixed a bug that pointed cmake to a wrong version file. 
+# - Added a lib search path that incorporates the build folder into the search path. 
 
 
 
@@ -76,15 +77,14 @@ endif ()
 #  )
 #endif ()
 
-    
-
 # ----------------------------------------------------------------------------
 # Extract the version from a version file. 
 
 # OpenCV Version 3 support
-find_file(__find_version "version.hpp"  PATHS  "${OpenCV_DIR}/modules/core/include/opencv2/core/"  )
+find_file(__find_version "version.hpp"  PATHS  "${OpenCV_DIR}/modules/core/include/opencv2/core/" 
+												"${OpenCV_DIR}/include/opencv2/core")
 if(__find_version)
-	SET(OPENCV_VERSION_FILE "${OpenCV_DIR}/modules/core/include/opencv2/core/version.hpp")
+	SET(OPENCV_VERSION_FILE "${__find_version}")
 	file(STRINGS "${OPENCV_VERSION_FILE}" OPENCV_VERSION_PARTS REGEX "#define CV_VERSION_[A-Z]+[ ]+" )
 
 	string(REGEX REPLACE ".+CV_VERSION_MAJOR[ ]+([0-9]+).*" "\\1" OPENCV_VERSION_MAJOR "${OPENCV_VERSION_PARTS}")
@@ -156,6 +156,7 @@ set(__LIBRARY_DIRS
 	${OpenCV_DIR}/builds/lib/Debug
 	${OpenCV_DIR}/build/lib/Release
 	${OpenCV_DIR}/build/lib/Debug
+	${OpenCV_DIR}/x64/vc15/lib
 )
 
 
@@ -766,6 +767,7 @@ if(${OPENCV_VERSION_MAJOR} EQUAL "3")
 		${OpenCV_CUDA_CODEC_DEBUG} ${OpenCV_CUDA_FEATURES2D_DEBUG} ${OpenCV_CUDA_FILTERS_DEBUG} ${OpenCV_CUDA_IMGPROC_DEBUG} 
 		${OpenCV_CUDA_LEGACY_DEBUG} ${OpenCV_CUDA_OBJDETECT_DEBUG} ${OpenCV_CUDA_OPTFLOW_DEBUG} ${OpenCV_CUDA_STEREO_DEBUG} 
 		${OpenCV_CUDA_WARPING_DEBUG}
+		${OpenCV_WORLD} ${OpenCV_WORLD_DEBUG}
 		CACHE PATH "Libraries")
 
 	set (OpenCV_FOUND TRUE CACHE PATH "Found opencv")

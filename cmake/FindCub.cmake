@@ -11,10 +11,19 @@
 # CUB_INCLUDE_DIRS - Directories containing the CUB include files.
 
 # In CMake 3.12+, set the CUB_ROOT environment variable to add another search path here
+#------------------------------------------------------------
+# Last edits:
+#
+#  Feb 14, 2020, RR
+# - Added a second cub search path
+
+
+
 find_path(
     CUB_ROOT_DIR
     NAMES cub/cub.cuh
     PATHS "C:/SDK/cub-1.8.0"
+		  "D:/SDK_RC/cub-1.8.0"
 )
 
 mark_as_advanced(
