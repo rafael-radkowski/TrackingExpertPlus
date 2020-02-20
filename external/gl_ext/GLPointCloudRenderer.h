@@ -65,6 +65,13 @@ namespace isu_ar {
 		*/
 		void setModelmatrix(glm::mat4 m) { modelMatrix = m; }
 
+
+		/*
+		Set the point cloud color. 
+		@param color  -  a color values in RGB format with each value in the range [0,1].
+		*/
+		void setPointColor(glm::vec3 color);
+
 	private:
 
 		int vaoID[1]; // Our Vertex Array Object

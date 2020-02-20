@@ -22,19 +22,20 @@ namespace nsGLPointCloudRenderer
 		"{                                                                 \n"
 		"    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(in_Position, 1.0);  \n"
 		"    pass_Color = in_Normal;                                         \n"
-		"	gl_PointSize = 4.0;												\n"	
+		"	 gl_PointSize = 4.0;												\n"	
 		"}                                                                 \n";
 
 	// Fragment shader source code. This determines the colors in the fragment generated in the shader pipeline. In this case, it colors the inside of our triangle specified by our vertex shader.
 	static const string fs_string_410 =
 		"#version 410 core                                                 \n"
 		"                                                                  \n"
+		"uniform vec3 pointcolor;                                          \n"
 		"in vec3 pass_Color;                                                 \n"
 		"in vec2 pass_Texture;												\n"
 		"out vec4 color;                                                    \n"
 		"void main(void)                                                   \n"
 		"{                                                                 \n"
-		"    color = vec4(1.0,0.0,0.0, 1.0);                               \n"
+		"    color = vec4(pointcolor, 1.0);                               \n"
 		"}                                                                 \n";
 
 
@@ -81,6 +82,9 @@ GLPointCloudRenderer::GLPointCloudRenderer(vector<Eigen::Vector3f>& dst_points, 
 	_pos_location = glGetAttribLocation(program, "in_Position");
 	_norm_location = glGetAttribLocation(program, "in_Normal");
 
+	// default color
+	glUniform3f(glGetUniformLocation(program, "pointcolor") , (GLfloat)1.0f, (GLfloat)0.0f, (GLfloat)1.0f );
+
     points.clear();
     normals.clear();
 
@@ -95,6 +99,10 @@ GLPointCloudRenderer::GLPointCloudRenderer(vector<Eigen::Vector3f>& dst_points, 
 
 	// create a vertex buffer object
 	cs557::CreateVertexObjects33(vaoID, vboID, &points[0].x, &normals[0].x, _N, _pos_location, _norm_location );
+
+
+	
+
 
     modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 }
@@ -114,7 +122,7 @@ void GLPointCloudRenderer::updatePoints(void)
 	glBindBuffer(GL_ARRAY_BUFFER, vboID[0]); // Bind our Vertex Buffer Object
 	glBufferSubData(GL_ARRAY_BUFFER, 0, (GLsizeiptr)(_N *3* sizeof(GLfloat)),(void*)&_points[0]); // Set the size and data of our VBO and set it to STATIC_DRAW
 
-								  //Color
+	//Normal vectors
 	glBindBuffer(GL_ARRAY_BUFFER, vboID[1]); // Bind our second Vertex Buffer Object
 	glBufferSubData(GL_ARRAY_BUFFER, 0, (GLsizeiptr)(_N * 3* sizeof(GLfloat)), (void*) &_normals[0]); // Set the size and data of our VBO and set it to STATIC_DRAW
 
@@ -149,6 +157,8 @@ void GLPointCloudRenderer::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix
 	glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, &modelMatrix[0][0]); // send the model matrix to our shader
 	glUniformMatrix4fv(projMatrixLocation, 1, GL_FALSE, &projectionMatrix[0][0]); // send the projection matrix to our shader
 
+	
+
 	// Bind the buffer and switch it to an active buffer
 	glBindVertexArray(vaoID[0]);
 
@@ -161,4 +171,15 @@ void GLPointCloudRenderer::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix
 	// Unbind the shader program
 	glUseProgram(0);
 
+}
+
+
+/*
+Set the point cloud color. 
+@param color  -  a color values in RGB format with each value in the range [0,1].
+*/
+void GLPointCloudRenderer::setPointColor(glm::vec3 color)
+{
+	// default color
+	glUniform3fv(glGetUniformLocation(program, "pointcolor"), 1 , &color[0] );
 }

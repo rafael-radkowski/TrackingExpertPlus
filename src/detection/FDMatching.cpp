@@ -153,6 +153,12 @@ bool FDMatching::extract_feature_map(vector<Eigen::Vector3f>* points, vector<Eig
 
 
 
+bool  FDMatching::searchIn(vector<Eigen::Vector3f>* points, vector<Eigen::Vector3f>* normals, std::vector<Pose>& poses)
+{
+	return detect( points, normals,  poses);
+}
+
+
 /*
 Extract the ppf features from points and normal vectors
 @param points - point as {x, y, z}

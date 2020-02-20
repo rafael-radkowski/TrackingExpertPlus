@@ -84,7 +84,7 @@ namespace texpert {
 		@param map_results - the map in which all the results should be inserted to.
 		*/
 		bool detect(vector<Eigen::Vector3f>* points, vector<Eigen::Vector3f>* normals, std::vector<Pose>& poses);
-
+		bool searchIn(vector<Eigen::Vector3f>* points, vector<Eigen::Vector3f>* normals, std::vector<Pose>& poses);
 
 		/*
 		Set true to invert the pose. The standard pose transforms the

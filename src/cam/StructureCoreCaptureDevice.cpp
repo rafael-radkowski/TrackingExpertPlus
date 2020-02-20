@@ -19,7 +19,8 @@
 
 texpert::StructureCoreCaptureDevice::StructureCoreCaptureDevice()
 {
-
+	_distortion = CameraParameters::getDistortions();
+	_intrinsic = CameraParameters::getIntrinsic();
 	_color_height = -1;
 	_color_width = -1;
 	_depth_height = -1;
@@ -261,4 +262,35 @@ void texpert::StructureCoreCaptureDevice::SessionDelegate::copyDepthToMat()
 	depthFrame = cameraFrame.clone();
 
 	depthMutex.unlock();
+}
+
+
+
+/*!
+Read camera parameters for the depth camera from a file.
+@param path_and_file - string with a relative or absolute path pointing to the 
+camera parameters
+*/
+bool  texpert::StructureCoreCaptureDevice::readCameraParameters(std::string path_and_file, bool verbose)
+{
+	bool ret = CameraParameters::Read(path_and_file, verbose);
+
+	if (ret) {
+		_intrinsic = CameraParameters::getIntrinsic();
+		_distortion = CameraParameters::getDistortions();
+	}	
+	return ret;
+}
+
+
+/*!
+Return the intrinsic camera parameters
+@return 3x3 cv::Mat with
+	[ fx 0 cx ]
+	[ 0 fy cy ]
+	[ 0 0  1  ]
+*/
+cv::Mat& texpert::StructureCoreCaptureDevice::getCameraParam(void)
+{
+	return _intrinsic;
 }

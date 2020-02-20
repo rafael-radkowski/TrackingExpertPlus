@@ -1,8 +1,8 @@
-#include "NearestNeighbors.h"
+#include "ICPKNN.h"
 
 using namespace  texpert;
 
-NearestNeighbors::NearestNeighbors() {
+ICPKNN::ICPKNN() {
 
 	_kdtree = new Cuda_KdTree();
 	_ready = false;
@@ -12,7 +12,7 @@ NearestNeighbors::NearestNeighbors() {
 
 }
 
-NearestNeighbors::~NearestNeighbors(){
+ICPKNN::~ICPKNN(){
 	delete _kdtree;
 }
 
@@ -22,7 +22,7 @@ Set the reference point cloud.
 This one goes into the kd-tree as soon as it is set. 
 @param pc - reference to the point cloud model
 */
-bool NearestNeighbors::setReferenceModel(PointCloud& pc) {
+bool ICPKNN::populate(PointCloud& pc) {
 
 	assert(_kdtree);
 
@@ -52,8 +52,36 @@ Set the test model, this is tested agains the
 reference model in the kd-tree
 @param pc - reference to the point cloud model
 */
-bool NearestNeighbors::setTestModel(PointCloud& pc)
+//bool ICPKNN::setTestModel(PointCloud& pc)
+//{
+//	_tpoints.clear();
+//
+//	vector<Eigen::Vector3f>& p = pc.points ;
+//
+//	for (int i = 0; i < pc.points.size(); i++) {
+//		Cuda_Point k = Cuda_Point(p[i].x(), p[i].y(), p[i].z());
+//		k._id = i;
+//		_tpoints.push_back(k);
+//	}
+//
+//	_testPoint = &pc;
+//
+//	// check if ready
+//	_ready = ready();
+//
+//	return true;
+//}
+
+
+/*
+Start the knn search and return matches.
+@param k - the number of matches to return
+@param matches - reference to the matches
+*/
+int ICPKNN::knn(PointCloud& pc, int k,  vector<Matches>& matches)
 {
+	// copy all models into the cuda structure. 
+
 	_tpoints.clear();
 
 	vector<Eigen::Vector3f>& p = pc.points ;
@@ -69,17 +97,7 @@ bool NearestNeighbors::setTestModel(PointCloud& pc)
 	// check if ready
 	_ready = ready();
 
-	return true;
-}
 
-
-/*
-Start the knn search and return matches.
-@param k - the number of matches to return
-@param matches - reference to the matches
-*/
-int NearestNeighbors::knn(int k,  vector<Matches>& matches)
-{
 	assert(_kdtree);
 
 	if (!_ready) return -1;
@@ -96,7 +114,7 @@ Check if this class is ready to run.
 The kd-tree and the test points - both need to have points
 @return - true, if it can run. 
 */
-bool NearestNeighbors::ready(void)
+bool ICPKNN::ready(void)
 {
 	if (_rpoints.size() > 0 && _tpoints.size() > 0)
 		return true;
@@ -109,7 +127,7 @@ bool NearestNeighbors::ready(void)
 /*
 Reset the tree
 */
-int NearestNeighbors::reset(void) {
+int ICPKNN::reset(void) {
 
 	assert(_kdtree);
 	_kdtree->resetDevTree();

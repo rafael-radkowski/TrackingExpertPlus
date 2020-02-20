@@ -17,6 +17,9 @@ rafael@iastate.edu
 -----------------------------------------------------------
 Last edits:
 
+Feb 7, 2020, RR
+- Added a camera parameter loader.
+
 */
 #include <iostream>
 #include <vector>
@@ -67,7 +70,7 @@ public:
 	bool process(void);
 
 
-	
+
 
 private:
 	// raw point cloud sampling
@@ -87,16 +90,31 @@ private:
 	int						_depth_rows;
 	int						_depth_cols;
 
+	// the depth camera focal length
+	// the default values are set for the structure core. 
+	float					_fx_depth;
+	float					_fy_depth;
+
+	// caemra principal points.
+	float					_cx_depth;
+	float					_cy_depth;
+
 	// location of an external storage to write the camera
 	// point cloud data to. 
 	PointCloud&				_the_cloud;
 
-
+	// Parameters to inidcate the sampling method
 	SamplingMethod			_sampling_method;
 	SamplingParam			_sampling_param;
 
+	// step size for normal vector estimation. 
+	// The normal vectors are estimated using cross-products
+	// to adjacent pixels. The variable indicates the distance to the neighbor. 
 	int						_normal_vector_step_size;
 
+	
+
+	// true, if all initialization steps were completed sucessfull.y
 	bool					_producer_ready;
 };
 

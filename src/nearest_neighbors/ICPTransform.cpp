@@ -11,18 +11,28 @@ Computes the difference between two set of points
 @return the rotation and translation difference between those points as
 4x4 matri in homogenous coordinate frames.
 */
-Matrix4f ICPTransform::Compute(vector<Vector4f>& points0, vector<Vector4f>& points1)
+Matrix4f ICPTransform::Compute(vector<Vector3f>& points0, vector<Vector3f>& points1, Pose initial_pose)
 {
 
 	Matrix4f result = Matrix4f::Identity();
 	Matrix4f overall = Matrix4f::Identity();
 
 	vector<Vector3f> in0, in1;
-	for (auto & e : points0) in0.push_back(Vector3f( e.x(), e.y(), e.z()) );
-	for (auto & e : points1) in1.push_back(Vector3f(e.x(), e.y(), e.z()));
+	// copy the points
+	std::copy(points0.begin(), points0.end(), back_inserter(in0));
+	std::copy(points1.begin(), points1.end(), back_inserter(in1));
 
 	float rms = 100000000.0;
 
+
+	//Matrix4f M = initial_pose.t.matrix();
+	Matrix3f R = initial_pose.t.rotation();
+	Vector3f t = initial_pose.t.translation();
+	//for (auto & e : in0) e = ( R * e) + t;
+	for_each(in0.begin(), in0.end(), [&](Vector3f& p){p = (R * p) + t;});
+
+
+	// the loop expects that both vectors are already index aligned. 
 	int itr = 0;
 	for (int i = 0; i < 10; i++)
 	{
@@ -51,9 +61,11 @@ Matrix4f ICPTransform::Compute(vector<Vector4f>& points0, vector<Vector4f>& poin
 		result(14) = t.z();
 
 		// update the points
-		for (auto & e : in0) e = (R * e) + t;
+		/// TODO: performance teste. Which function is faster for_each vs. std::transform
+		//for (auto & e : in0) e = (R * e) + t;
+		for_each(in0.begin(), in0.end(), [&](Vector3f& p){p = (R * p) + t;});
 	
-		overall = overall * result;
+		overall =  result * overall;
 
 		itr++;
 		rms = CheckRMS(in0, in1);

@@ -21,6 +21,12 @@
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+# Build the tracking test
+option( TRAKINGX_BUILD_TEST_TRACKING "TrackingX Build Tracking Test" OFF)
 
 add_subdirectory(test_detection)
 add_subdirectory(test_camera)
+
+if(TRAKINGX_BUILD_TEST_TRACKING)
+add_subdirectory(test_tracking)
+endif()

@@ -32,6 +32,9 @@ MIT License
 // Eigen 3
 #include <Eigen/Dense>
 
+// local
+#include "FDTypes.h"
+
 
 using namespace Eigen;
 using namespace std;
@@ -44,15 +47,15 @@ public:
 
 	/*
 	Computes the difference between two set of points
-	@param points0 - a vector with Eigen::Vec4 points, [x, y, z, w]
-	@param points1 - a vector with Eigen::VEc4 points,  [x, y, z, w]
+	@param points0 - a vector with Eigen::Vec3 points, [x, y, z]
+	@param points1 - a vector with Eigen::Vec3 points,  [x, y, z]
 	@return the rotation and translation difference between those points as 
 		4x4 matri in homogenous coordinate frames.
 	*/
-	static  Matrix4f Compute(vector<Vector4f>& points0, vector<Vector4f>& points1);
+	static  Matrix4f Compute(vector<Vector3f>& points0, vector<Vector3f>& points1, Pose initial_pose);
 
 
-private:
+
 
 	/*
 	Calculate the rotation using the method from Arun et al. 1987

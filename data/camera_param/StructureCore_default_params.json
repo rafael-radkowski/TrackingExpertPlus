@@ -1,0 +1,17 @@
+{
+    "intrinsic": {
+        "type_id": "opencv-matrix",
+        "rows": 3,
+        "cols": 3,
+        "dt": "f",
+        "data": [ 590.0, 0.0, 240.0, 0.0, 590.0, 320.0, 0.0, 0.0, 1.0 ]
+    },
+    "dist": {
+        "type_id": "opencv-matrix",
+        "rows": 5,
+        "cols": 1,
+        "dt": "f",
+        "data": [ 0.0, 0.0, 0.0, 0.0, 0.0 ]
+    },
+    "imgSize": [ 640, 480 ]
+}

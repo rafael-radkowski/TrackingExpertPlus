@@ -18,6 +18,14 @@ PointCloudProducer::PointCloudProducer(ICaptureDevice& capture_device, PointClou
 	_depth_cols = -1;
 	_depth_rows = -1;
 
+	cv::Mat param = _capture_device.getCameraParam();
+
+	_fx_depth = param.at<float>(0,0);
+	_fy_depth = param.at<float>(1,1);
+
+	_cx_depth = 0.0;
+	_cy_depth = 0.0;
+
 
 //	if (_capture_device.isOpen()) {
 //		cout << "[ERROR] - PointCloudProducer: error when opening the camera." << endl;
@@ -80,6 +88,9 @@ void PointCloudProducer::setNormalVectorParams(int step_size)
 }
 
 
+
+
+
 /*!
 Process the current camera frame
 @return true, if successful, otherwise false. 
@@ -113,7 +124,7 @@ bool PointCloudProducer::process(void)
 bool PointCloudProducer::run_sampling_raw(float* imgBuf)
 {
 	// sampling
-	cuSample3f::UniformSampling((float*)imgBuf, _depth_cols, _depth_rows, 320.0, 320.0, 0.0, 0.0, 1, false,
+	cuSample3f::UniformSampling((float*)imgBuf, _depth_cols, _depth_rows, _fx_depth, _fy_depth, _cx_depth, _cy_depth, 1, false,
 								(vector<float3>&)_the_cloud.points, 
 								(vector<float3>&)_the_cloud.normals);
 
@@ -125,7 +136,7 @@ bool PointCloudProducer::run_sampling_uniform(float* imgBuf)
 {
 	
 	// sampling
-	cuSample3f::UniformSampling((float*)imgBuf, _depth_cols, _depth_rows, 320.0, 320.0, 0.0, 0.0, _normal_vector_step_size, false,
+	cuSample3f::UniformSampling((float*)imgBuf, _depth_cols, _depth_rows, _fx_depth, _fy_depth, _cx_depth, _cy_depth, _normal_vector_step_size, false,
 								(vector<float3>&)_the_cloud.points, 
 								(vector<float3>&)_the_cloud.normals);
 
@@ -136,7 +147,7 @@ bool PointCloudProducer::run_sampling_uniform(float* imgBuf)
 bool PointCloudProducer::run_sampling_random(float* imgBuf)
 {
 	// sampling
-	cuSample3f::RandomSampling((float*)imgBuf, _depth_cols, _depth_rows, 320.0, _normal_vector_step_size, false,
+	cuSample3f::RandomSampling((float*)imgBuf, _depth_cols, _depth_rows, _fx_depth, _normal_vector_step_size, false,
 								(vector<float3>&)_the_cloud.points, 
 								(vector<float3>&)_the_cloud.normals);
 

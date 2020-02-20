@@ -63,6 +63,9 @@ namespace texpert
 		*/
 		static void PrintGlm4(glm::mat4& matrix);
 
+
+		static void PrintMatrix4f(Eigen::Matrix4f& matrix);
+
 	private:
 
 
