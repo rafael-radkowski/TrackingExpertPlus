@@ -7,7 +7,7 @@ using namespace texpert;
 TrackingMain::TrackingMain()
 {
 	_producer = NULL;
-	_sParam.uniform_step = 4;
+	_sParam.uniform_step = 8;
 	_sParam.random_max_points = 5000;
 
 

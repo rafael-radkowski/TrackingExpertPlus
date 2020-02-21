@@ -132,10 +132,11 @@ Calculates the normal vectors for points. The points must be organized in a grid
 @param width - the width of the image
 @param height - the height of the image
 @param step_size - the number of points that should be stepped over for the normal vector calculation
+@param flip_normal - parameter is multiplied with normal vector. Set to 1 to keep the normal vector, set to -1 to flip it.
 @param dst_normals - a float3 array to store the normal vectors as float3 [nx, ny, nz]
 @param dst_image - the normal vector data is stored in an image as RGB values. For debug purpose.
 */
-__global__ void pcu_calculate_normal_vector( float3* src_points, int width, int height,  int step_size,  float3* dst_normals, float* dst_image)
+__global__ void pcu_calculate_normal_vector( float3* src_points, int width, int height,  int step_size, float flip_normal,  float3* dst_normals, float* dst_image)
 {
 	int i = (blockIdx.x * blockDim.x) + threadIdx.x;
 	int j = (blockIdx.y * blockDim.y) + threadIdx.y;
@@ -153,10 +154,12 @@ __global__ void pcu_calculate_normal_vector( float3* src_points, int width, int 
 	int index_west = ( j * width ) + ((i- step_size));
 
 
-
+	float3 reset_point; reset_point.x = 0.0f; reset_point.y = 0.0f; reset_point.z =0.0f;
 	float3 aveNormal; aveNormal.x = 0.0f; aveNormal.y = 0.0f; aveNormal.z = 0.0f; 
 	float3 center = src_points[index_center];
 	int pointsUsed = 0;
+
+	
 
 	const float max_dist = 0.2f;
 	//if (i >= step_size && i < width - step_size  && j >= step_size && j < height - step_size)
@@ -164,15 +167,19 @@ __global__ void pcu_calculate_normal_vector( float3* src_points, int width, int 
 	//cross product quadrant 1
 	if (i < width-step_size  && j >= step_size)
 	{
+		
+		
 		float3 north = src_points[index_north];
 		float3 east = src_points[index_east];
 		float3 temp = cross(east-center, north - center);
-
+		
 		if (isfinite(temp.x) && fabs(east.z - center.z) < max_dist & fabs(north.z - center.z) < max_dist)
 		{
 			temp = normalize(temp);
-			aveNormal += temp;
-			pointsUsed++;
+			if(!isnan(temp.x)){
+				aveNormal += temp;
+				pointsUsed++;
+			}
 		}		
 	}
 
@@ -185,8 +192,10 @@ __global__ void pcu_calculate_normal_vector( float3* src_points, int width, int 
 		if (isfinite(temp.x) && abs(west.z - center.z) < max_dist && abs(north.z - center.z) < max_dist )
 		{
 			temp = normalize(temp);
-			aveNormal += temp;
-			pointsUsed++;
+			if(!isnan(temp.x)){
+				aveNormal += temp;
+				pointsUsed++;
+			}
 		}
 	}
 
@@ -199,8 +208,10 @@ __global__ void pcu_calculate_normal_vector( float3* src_points, int width, int 
 		if (isfinite(temp.x) && abs(west.z - center.z) < max_dist && abs(south.z - center.z) < max_dist)
 		{
 			temp = normalize(temp);
-			aveNormal += temp;
-			pointsUsed++;
+			if(!isnan(temp.x)){
+				aveNormal += temp;
+				pointsUsed++;
+			}
 		}
 	}
 
@@ -214,19 +225,28 @@ __global__ void pcu_calculate_normal_vector( float3* src_points, int width, int 
 		if (isfinite(temp.x) && abs(east.z - center.z) < max_dist && abs(south.z - center.z) < max_dist)
 		{
 			temp = normalize(temp);
-			aveNormal += temp;
-			pointsUsed++;
+			if(!isnan(temp.x)){
+				aveNormal += temp;
+				pointsUsed++;
+			}
 		}
 	}
 
+	// check whether a normal vector exists
+	if(pointsUsed > 0){
+		aveNormal /= (pointsUsed);
 
-	aveNormal /= (pointsUsed);
-
-	//make unit vector
-	aveNormal = normalize(aveNormal);
-
-
-	dst_normals[index_center] = -aveNormal;// src_points[index_center];
+		//make unit vector
+		aveNormal = flip_normal * normalize( aveNormal);
+		src_points[index_center] = center;
+	}else
+	{
+		// we do not want a point if we do not have a normal vector
+		src_points[index_center] = reset_point;
+	}
+	
+	dst_normals[index_center] = aveNormal;
+	
 
 	// for visualization
 	dst_image[index_out] = aveNormal.z * 255.0;
@@ -302,7 +322,7 @@ Minimum step_size is 1.
 NOTE, COPYING DATA REQUIRES A SIGNIFICANT AMOUNT OF TIME AND SHOULD ONLY BE EXECUTED AT THE VERY LAST STEP
 **********************************************************************************************************************************************************************************************/
 //static 
-int cuPCU3f::CreatePointCloud(float* src_image_ptr, int width, int height, int channels, float focal_length_x, float focal_length_y, float cx, float cy, int step_size, vector<float3>& points, vector<float3>& normals, bool to_host)
+int cuPCU3f::CreatePointCloud(float* src_image_ptr, int width, int height, int channels, float focal_length_x, float focal_length_y, float cx, float cy, int step_size, float normal_flip, vector<float3>& points, vector<float3>& normals, bool to_host)
 {
 /*
 	std::ofstream off("test_cu.csv", std::ofstream::out);
@@ -361,7 +381,7 @@ int cuPCU3f::CreatePointCloud(float* src_image_ptr, int width, int height, int c
 	cudaDeviceSynchronize();
 
 	// compute normal vectors
-	pcu_calculate_normal_vector << <blocks, threads_per_block >> > (point_output_dev, width, height, step_size, normals_output_dev, image_normals_out_dev );
+	pcu_calculate_normal_vector << <blocks, threads_per_block >> > (point_output_dev, width, height, step_size, normal_flip, normals_output_dev, image_normals_out_dev);
 	err = cudaGetLastError();
 	if (err != 0) { std::cout << "\n[KNN] - normals points processing error.\n"; }
 
@@ -432,8 +452,6 @@ void cuPCU3f::AllocateDeviceMemory(int width, int height, int channels)
 	image_normals_out_dev = cuDevMem3f::DevNormalsImagePtr();
 	point_output_dev = cuDevMem3f::DevPointPtr();
 	normals_output_dev = cuDevMem3f::DevNormalsPtr();
-
-
 }
 
 
@@ -660,13 +678,14 @@ A(i) = {d0, d1, d2, ..., dN}
 @param focal_legnth - the focal length of the camera in pixel
 @param normal_radius - for normal vector calculations. The interger specifies how many steps a neighbor sould be away no obtain a vector for normal vector calculation.
 Minimum normal_radius is 1.
+@param normal_flip - set this value to -1 to flip the normal vectors, otherwise to 1. Ignore all other values. normal_flip is multiplied with the normal vector.  
 @param points - a vector A(i) = {p0, p1, p2, ..., pN} with all points p_i = {px, py, pz} as float3.
 @param normals - a vector A(i) = {n0, n1, n2, ..., nN} with all normal vectors n_i = {nx, ny, nz} as float3
 @param to_host - if true, the device normals and points are copied back to the host. If false, this is skipped and the  data in points and normals remains empty.
 NOTE, COPYING DATA REQUIRES A SIGNIFICANT AMOUNT OF TIME AND SHOULD ONLY BE EXECUTED AT THE VERY LAST STEP
 **********************************************************************************************************************************************************************************************/
 //static 
-void cuSample3f::UniformSampling(float* src_image_ptr, int width, int height, float focal_length_x, float focal_length_y, float cx, float cy, int normal_radius, bool cp_enabled, vector<float3>& points, vector<float3>& normals, bool to_host)
+void cuSample3f::UniformSampling(float* src_image_ptr, int width, int height, float focal_length_x, float focal_length_y, float cx, float cy, int normal_radius, float normal_flip, bool cp_enabled, vector<float3>& points, vector<float3>& normals, bool to_host)
 {
 	// Uniform sample pattern must be initialized in advance. 
 	assert(g_cu_sampling_dev != NULL);
@@ -681,7 +700,7 @@ void cuSample3f::UniformSampling(float* src_image_ptr, int width, int height, fl
 	//-----------------------------------------------------------
 	// Create the point cloud
 
-	cuPCU3f::CreatePointCloud((float*)src_image_ptr, width, height, 1, focal_length_x, focal_length_y, cx, cy, normal_radius, points, normals, false);
+	cuPCU3f::CreatePointCloud((float*)src_image_ptr, width, height, 1, focal_length_x, focal_length_y, cx, cy, normal_radius, normal_flip, points, normals, false);
 
 
 
@@ -720,13 +739,14 @@ A(i) = {d0, d1, d2, ..., dN}
 @param focal_legnth - the focal length of the camera in pixel
 @param normal_radius - for normal vector calculations. The interger specifies how many steps a neighbor sould be away no obtain a vector for normal vector calculation.
 Minimum normal_radius is 1.
+@param normal_flip - set this value to -1 to flip the normal vectors, otherwise to 1. Ignore all other values. normal_flip is multiplied with the normal vector.  
 @param points - a vector A(i) = {p0, p1, p2, ..., pN} with all points p_i = {px, py, pz} as float3.
 @param normals - a vector A(i) = {n0, n1, n2, ..., nN} with all normal vectors n_i = {nx, ny, nz} as float3
 @param to_host - if true, the device normals and points are copied back to the host. If false, this is skipped and the  data in points and normals remains empty.
 NOTE, COPYING DATA REQUIRES A SIGNIFICANT AMOUNT OF TIME AND SHOULD ONLY BE EXECUTED AT THE VERY LAST STEP
 **********************************************************************************************************************************************************************************************/
 //static 
-void cuSample3f::RandomSampling(float* src_image_ptr, int width, int height, float focal_length, int normal_radius, bool cp_enabled, vector<float3>& points, vector<float3>& normals, bool to_host)
+void cuSample3f::RandomSampling(float* src_image_ptr, int width, int height, float focal_length, int normal_radius, float normal_flip, bool cp_enabled, vector<float3>& points, vector<float3>& normals, bool to_host)
 {
 	// Uniform sample pattern must be initialized in advance. 
 	assert(g_cu_sampling_dev != NULL);
@@ -740,7 +760,7 @@ void cuSample3f::RandomSampling(float* src_image_ptr, int width, int height, flo
 
 	//-----------------------------------------------------------
 	// Create the point cloud
-	cuPCU3f::CreatePointCloud((float*)src_image_ptr, width, height, 1, focal_length, focal_length, 0.0 ,0.0, normal_radius, points, normals, false);
+	cuPCU3f::CreatePointCloud((float*)src_image_ptr, width, height, 1, focal_length, focal_length, 0.0 ,0.0, normal_radius, normal_flip, points, normals, false);
 
 
 
@@ -761,10 +781,6 @@ void cuSample3f::RandomSampling(float* src_image_ptr, int width, int height, flo
 	cudaMemcpy(&points[0], point_output_dev, output_size, cudaMemcpyDeviceToHost);
 	cudaMemcpy(&normals[0], normals_output_dev, output_size, cudaMemcpyDeviceToHost);
 }
-
-
-
-
 
 
 
@@ -791,3 +807,5 @@ void cuSample3f::SetCuttingPlaneParams(float a, float b, float c, float d, float
 	cudaError err = cudaMemcpy(params, (float*)host_params, 5 * sizeof(float), cudaMemcpyHostToDevice);
 	if (err != 0) { std::cout << "\n[cuSample] - cudaMemcpy error.\n"; }
 }
+
+

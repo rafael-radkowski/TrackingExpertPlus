@@ -162,7 +162,7 @@ int main(int argc, char* argv)
 	point cloud (UNIFORM), and a randomly sampled (RANDOM) point cloud.
 	*/
 	SamplingParam sParam;
-	sParam.uniform_step = 2;
+	sParam.uniform_step = 16;
 	sParam.random_max_points = 5000;
 	producer->setSampingMode(UNIFORM, sParam);
 

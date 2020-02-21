@@ -1,8 +1,8 @@
-#include "ICPKNN.h"
+#include "KNN.h"
 
 using namespace  texpert;
 
-ICPKNN::ICPKNN() {
+KNN::KNN() {
 
 	_kdtree = new Cuda_KdTree();
 	_ready = false;
@@ -11,8 +11,7 @@ ICPKNN::ICPKNN() {
 	_testPoint = NULL;
 
 }
-
-ICPKNN::~ICPKNN(){
+KNN::~KNN(){
 	delete _kdtree;
 }
 
@@ -22,7 +21,7 @@ Set the reference point cloud.
 This one goes into the kd-tree as soon as it is set. 
 @param pc - reference to the point cloud model
 */
-bool ICPKNN::populate(PointCloud& pc) {
+bool KNN::populate(PointCloud& pc) {
 
 	assert(_kdtree);
 
@@ -52,7 +51,7 @@ Set the test model, this is tested agains the
 reference model in the kd-tree
 @param pc - reference to the point cloud model
 */
-//bool ICPKNN::setTestModel(PointCloud& pc)
+//bool KNN::setTestModel(PointCloud& pc)
 //{
 //	_tpoints.clear();
 //
@@ -78,7 +77,7 @@ Start the knn search and return matches.
 @param k - the number of matches to return
 @param matches - reference to the matches
 */
-int ICPKNN::knn(PointCloud& pc, int k,  vector<Matches>& matches)
+int KNN::knn(PointCloud& pc, int k,  vector<Matches>& matches)
 {
 	// copy all models into the cuda structure. 
 
@@ -114,7 +113,7 @@ Check if this class is ready to run.
 The kd-tree and the test points - both need to have points
 @return - true, if it can run. 
 */
-bool ICPKNN::ready(void)
+bool KNN::ready(void)
 {
 	if (_rpoints.size() > 0 && _tpoints.size() > 0)
 		return true;
@@ -127,7 +126,7 @@ bool ICPKNN::ready(void)
 /*
 Reset the tree
 */
-int ICPKNN::reset(void) {
+int KNN::reset(void) {
 
 	assert(_kdtree);
 	_kdtree->resetDevTree();

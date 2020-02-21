@@ -14,7 +14,7 @@
 // local
 #include "FDTypes.h"
 #include "ICPTransform.h"
-#include "ICPKNN.h"
+#include "KNN.h"
 #include "Types.h"
 #include "MatrixUtils.h"
 
@@ -72,7 +72,7 @@ private:
 	PointCloud				_testPointsProcessing;
 
 	// k-nearest neighbors implementation
-	ICPKNN*					_knn;		
+	KNN*					_knn;		
 
 
 	// icp params

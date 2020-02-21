@@ -9,7 +9,7 @@ ICP::ICP() {
 	_max_error = 0.001;
 	_max_iterations = 40;
 
-	_knn = new ICPKNN();
+	_knn = new KNN();
 
 }
 

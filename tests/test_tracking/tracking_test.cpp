@@ -20,6 +20,8 @@
 #include "trackingx.h"
 #include "graphicsx.h"
 #include "TrackingMain.h"
+#include "ReaderWriterOBJ.h"
+#include "ReaderWriterPLY.h"
 
 using namespace texpert;
 
@@ -28,13 +30,13 @@ using namespace texpert;
 // instance of a structure core camera 
 texpert::StructureCoreCaptureDevice*	camera;
 
-
 // Instance of a PointCloudProducer
 // It creates a 3D point cloud using the given depth image. 
 texpert::PointCloudProducer*			producer;
 
 // Point cloud sampling parameters
 SamplingParam							sParam;
+
 
 
 // The OpenGL window
@@ -63,16 +65,43 @@ PointCloud			pc_camera_as_loaded;
 // Registrations
 PCRegistratation*	pc_reg;
 
-#define _DEBUG
-#ifdef _DEBUG
-std::string			ref_file = "../data/stanford_bunny_pc.obj";
-std::string			camera_file = "../data/stanford_bunny_pc.obj";
-#else
+//#define _DEBUG
+//#ifdef _DEBUG
+//std::string			ref_file = "../data/stanford_bunny_pc.obj";
+//std::string			camera_file = "../data/stanford_bunny_pc.obj";
+//#else
 std::string			ref_file = "../data/tracking/N0-000_pc.obj";
-std::string			camera_file = "../data/tracking/N0-000_pc.obj";
-#endif
+std::string			camera_file = "../data/tracking/test/gearbox_01_point_cloud.obj";
+//#endif
+
+int file_counter = 3;
 
 
+void keyboard_callback( int key, int action) {
+
+
+	cout << key << " : " << action << endl;
+	switch (action) {
+	case 0:  // key up
+	
+		switch (key) {
+		case 87: // w
+			string file = "gearbox_";
+			file.append(to_string(file_counter));
+			file.append("_point_cloud.obj");
+			file_counter++;
+
+			ReaderWriterOBJ::Write(file, pc_camera.points, pc_camera.normals);
+			ReaderWriterPLY::Write(file, pc_camera.points, pc_camera.normals);
+			cout << "Wrote to file" << endl;
+			break;
+		}
+		break;
+	case 1: // key down
+
+		break;
+	}
+}
 
 
 /*
@@ -84,7 +113,7 @@ void render_loop(glm::mat4 pm, glm::mat4 vm) {
 
 #ifdef WITH_STATIC_TEST
 
-	bool err = pc_reg->process(pc_camera);
+	//bool err = pc_reg->process(pc_camera);
 
 #else
 	
@@ -186,10 +215,9 @@ int main(int argc, char** argv)
 	/* Set the sampling parameters. 
 	The producer instance can provide the full frame (RAW), a uniformly smapled 
 	point cloud (UNIFORM), and a randomly sampled (RANDOM) point cloud. */
-	sParam.uniform_step = 4;
+	sParam.uniform_step = 8;
 	sParam.random_max_points = 5000;
 	producer->setSampingMode(UNIFORM, sParam);
-
 #endif
 
 	/*
@@ -199,7 +227,7 @@ int main(int argc, char** argv)
 	window = new isu_ar::GLViewer();
 	window->create(1280, 1280, "Tracking test");
 	window->addRenderFcn(render_loop);
-	//window->addKeyboardCallback(std::bind(&FMEvalApp::keyboard_callback, this, _1, _2));
+	window->addKeyboardCallback(keyboard_callback);
 	window->setViewMatrix(glm::lookAt(glm::vec3(0.0f, 0.0, -0.5f), glm::vec3(0.0f, 0.0f, 0.f), glm::vec3(0.0f, 1.0f, 0.0f)));
 	window->setClearColor(glm::vec4(1, 1, 1, 1));
 

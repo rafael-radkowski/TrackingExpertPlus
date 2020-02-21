@@ -49,7 +49,10 @@ Set the angle step
 */
 bool FDMatching::setAngleStep(float angele_step)
 {
-	if (angele_step < 0.0) return false;
+	if (angele_step < 3.0 && angele_step > 90.0){
+		std::cout << "[Warning] - angele_step not set; parameter must be in range [3.0, 90.0]" << endl;
+		return false;
+	}
 
 	_angle_step = angele_step / 180.0f * static_cast<float>(M_PI);;
 	_angle_bins = (int)(static_cast<float>(2 * M_PI) / _angle_step) + 1;

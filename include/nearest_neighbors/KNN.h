@@ -32,12 +32,12 @@ namespace texpert {
 
 using Matches = MyMatches;
 
-class ICPKNN
+class KNN
 {
 public:
 
-	ICPKNN();
-	~ICPKNN();
+	KNN();
+	~KNN();
 
 
 	/*
