@@ -143,7 +143,7 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/loader/NoiseFilter.h
 	${PROJECT_SOURCE_DIR}/include/loader/LoaderOBJ.h
 	${PROJECT_SOURCE_DIR}/include/loader/FileUtilsExt.h
-	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/ICPKNN.h
+	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/KNN.h
 	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/ICPTransform.h
 	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/ICP.h
 	${PROJECT_SOURCE_DIR}/include/pointcloud/PointCloudUtils.h
@@ -223,7 +223,7 @@ set(Loader_SRC
 
 
 set(NN_SRC
-	nearest_neighbors/ICPKNN.cpp
+	nearest_neighbors/KNN.cpp
 	nearest_neighbors/ICPTransform.cpp
 	nearest_neighbors/ICP.cpp
 )

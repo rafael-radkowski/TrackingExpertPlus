@@ -19,13 +19,13 @@
 // TrackingExpert
 #include "trackingx.h"
 #include "graphicsx.h"
-#include "TrackingMain.h"
+#include "TrackingMain.h" 
 #include "ReaderWriterOBJ.h"
 #include "ReaderWriterPLY.h"
 
 using namespace texpert;
 
-//#define WITH_STATIC_TEST
+#define WITH_STATIC_TEST
 
 // instance of a structure core camera 
 texpert::StructureCoreCaptureDevice*	camera;
@@ -70,12 +70,13 @@ PCRegistratation*	pc_reg;
 //std::string			ref_file = "../data/stanford_bunny_pc.obj";
 //std::string			camera_file = "../data/stanford_bunny_pc.obj";
 //#else
-std::string			ref_file = "../data/tracking/N0-000_pc.obj";
-std::string			camera_file = "../data/tracking/test/gearbox_01_point_cloud.obj";
+//std::string			ref_file = "../data/tracking/N0-000_pc.obj";
+std::string			ref_file = "../data/stanford_bunny_pc.obj ";
+std::string			camera_file = "../data/test/bunny_2_2020-02-21_06-56-55_pc.obj";
 //#endif
 
-int file_counter = 3;
-
+int file_counter = 1;
+string date = "";
 
 void keyboard_callback( int key, int action) {
 
@@ -86,9 +87,12 @@ void keyboard_callback( int key, int action) {
 	
 		switch (key) {
 		case 87: // w
-			string file = "gearbox_";
+			string file = "bunny_";
 			file.append(to_string(file_counter));
-			file.append("_point_cloud.obj");
+			file.append("_");
+			file.append(date);
+			file.append("_pc.obj");
+			
 			file_counter++;
 
 			ReaderWriterOBJ::Write(file, pc_camera.points, pc_camera.normals);
@@ -165,6 +169,7 @@ void render_loop(glm::mat4 pm, glm::mat4 vm) {
 int main(int argc, char** argv)
 {
 	bool err = false;
+	date = TimeUtils::GetCurrentDateTime();
 
 	pc_reg = new PCRegistratation();
 
@@ -215,7 +220,7 @@ int main(int argc, char** argv)
 	/* Set the sampling parameters. 
 	The producer instance can provide the full frame (RAW), a uniformly smapled 
 	point cloud (UNIFORM), and a randomly sampled (RANDOM) point cloud. */
-	sParam.uniform_step = 8;
+	sParam.uniform_step = 6;
 	sParam.random_max_points = 5000;
 	producer->setSampingMode(UNIFORM, sParam);
 #endif
@@ -224,13 +229,13 @@ int main(int argc, char** argv)
 	create the renderer.
 	The renderer executes the main loop in this demo. 
 	*/
+	glm::mat4 vm = glm::lookAt(glm::vec3(0.0f, 0.0, -0.5f), glm::vec3(0.0f, 0.0f, 0.5), glm::vec3(0.0f, 1.0f, 0.0f));
 	window = new isu_ar::GLViewer();
 	window->create(1280, 1280, "Tracking test");
 	window->addRenderFcn(render_loop);
 	window->addKeyboardCallback(keyboard_callback);
-	window->setViewMatrix(glm::lookAt(glm::vec3(0.0f, 0.0, -0.5f), glm::vec3(0.0f, 0.0f, 0.f), glm::vec3(0.0f, 1.0f, 0.0f)));
+	window->setViewMatrix(vm);
 	window->setClearColor(glm::vec4(1, 1, 1, 1));
-
 
 
 	/*

@@ -149,7 +149,7 @@ bool FDMatching::extract_feature_map(vector<Eigen::Vector3f>* points, vector<Eig
 	}
 
 	if(_verbose)
-		_cprintf("\n[PPFExtTracking] - Descriptors for %d points extracted. ", counter);
+		_cprintf("\n[PPFExtTracking] - Descriptors for %d points extracted. \n", counter);
 	return true;
 
 }

@@ -1,5 +1,28 @@
 #ifndef __GL_POINT_CLOUD_RENDERER__
 #define __GL_POINT_CLOUD_RENDERER__
+/*
+
+
+
+
+
+
+
+
+
+
+
+
+//-----------------------------------------------------------------------
+Last edits:
+
+Feb 21, 2020, RR
+- Added a geoemetry shader to render normal vectors. 
+
+
+
+
+*/
 
 // stl include
 #include <iostream>
@@ -72,18 +95,28 @@ namespace isu_ar {
 		*/
 		void setPointColor(glm::vec3 color);
 
+
+		/*
+		Enable normal rendering. 
+		Note that the normal vectors require a geometry shader. 
+		@param draw - true renders the normals. 
+		*/
+		void enableNormalRendering(bool draw);
+
 	private:
 
 		int vaoID[1]; // Our Vertex Array Object
 		int vboID[2]; // Our Vertex Buffer Object
 		int iboID[1]; // Our Index  Object
 		int program;
-		int program_backup;
+		int program_normals;
+		int program_normals_locations[6];
 
 		int viewMatrixLocation;
 		int modelMatrixLocation;
 		int projMatrixLocation;
 
+		bool _draw_normals;
 
 		std::vector<glm::vec3> points;
 		std::vector<glm::vec3> normals;
@@ -96,6 +129,7 @@ namespace isu_ar {
 		glm::mat4	_projectionMatrix;
 		glm::mat4	_viewMatrix;
 
+		glm::vec3	_point_color;
 
 		int _N; // number of vertices
 		int _I; // number indices
