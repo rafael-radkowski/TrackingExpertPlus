@@ -42,6 +42,7 @@ namespace nsGLPointCloudRenderer
 		"uniform mat4 projectionMatrix;                                    \n"
 		"uniform mat4 viewMatrix;                                           \n"
 		"uniform mat4 modelMatrix;                                          \n"
+		"uniform float normal_length;                                          \n"
 		"																	\n"
 		"layout(points) in;													\n"
 		"//layout(points, max_vertices=1) out;								\n"
@@ -60,7 +61,7 @@ namespace nsGLPointCloudRenderer
 		"		gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(vertex[0].pos,1.0);							\n"
 		"		//gl_PointSize = 4.0;											\n"
 		"		EmitVertex();												\n"
-		"		gl_Position = projectionMatrix * viewMatrix * modelMatrix *  (vec4(vertex[0].pos,1.0)+ 0.05  * vec4(vertex[0].normal,0.0));		\n"
+		"		gl_Position = projectionMatrix * viewMatrix * modelMatrix *  (vec4(vertex[0].pos,1.0)+ normal_length  * vec4(vertex[0].normal,0.0));		\n"
 		"		//gl_PointSize = 4.0;											\n"
 		"		EmitVertex();												\n"
 		"	}																\n"
@@ -94,17 +95,24 @@ Create an point cloud model from a point cloud dataset
 @param pc - the point cloud dataset 
 @param shader_program - overwrite the default shader program by passing a hander to the constructor
 */
-GLPointCloudRenderer::GLPointCloudRenderer(vector<Eigen::Vector3f>& dst_points, vector<Eigen::Vector3f>& dst_normals):
-	_points(dst_points), _normals(dst_normals)
+GLPointCloudRenderer::GLPointCloudRenderer(vector<Eigen::Vector3f>& src_points, vector<Eigen::Vector3f>& src_normals, texpertgfx::GLDataUsage usage):
+	_points(src_points), _normals(src_normals), _data_usage(usage)
 {
 
 
-	_block = false;
+	//_block.unlock();
     program = -1;
 	_N = 0;
 	_I = 0;
 
+	// default point color
+	_point_color = glm::vec3(1.0,0.0,0.0);
+	_normal_color = glm::vec3(0.0,0.2,0.8);
+	_normal_length = 0.05f;
+
 	_draw_normals = false;
+	_draw_points = true;
+	_auto_update = true;
 
 	float center_x = 0.0;
 	float center_y = 0.0;
@@ -135,14 +143,16 @@ GLPointCloudRenderer::GLPointCloudRenderer(vector<Eigen::Vector3f>& dst_points, 
 
 	for(int i=0; i<size; i++)
 	{
-        points.push_back( glm::vec3(0.0,0.0, i * 0.01 ) );
+		   points.push_back( glm::vec3(0.0,0.0, i * 0.01 ) );
         normals.push_back(glm::vec3(0.0,0.0, i * 0.01 ) );
 	}
 	_N = points.size();
 
 
 	// create a vertex buffer object
-	cs557::CreateVertexObjects33(vaoID, vboID, &points[0].x, &normals[0].x, _N, _pos_location, _norm_location );
+	bool data_usage = true;
+	if(_data_usage == texpertgfx::DYNAMIC) data_usage = false;
+	texpertgfx::CreateVertexObjects33(vaoID, vboID, &points[0].x, &normals[0].x, _N, data_usage, _pos_location, _norm_location );
 
     modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 
@@ -166,6 +176,8 @@ GLPointCloudRenderer::GLPointCloudRenderer(vector<Eigen::Vector3f>& dst_points, 
 	program_normals_locations[4]  = glGetAttribLocation(program_normals, "in_Normal");
 	program_normals_locations[5]  = glGetUniformLocation(program_normals, "pointcolor");
 
+
+	// binds the vbos to the shader
 	glBindBuffer(GL_ARRAY_BUFFER, vboID[0]);
 	glVertexAttribPointer((GLuint)program_normals_locations[3] , 3, GL_FLOAT, GL_FALSE, 0, 0); 
 	glEnableVertexAttribArray(program_normals_locations[3] );
@@ -176,8 +188,12 @@ GLPointCloudRenderer::GLPointCloudRenderer(vector<Eigen::Vector3f>& dst_points, 
 	
 	
 	// default color
-	glUniform3f( program_normals_locations[5] , (GLfloat)0.0f, (GLfloat)0.0f, (GLfloat)1.0f );
+	glUniform3fv( program_normals_locations[5], 1, &_normal_color[0]);
+	glUniform1f(  glGetUniformLocation(program_normals, "normal_length"), _normal_length );
+	
 }
+
+
 
 
 /*
@@ -185,11 +201,13 @@ Update the points using the existing references.
 */
 void GLPointCloudRenderer::updatePoints(void)
 {
+	if(!_auto_update)return;
+
 	_N = _points.size();
 
-	_block = true;
+	_block.lock();
 
-	//glUseProgram(program);
+//	glUseProgram(program);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vboID[0]); // Bind our Vertex Buffer Object
 	glBufferSubData(GL_ARRAY_BUFFER, 0, (GLsizeiptr)(_N *3* sizeof(GLfloat)),(void*)&_points[0]); // Set the size and data of our VBO and set it to STATIC_DRAW
@@ -200,9 +218,7 @@ void GLPointCloudRenderer::updatePoints(void)
 
 	glBindVertexArray(0); // Disable our Vertex Buffer Object
 
-	_block = false;
-
-	//draw(_projectionMatrix, _viewMatrix);
+	_block.unlock();
 
 }
 
@@ -214,12 +230,14 @@ Draw the obj model
 */
 void GLPointCloudRenderer::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
 {
-
+	// update the points
 	updatePoints();
+
 	_projectionMatrix = projectionMatrix;
 	_viewMatrix = viewMatrix;
 
-	if (_block) return;
+	//if (!_block.try_lock()) return;
+	_block.lock();
 
     // Enable the shader program
 	glUseProgram(program);
@@ -236,7 +254,8 @@ void GLPointCloudRenderer::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix
 	
 
 	// Draw the triangles
- 	glDrawArrays(GL_POINTS, 0, _N);
+	if(_draw_points)
+ 		glDrawArrays(GL_POINTS, 0, _N);
 	
 	// Unbind our Vertex Array Object
 	//glBindVertexArray(0);
@@ -253,6 +272,7 @@ void GLPointCloudRenderer::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix
 		// Unbind the shader program
 		glUseProgram(0);
 
+		_block.unlock();
 		return;
 	}
 
@@ -261,7 +281,7 @@ void GLPointCloudRenderer::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix
 	glUniformMatrix4fv(program_normals_locations[1] , 1, GL_FALSE, &viewMatrix[0][0]); // send the view matrix to our shader
 	glUniformMatrix4fv(program_normals_locations[2] , 1, GL_FALSE, &modelMatrix[0][0]); // send the model matrix to our shader
 	glUniformMatrix4fv(program_normals_locations[0] , 1, GL_FALSE, &projectionMatrix[0][0]); // send the projection matrix to our shader
-	glUniform3f(  glGetUniformLocation(program_normals, "pointcolor") , (GLfloat)0.0f, (GLfloat)0.0f, (GLfloat)1.0f );
+	glUniform3fv(  glGetUniformLocation(program_normals, "pointcolor") ,  1, &_normal_color[0] );
 
 
 	// Bind the buffer and switch it to an active buffer
@@ -279,6 +299,9 @@ void GLPointCloudRenderer::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix
 
 	// Unbind the shader program
 	glUseProgram(0);
+
+	// unlock the mutex
+	_block.unlock();
 }
 
 
@@ -288,9 +311,75 @@ Set the point cloud color.
 */
 void GLPointCloudRenderer::setPointColor(glm::vec3 color)
 {
+	// check limits
+	color.r = std::min(1.0f,  std::max(0.0f, color.r) );
+	color.g = std::min(1.0f,  std::max(0.0f, color.g) );
+	color.b = std::min(1.0f,  std::max(0.0f, color.b) );
+
+	// the color is used during runtime since the shader pogram is re-used. 
 	_point_color = color;
-	// default color
-	glUseProgram(program);
-	glUniform3fv(glGetUniformLocation(program, "pointcolor"), 1 , &_point_color[0] );
-	//glUseProgram(program);
+
+}
+
+
+
+/*
+Set the color for the normal vectors
+@param color  -  a color values in RGB format with each value in the range [0,1].
+*/
+void  GLPointCloudRenderer::setNormalColor(glm::vec3 color)
+{
+	// check limits
+	color.r = std::min(1.0f,  std::max(0.0f, color.r) );
+	color.g = std::min(1.0f,  std::max(0.0f, color.g) );
+	color.b = std::min(1.0f,  std::max(0.0f, color.b) );
+
+	_normal_color = color;
+}
+
+
+/*
+Enable normal rendering. 
+Note that the normal vectors require a geometry shader. 
+@param draw - true renders the normals. 
+*/
+void GLPointCloudRenderer::enableNormalRendering(bool draw)
+{
+	_draw_normals = draw;
+}
+
+/*
+Render the points.. 
+@param draw - true renders the points. 
+*/
+void GLPointCloudRenderer::enablePointRendering(bool draw)
+{
+	_draw_points = draw;
+}
+
+
+/*
+Enable automatic point update. 
+The renderer updates the points before each draw if set to 'true'
+Otherwise, one has to call the api 'updatePoints' to manually update the points. 
+Default is 'true'
+@param enable - true enables auto update, false disables it. 
+*/
+void GLPointCloudRenderer::enableAutoUpdate(bool enable)
+{
+	_auto_update = enable;
+}
+
+
+
+/*
+Set the normal vector rendering length
+@param length - a value > 0.0
+*/
+void GLPointCloudRenderer::setNormalGfxLength(float length)
+{
+	_normal_length = std::max(length, 0.0001f);
+	glUseProgram(program_normals);
+	glUniform1f(  glGetUniformLocation(program_normals, "normal_length"), _normal_length );
+	glUseProgram(0);
 }

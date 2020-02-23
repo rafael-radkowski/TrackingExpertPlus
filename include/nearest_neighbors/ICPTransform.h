@@ -4,8 +4,10 @@ class ICPTransform
 
 This class implements an ICP point alignment from two set of points. 
 It only implements the transformation part of a point-to-point ICP algorithm.
-Means, the points in the input vectors points0 and points1 MUST be index aligned nearest neighbors
-and come as Vector4f with [x,y, z, w] per point. 
+
+Means, the points in the input vectors points0 and points1 MUST be index-aligned nearest neighbors
+and come as Vector3f with [x,y, z] per point. 
+
 All matrices are in Eigen-standard column major, with matrix to points from the left -> M p
 
 Note, the class uses float, which reduces the precision if the point values are already numerically
@@ -20,6 +22,9 @@ rafael@iastate.edu
 Nov. 17, 2017
 MIT License
 ---------------------------------------------------------------
+
+Last edited:
+
 */
 
 
@@ -62,8 +67,8 @@ public:
 	Arun, K., Huang, T.S., and Blostein, S.D., 1987. “Least - squares fitting of two 3 - d point sets”.
 	IEEE Transactions on Pattern Analysis and Machine Intel - ligence, PAMI - 9(5), Sept, pp. 698–700
 
-	@param pVec0 - first point array, each element needs to be a vector4 [[x, y, z, w], [x, y, z, w], ...]
-	@param pVec1 - second point array, each element needs to be a vector4 [[x, y, z, w], [x, y, z, w], ...]
+	@param pVec0 - first point array, each element needs to be a vector3 [[x, y, z,], [x, y, z,], ...]
+	@param pVec1 - second point array, each element needs to be a vector3 [[x, y, z,], [x, y, z,], ...]
 	@param return: 3x3 matrix with the delta rotation
 	*/
 	static Matrix3f CalcRotationArun( vector<Vector3f>& pVec0, vector<Vector3f>& pVec1);
@@ -71,8 +76,8 @@ public:
 
 	/*
 	Calculates the translation delta between both point sets as mean.
-	@param pVec0 - first point array, each element needs to be a vector4 [[x, y, z, w], [x, y, z, w], ...]
-	@param pVec1 - second point array, each element needs to be a vector4 [[x, y, z, w], [x, y, z, w], ...]
+	@param pVec0 - first point array, each element needs to be a vector3 [[x, y, z], [x, y, z], ...]
+	@param pVec1 - second point array, each element needs to be a vector3 [[x, y, z], [x, y, z], ...]
 	@param return: Vec 3 with the delta translation
 	*/
 	static Vector3f CalculateTranslation(vector<Vector3f>& pVec0, vector<Vector3f>& pVec1);
@@ -80,8 +85,8 @@ public:
 	/*
 	Check the root mean square error between the two points sets. 
 	Do not forget to translate the reference point set before checking. 
-	@param pVec0 - first point array, each element needs to be a vector4 [[x, y, z, w], [x, y, z, w], ...]
-	@param pVec1 - second point array, each element needs to be a vector4 [[x, y, z, w], [x, y, z, w], ...]
+	@param pVec0 - first point array, each element needs to be a vector3 [[x, y, z], [x, y, z], ...]
+	@param pVec1 - second point array, each element needs to be a vector3 [[x, y, z], [x, y, z], ...]
 	@param return: float values representing the RMS
 	*/
 	static float CheckRMS(vector<Vector3f>& pVec0, vector<Vector3f>& pVec1);

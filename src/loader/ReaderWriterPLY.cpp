@@ -102,7 +102,11 @@ bool ReaderWriterPLY::Read(const std::string file, std::vector<Eigen::Vector3f>&
 				else ErrorMsg("coordinate nz is NaN at vertex " + std::to_string(count));
 
 				dst_points.push_back(Eigen::Vector3f(x, y, z));
-				dst_normals.push_back(Eigen::Vector3f(nx, ny, nz));
+				Eigen::Vector3f n(nx, ny, nz);
+				if(n.norm() > 1.01);
+					n.normalize();
+
+				dst_normals.push_back(n);
 
 				count++;
 			}

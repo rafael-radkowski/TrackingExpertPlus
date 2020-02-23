@@ -11,6 +11,9 @@ MIT License
 ------------------------------------------------------------------------------------------------------
 Last edits:
 
+Feb 22, 2020, RR
+- check_type removes all spaces from the extracted file type.
+
 
 */
 #include <iostream>
@@ -61,6 +64,9 @@ protected:
 		
 		int idx0 = path_and_file.find_last_of(".");
 		std::string t = path_and_file.substr(idx0+1, path_and_file.size() - idx0 - 1);
+
+		// remove space
+		t.erase(remove_if(t.begin(), t.end(), isspace), t.end());
 
 		// convert to lower case
 		std::for_each(t.begin(), t.end(), [](char & c) {

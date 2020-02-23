@@ -17,6 +17,7 @@
 #include <fstream>
 
 // TrackingExpert
+#include "./camera/StructureCoreCaptureDevice.h"  // the camera
 #include "trackingx.h"
 #include "graphicsx.h"
 #include "TrackingMain.h" 
@@ -45,6 +46,7 @@ isu_ar::GLPointCloudRenderer* gl_camera_point_cloud;
 isu_ar::GLPointCloudRenderer* gl_reference_point_cloud;
 isu_ar::GLPointCloudRenderer* gl_reference_eval; // evaluation point cloud for visual evaluation
 
+int							gl_normal_rendering = 0;
 
 TrackingMain*		tm;
 
@@ -87,6 +89,7 @@ void keyboard_callback( int key, int action) {
 	
 		switch (key) {
 		case 87: // w
+		{
 			string file = "bunny_";
 			file.append(to_string(file_counter));
 			file.append("_");
@@ -97,13 +100,22 @@ void keyboard_callback( int key, int action) {
 
 			ReaderWriterOBJ::Write(file, pc_camera.points, pc_camera.normals);
 			ReaderWriterPLY::Write(file, pc_camera.points, pc_camera.normals);
-			cout << "Wrote to file" << endl;
 			break;
+			} 
+		case 78: // n
+			{
+			gl_normal_rendering = (++gl_normal_rendering)%2;
+			gl_camera_point_cloud->enableNormalRendering((gl_normal_rendering==1)? true :false);
+			gl_reference_point_cloud->enableNormalRendering((gl_normal_rendering==1)? true :false);
+
+			break;
+			}
 		}
 		break;
-	case 1: // key down
+		
+		case 1: // key down
 
-		break;
+			break;
 	}
 }
 
@@ -147,15 +159,15 @@ void render_loop(glm::mat4 pm, glm::mat4 vm) {
 
 	//-----------------------------------------------------------
 	// Rendering
-	gl_reference_point_cloud->updatePoints();
+	//gl_reference_point_cloud->updatePoints();
 	gl_reference_point_cloud->draw(pm, vm);
 
-	gl_camera_point_cloud->updatePoints();
+	//gl_camera_point_cloud->updatePoints();
 	gl_camera_point_cloud->draw(pm, vm);
 
 	if(pose.size() > 0){
 		gl_reference_eval->setModelmatrix(pose[0]);
-		gl_reference_eval->updatePoints();
+		//gl_reference_eval->updatePoints();
 	}
 	gl_reference_eval->draw(pm, vm);
 
@@ -243,14 +255,16 @@ int main(int argc, char** argv)
 	*/
 	gl_reference_point_cloud = new	isu_ar::GLPointCloudRenderer(pc_ref.points, pc_ref.normals);
 	gl_reference_point_cloud->setPointColor(glm::vec3(0.0,1.0,0.0));
+	gl_reference_point_cloud->setNormalColor(glm::vec3(0.0,0.8,0.8));
 
 	gl_reference_eval = new	isu_ar::GLPointCloudRenderer(pc_ref.points, pc_ref.normals);
 	gl_reference_eval->setPointColor(glm::vec3(1.0,1.0,0.0));
+	gl_reference_eval->setNormalColor(glm::vec3(0.5,0.8,0.8));
 	
 #ifdef WITH_STATIC_TEST
-	gl_camera_point_cloud = new	isu_ar::GLPointCloudRenderer(pc_camera.points, pc_camera.normals);
+	gl_camera_point_cloud = new	isu_ar::GLPointCloudRenderer(pc_camera.points, pc_camera.normals, texpertgfx::DYNAMIC);
 	gl_camera_point_cloud->setPointColor(glm::vec3(1.0,0.0,0.0));
-
+	gl_camera_point_cloud->setNormalColor(glm::vec3(0.8,0.5,0.0));
 #else
 	
 	// the point cloud renderer

@@ -1,4 +1,57 @@
 #pragma once
+/*
+class ICP
+files: ICP.h/.cpp
+
+@brief: The class implements the Iterative Closest Point algorithm, 
+its point-to-point version according to 
+Besl, McKay, A method for registration of 3D shapes, PAMI, 1992.
+
+	arg min -> sum ( R m + t - p)
+
+with m, the model points and p, the camera points. The matrix R and the translation t 
+align the point set m with p. 
+
+Note that the class's apis are labels for camera data. 
+
+The class keeps an instance of a CUDA-based kd-tree for knn search. 
+Thus, the class does not work if CUDA capabilities are not present. 
+
+Also, this implementation has two termination criteria. 
+First, a minimum error that has to be reached. The error can be set with setMinError().
+Second, a maximum number of iterations. This number can be set with setMaxIterations().
+
+The second termination criterium is helpful when working with real-time camera data and  augmented reality. 
+It may yield imperfect registration when an object is moving. But the user does not notice this. 
+
+Usage:
+	1) set the camera data using setCameraData(PointCloud& pc);
+	2) register a 3D model, its poitns using compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_pose, float& rms);
+
+ICP does not run if no points are given.
+
+Tests:
+July 23, 2019, RR: the class was tested with static stanford bunny models and worked just fine. 
+
+Dependencies:
+- ICPTransform.h/.cpp
+- KNN.h/.cpp
+- ICPReject.h/.cpp
+
+
+Rafael Radkowski
+Iowa State University
+rafael@iastate.edu
+July 2019
+
+MIT License
+-----------------------------------------------------------------------------------------------
+Last edited:
+
+Feb 22, 2020, RR
+- Fixed a bug that set the verbose level incorrectly. 
+
+*/
 
 
 // stl
@@ -14,6 +67,7 @@
 // local
 #include "FDTypes.h"
 #include "ICPTransform.h"
+#include "ICPReject.h"
 #include "KNN.h"
 #include "Types.h"
 #include "MatrixUtils.h"
@@ -53,7 +107,29 @@ public:
 	bool setVerbose(bool verbose, int verbose_level = 1);
 
 
+	/*
+	Set a minimum error as termination criteria.
+	@param error - a float value > 0.0
+	*/
+	void setMinError(float error);
+
+
+	/*
+	Set the number of maximum iterations. 
+	@param max_iterations - integer number with the max. number of iterations.
+		The number must be in the range [1, 1000] 
+	*/
+	void setMaxIterations(int max_iterations);
+
 private:
+
+
+	// this is a tests function to test the functionality of the translation and orientation calculation. 
+	// Use it by defining #define ICPTRANSTEST.
+	// Note that this function does not use any nearest neighbors function and assumes that 
+	// _testPoints and _cameraPoints are equal and index aligned. 
+	bool test_transformation(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_pose, float& rms);
+
 
 	/*
 	Check if this class is ready to run.
@@ -74,6 +150,8 @@ private:
 	// k-nearest neighbors implementation
 	KNN*					_knn;		
 
+	// tests for outlier rejection
+	ICPReject				_outlier_reject;
 
 	// icp params
 	float					_max_error;

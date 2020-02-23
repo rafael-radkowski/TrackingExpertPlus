@@ -12,22 +12,23 @@ Load a point cloud object from a file
 //static 
 bool ReaderWriterOBJ::Read(const std::string file, std::vector<Eigen::Vector3f>& dst_points, std::vector<Eigen::Vector3f>& dst_normals, const bool normalize, const bool invert_z)
 {
-	if (!texpert::FileUtils::Exists(file)) {
-		std::cout << "[ERROR] - ReaderWriterOBJ: the file " << file << " does not exist." << std::endl;
+	std::string found_file;
+	if (!texpert::FileUtils::Search(file, found_file)) {
+		std::cout << "[ERROR] - ReaderWriterOBJ: the file " << found_file << " does not exist." << std::endl;
 		return false;
 	}
 
-	if (!check_type(file, "obj")) {
-		std::cout << "[ERROR] - ReaderWriterOBJ: the file " << file << " is not obf wavefront file. This loader only supports obj." << std::endl;
+	if (!check_type(found_file, "obj")) {
+		std::cout << "[ERROR] - ReaderWriterOBJ: the file " << found_file << " is not obj wavefront file. This loader only supports obj." << std::endl;
 		return false;
 	}
 
 
-	std::ifstream infile(file);
+	std::ifstream infile(found_file);
 
     if(!infile.is_open()){
         #ifdef _WIN32
-        _cprintf("[ERROR] - ReaderWriterPLY: could not open file %s.\n", file.c_str());
+        _cprintf("[ERROR] - ReaderWriterPLY: could not open file %s.\n", found_file.c_str());
         #else
          cout << "[ERROR] - ReaderWriterPLY: could not open file " <<  file << "." << endl;
         #endif
@@ -63,7 +64,8 @@ bool ReaderWriterOBJ::Read(const std::string file, std::vector<Eigen::Vector3f>&
 
 					if (invert_z) dnz = -dnz;
 					Eigen::Vector3f v((float)dnx,(float)dny,(float)dnz);
-					//v.normalize();
+					if(v.norm() > 1.001)
+						v.normalize();
 					dst_normals.push_back(v);
 
 					 count_n++;
@@ -103,9 +105,9 @@ bool ReaderWriterOBJ::Read(const std::string file, std::vector<Eigen::Vector3f>&
 
 	infile.close();
 
-	std::cout << "[INFO] - ReaderWriterPLY: loaded " << count_p << " points and " << count_n << " normal vectors from file " << file << "." << std::endl;
+	std::cout << "[INFO] - ReaderWriterOBJ: loaded " << count_p << " points and " << count_n << " normal vectors from file " << found_file << "." << std::endl;
 	if (count_n_err > 0 || count_p_err > 0) {
-		std::cout << "[INFO] - ReaderWriterPLY: detected " << count_p_err << " invalid points and " << count_n_err << " invalid normal vectors in file " << file << "." << std::endl;
+		std::cout << "[INFO] - ReaderWriterOBJ: detected " << count_p_err << " invalid points and " << count_n_err << " invalid normal vectors in file " << found_file << "." << std::endl;
 	}
 
 	return true;

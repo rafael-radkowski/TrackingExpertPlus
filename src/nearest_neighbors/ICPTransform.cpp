@@ -121,6 +121,15 @@ Matrix3f ICPTransform::CalcRotationArun(vector<Vector3f>& pVec0, vector<Vector3f
 	JacobiSVD<Matrix3f> svd(W, ComputeFullU | ComputeFullV);
 	Matrix3f R = (svd.matrixV() * svd.matrixU().transpose());
 
+
+
+	float det = R.determinant();
+	if (det < 0.0) {
+	//	_cprintf("Singular exception \n");
+		R = Matrix3f::Identity();
+	}
+
+
 	return R;
 }
 

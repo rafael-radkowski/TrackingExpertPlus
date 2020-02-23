@@ -130,12 +130,6 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/detection/FDClustering.h
 	${PROJECT_SOURCE_DIR}/include/detection/PCRegistration.h
 	${PROJECT_SOURCE_DIR}/include/detection/nurmur.h
-	${PROJECT_SOURCE_DIR}/include/kdtree/sort.h
-	${PROJECT_SOURCE_DIR}/include/kdtree/dequeue.h
-	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_KdTree.h
-	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Helpers.h
-	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Common.h
-	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Types.h
 	${PROJECT_SOURCE_DIR}/include/loader/Types.h
 	${PROJECT_SOURCE_DIR}/include/loader/SamplingTypes.h
 	${PROJECT_SOURCE_DIR}/include/loader/Sampling.h
@@ -143,9 +137,6 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/loader/NoiseFilter.h
 	${PROJECT_SOURCE_DIR}/include/loader/LoaderOBJ.h
 	${PROJECT_SOURCE_DIR}/include/loader/FileUtilsExt.h
-	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/KNN.h
-	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/ICPTransform.h
-	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/ICP.h
 	${PROJECT_SOURCE_DIR}/include/pointcloud/PointCloudUtils.h
 	${PROJECT_SOURCE_DIR}/include/pointcloud/PointCloudTransform.h
 	${PROJECT_SOURCE_DIR}/include/pointcloud/PointCloudEval.h
@@ -208,6 +199,12 @@ set(Cuda_kdtree_SRC
 	kdtree/CudaErrorCheck.cu
 	kdtree/Cuda_KdTree.cu
 	kdtree/Cuda_Helpers.cpp
+	${PROJECT_SOURCE_DIR}/include/kdtree/sort.h
+	${PROJECT_SOURCE_DIR}/include/kdtree/dequeue.h
+	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_KdTree.h
+	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Helpers.h
+	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Common.h
+	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Types.h
 )
 
 set(Loader_SRC
@@ -223,9 +220,14 @@ set(Loader_SRC
 
 
 set(NN_SRC
+	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/KNN.h
+	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/ICPTransform.h
+	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/ICP.h
+	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/ICPReject.h
 	nearest_neighbors/KNN.cpp
 	nearest_neighbors/ICPTransform.cpp
 	nearest_neighbors/ICP.cpp
+	nearest_neighbors/ICPReject.cpp
 )
 
 set( PointCloud_SRC
@@ -274,9 +276,9 @@ set( Utils_SRC
 #  SRC Groups, organize the tree
 
 source_group(Detection FILES ${Detection_SRC})
-source_group(Cuda kd-tree FILES ${Cuda_kdtree_SRC})
+source_group(kdtree FILES ${Cuda_kdtree_SRC})
 source_group(Loader FILES ${Loader_SRC})
-source_group(NN FILES ${NN_SRC})
+source_group(ICP FILES ${NN_SRC})
 source_group(PointCloud FILES ${PointCloud_SRC})
 source_group(Shader FILES ${Shader_SRC})
 source_group(Utils FILES ${Utils_SRC})
