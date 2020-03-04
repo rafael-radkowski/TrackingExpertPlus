@@ -26,6 +26,7 @@ bool KNN::populate(PointCloud& pc) {
 	assert(_kdtree);
 
 	_rpoints.clear();
+	
 
 	vector<Eigen::Vector3f> p = pc.points;
 	size_t size = pc.points.size();

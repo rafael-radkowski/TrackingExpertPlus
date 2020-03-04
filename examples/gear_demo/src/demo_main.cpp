@@ -96,7 +96,7 @@ int main(int argc, char* argv)
 	//window->addKeyboardCallback(std::bind(&FMEvalApp::keyboard_callback, this, _1, _2));
 	window->setViewMatrix(glm::lookAt(glm::vec3(1.0f, 0.0, -0.5f), glm::vec3(0.0f, 0.0f, 0.f), glm::vec3(0.0f, 1.0f, 0.0f)));
 	window->setClearColor(glm::vec4(1, 1, 1, 1));
-	window->enableCameraControl(false);
+	window->enableCameraControl(true);
 	
 	/*
 	Create the video background

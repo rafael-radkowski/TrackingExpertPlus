@@ -36,4 +36,5 @@ endif()
 # Build the ICP test class
 if(TRAKINGX_BUILD_TEST_ICP)
 add_subdirectory(test_icp)
+add_subdirectory(test_icp_camera)
 endif()

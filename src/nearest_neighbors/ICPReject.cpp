@@ -20,7 +20,7 @@ Test whether two points are close enough to be considered as inliers.
 */
 bool ICPReject::testDistance(const Eigen::Vector3f& p0, const Eigen::Vector3f& p1)
 {
-	return ( ((p0 - p1).norm() < _max_distance) ? true : false );
+	return ( ((p0 - p1).norm() < (_max_distance*_max_distance)) ? true : false );
 }
 
 
@@ -61,6 +61,7 @@ Test for both, point distance and normal alignment
 */
 bool ICPReject::testDistanceAngle(const Eigen::Vector3f& p0, const Eigen::Vector3f& p1, Eigen::Vector3f n0, Eigen::Vector3f n1)
 {
+	return ( testDistance(p0, p1) );
 	return ( testDistance(p0, p1) && testAngle(n0, n1) );
 }
 

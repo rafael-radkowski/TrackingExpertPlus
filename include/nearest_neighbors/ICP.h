@@ -51,6 +51,9 @@ Last edited:
 Feb 22, 2020, RR
 - Fixed a bug that set the verbose level incorrectly. 
 
+March 3, 2020, RR
+- Added two apis to set the inlier outlier rejection criteria params.
+
 */
 
 
@@ -120,6 +123,25 @@ public:
 		The number must be in the range [1, 1000] 
 	*/
 	void setMaxIterations(int max_iterations);
+
+
+	/*
+	Set the maximum angle delta for two points to be considered
+	as inliers. All other points will be rejected. 
+	@param max_angle - the maximum angle in degrees. 
+		The value must be between 0 and 180 degrees. 
+	*/
+	void setRejectMaxAngle(float max_angle);
+
+
+	/*
+	Set the maximum value for two point sets to be considered
+	as inliers. 
+	@param max_distance - a float value larger than 0.01;
+	*/
+	void setRejectMaxDistance(float max_distance);
+
+
 
 private:
 

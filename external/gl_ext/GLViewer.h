@@ -11,6 +11,9 @@ March 20, 2019, RR
 - Added a 'stop' function to close the window from code. 
 Feb 5, 2020, RR
 - Swapped window with and height to see the window nicely shaped. 
+March 3, 2020, RR
+- Initialized the _camera_control variable. It was uninitialized which 
+caused the controller to stop if the value was set to 0 by random. 
 */
 
 

@@ -6,13 +6,13 @@ using namespace  texpert;
 
 ICP::ICP() {
 
-	_max_error = 0.001;
-	_max_iterations = 40;
+	_max_error = 0.0001;
+	_max_iterations = 10;
 
 	_knn = new KNN();
 
-	_outlier_reject.setMaxNormalVectorAngle(25.0);
-	_outlier_reject.setMaxThreshold(1.5);
+	_outlier_reject.setMaxNormalVectorAngle(45.0);
+	_outlier_reject.setMaxThreshold(0.1);
 
 }
 
@@ -123,8 +123,11 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 		});
 
 		// Check if sufficient points are available to register the points
-		if (matching_points.size() < 12) {
+		if (matching_points.size() < 16) {
 			cout << "insufficient points" << endl;
+			result_pose = overall;
+			if(_verbose && _verbose_level == 2)
+				MatrixUtils::PrintMatrix4f(result_pose);
 			return false;
 		}
 
@@ -133,22 +136,26 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 		Vector3f t = ICPTransform::CalculateTranslation(accepted_points, matching_points);
 		Matrix3f R_inv = R;// Matrix3f::Identity();
 
+		result = Matrix4f::Identity();
 		// maintaining row-major
-		result(0) = R_inv(0);
-		result(1) = R_inv(1);
-		result(2) = R_inv(2);
+		result(0) = 1.0;//R_inv(0);
+		result(1) = 0.0;//R_inv(1);
+		result(2) = 0.0;//R_inv(2);
 
-		result(4) = R_inv(3);
-		result(5) = R_inv(4);
-		result(6) = R_inv(5);
+		result(4) = 0.0;//R_inv(3);
+		result(5) = 1.0;//R_inv(4);
+		result(6) = 0.0;//R_inv(5);
 
-		result(8) = R_inv(6);
-		result(9) = R_inv(7);
-		result(10) = R_inv(8);
+		result(8) =  0.0;//R_inv(6);
+		result(9) = 0.0;// R_inv(7);
+		result(10) = 1.0;//R_inv(8);
 
 		result(12) = t.x();
 		result(13) = t.y();
 		result(14) = t.z();
+
+
+		cout << t.x() << "\t" << t.y() << "\t" << t.z() << std::endl;
 
 		// update the point transformation
 		/// TODO: performance teste. Which function is faster for_each vs. std::transform
@@ -157,9 +164,13 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 
 		// transform the original points and normal vectors
 		for_each(_testPointsProcessing.points.begin(), _testPointsProcessing.points.end(), [&](Vector3f& p){p = (R * p) + t;});
-		for_each(_testPointsProcessing.normals.begin(), _testPointsProcessing.normals.end(), [&](Vector3f& p){p = (R * p);});
+		for_each(_testPointsProcessing.normals.begin(), _testPointsProcessing.normals.end(), [&](Vector3f& n){n = (R * n);});
+	
 	
 		overall =  result * overall;
+
+		if(_verbose && _verbose_level == 2)
+				MatrixUtils::PrintMatrix4f(result);
 
 		itr++;
 		rms = ICPTransform::CheckRMS(accepted_points,  matching_points);
@@ -172,7 +183,7 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 		
 	}
 	
-	result_pose = initial_pose.t.matrix() * overall;
+	result_pose =  overall;
 
 	if(_verbose && _verbose_level == 2)
 		MatrixUtils::PrintMatrix4f(result_pose);
@@ -335,4 +346,30 @@ Set the number of maximum iterations.
 void ICP::setMaxIterations(int max_iterations)
 {
 	_max_iterations = std::min(1000, std::max(1, max_iterations));
+}
+
+
+/*
+Set the maximum angle delta for two points to be considered
+as inliers. All other points will be rejected. 
+@param max_angle - the maximum angle in degrees. 
+	The value must be between 0 and 180 degrees. 
+*/
+void ICP::setRejectMaxAngle(float max_angle)
+{
+	float angle = std::min(180.0f, std::max(0.0f, max_angle));
+
+	_outlier_reject.setMaxNormalVectorAngle(angle);
+}
+
+/*
+Set the maximum value for two point sets to be considered
+as inliers. 
+@param max_distance - a float value larger than 0.01;
+*/
+void ICP::setRejectMaxDistance(float max_distance)
+{
+	float distance = std::min(100.f, std::max(0.01f, max_distance));
+
+	_outlier_reject.setMaxThreshold(distance);
 }

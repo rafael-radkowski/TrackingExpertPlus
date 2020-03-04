@@ -128,7 +128,7 @@ Matrix3f ICPTransform::CalcRotationArun(vector<Vector3f>& pVec0, vector<Vector3f
 	//	_cprintf("Singular exception \n");
 		R = Matrix3f::Identity();
 	}
-
+	std::cout << det << std::endl; 
 
 	return R;
 }

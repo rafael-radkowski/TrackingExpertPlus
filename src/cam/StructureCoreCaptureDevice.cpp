@@ -33,7 +33,7 @@ texpert::StructureCoreCaptureDevice::StructureCoreCaptureDevice()
 	settings.structureCore.visibleEnabled = true;
 	settings.structureCore.depthResolution = ST::StructureCoreDepthResolution::_640x480;
 	settings.structureCore.visibleResolution = ST::StructureCoreVisibleResolution::_640x480;
-
+	settings.structureCore.depthRangeMode = ST::StructureCoreDepthRangeMode::Short;
 	//ST::CaptureSessionSettings settings;
  //   settings.source = ST::CaptureSessionSourceId::StructureCore;
  //   settings.structureCore.depthEnabled = true;
@@ -44,6 +44,9 @@ texpert::StructureCoreCaptureDevice::StructureCoreCaptureDevice()
  //   settings.structureCore.depthResolution = ST::StructureCoreDepthResolution::VGA;
  //   settings.structureCore.imuUpdateRate = ST::StructureCoreIMUUpdateRate::AccelAndGyro_200Hz;
 
+	settings.structureCore.infraredAutoExposureEnabled = false;
+	settings.structureCore.initialInfraredExposure = 0.0033f;
+	settings.structureCore.initialInfraredGain = 3.0f;
 
 	_color_height = 480;
 	_color_width = 640;

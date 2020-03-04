@@ -73,6 +73,10 @@ protected:
 			c = ::tolower(c);
 		});
 
+		std::for_each(type.begin(), type.end(), [](char & c) {
+			c = ::tolower(c);
+		});
+
 		if (type.compare(t) == 0) {
 			return true;
 		}
