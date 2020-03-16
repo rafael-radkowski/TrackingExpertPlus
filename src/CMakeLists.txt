@@ -152,6 +152,7 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/loader/ReaderWriter.h
 	${PROJECT_SOURCE_DIR}/include/loader/ReaderWriterOBJ.h
 	${PROJECT_SOURCE_DIR}/include/loader/ReaderWriterPLY.h
+	${PROJECT_SOURCE_DIR}/include/loader/ReaderWriterUtil.h
 	${PROJECT_SOURCE_DIR}/include/loader/ImgReaderWriter.h
 	${PROJECT_SOURCE_DIR}/include/loader/ImgReaderWriterPNG.h
 	${PROJECT_SOURCE_DIR}/include/loader/DataReaderWriter.h
@@ -214,6 +215,7 @@ set(Loader_SRC
 	loader/FileUtilsExt.cpp
 	loader/ReaderWriterOBJ.cpp
 	loader/ReaderWriterPLY.cpp
+	loader/ReaderWriterUtil.cpp
 	loader/ImgReaderWriterPNG.cpp
 	loader/DataReaderWriter.cpp
 )
