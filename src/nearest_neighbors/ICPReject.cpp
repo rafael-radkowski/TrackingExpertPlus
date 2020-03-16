@@ -61,7 +61,7 @@ Test for both, point distance and normal alignment
 */
 bool ICPReject::testDistanceAngle(const Eigen::Vector3f& p0, const Eigen::Vector3f& p1, Eigen::Vector3f n0, Eigen::Vector3f n1)
 {
-	return ( testDistance(p0, p1) );
+	//return ( testDistance(p0, p1) );
 	return ( testDistance(p0, p1) && testAngle(n0, n1) );
 }
 

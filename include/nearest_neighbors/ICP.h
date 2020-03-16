@@ -54,6 +54,10 @@ Feb 22, 2020, RR
 March 3, 2020, RR
 - Added two apis to set the inlier outlier rejection criteria params.
 
+March 16, 2020, RR
+- Added a api that returns the last nearest neighbors vectors. This is a debug 
+ api that allows one to understand the nn better. It is not meant for general use. 
+
 */
 
 
@@ -143,6 +147,20 @@ public:
 
 
 
+
+	//-------------------------------------------------------------------------------
+
+	/* DEBUG FUNCTION
+	   Return the last set of nearest neighbors from the knn search. 
+	   @return vector containing the nn pairs as indices pointing from the reference point set
+	   to the envrionment point set. 
+	   Note that this functionality is just for debugging. It is performance consuming and should not be used
+	   under normal operations. 
+	*/
+	std::vector<std::pair<int, int> >& getNN(void);
+
+
+
 private:
 
 
@@ -169,6 +187,9 @@ private:
 	PointCloud				_testPoints;
 	PointCloud				_testPointsProcessing;
 
+
+	std::vector<Matches>	_local_matches;
+
 	// k-nearest neighbors implementation
 	KNN*					_knn;		
 
@@ -181,6 +202,9 @@ private:
 
 	bool					_verbose;
 	int						_verbose_level;
+
+	// helper to debug knn hits
+	std::vector<std::pair<int, int>> _verbose_matches;
 };
 
 

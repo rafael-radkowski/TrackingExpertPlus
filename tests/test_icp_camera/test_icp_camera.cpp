@@ -24,6 +24,7 @@
 #include "ReadFiles.h"
 #include "ICP.h"  // the ICP class to test
 #include "MatrixTransform.h"
+#include "GLLineRenderer.h"
 
 using namespace texpert;
 
@@ -35,8 +36,13 @@ isu_ar::GLPointCloudRenderer* gl_camera_point_cloud;
 isu_ar::GLPointCloudRenderer* gl_reference_point_cloud;
 isu_ar::GLPointCloudRenderer* gl_reference_eval; // evaluation point cloud for visual evaluation
 
+// a debug visualization that allows one to render lines between points. 
+isu_ar::GLLineRenderer*			gl_knn_lines;
+
+
 int							gl_normal_rendering = 0;
 int							gl_ref_rendering = 1;
+int							gl_nn_rendering = 0;
 
 
 SamplingParam		sampling_param;
@@ -112,6 +118,13 @@ void keyboard_callback( int key, int action) {
 			{
 				gl_ref_rendering = (++gl_ref_rendering)%2;
 				gl_reference_point_cloud->enablePointRendering((gl_ref_rendering==1)? true :false);
+		
+			break;
+			}
+		case 67: // c
+			{
+				gl_nn_rendering = (++gl_nn_rendering)%2;
+				gl_knn_lines->enableRenderer((gl_nn_rendering==1)? true :false);
 		
 			break;
 			}
@@ -220,6 +233,8 @@ void render_loop(glm::mat4 pm, glm::mat4 vm) {
 
 	gl_reference_eval->draw(pm, vm);
 
+	gl_knn_lines->draw(pm, vm);
+
 	
 	Sleep(25);
 }
@@ -298,10 +313,10 @@ int main(int argc, char** argv)
 
 	icp = new texpert::ICP();
 	icp->setMinError(0.001);
-	icp->setMaxIterations(15);
+	icp->setMaxIterations(1);
 	icp->setVerbose(true, 2);
-	icp->setRejectMaxAngle(60.0);
-	icp->setRejectMaxDistance(0.2);
+	icp->setRejectMaxAngle(45.0);
+	icp->setRejectMaxDistance(0.4);
 	icp->setCameraData(pc_camera_as_loaded);
 	icp->compute(pc_ref, pose, pose_result, rms);
 	
@@ -333,7 +348,8 @@ int main(int argc, char** argv)
 	gl_reference_eval->setPointColor(glm::vec3(1.0,1.0,0.0));
 	gl_reference_eval->setNormalColor(glm::vec3(0.5,0.8,0.8));
 	gl_reference_eval->setNormalGfxLength(0.02f);
-
+	gl_reference_eval->enablePointRendering(false);
+	
 
 	/*glm::mat4 test_matrix(0.993924, 0.0264946, -0.106836, -0.00770066,
 					-0.085335, 0.798538, -0.595866, 0.036563,
@@ -357,6 +373,12 @@ int main(int argc, char** argv)
 	gl_camera_point_cloud->setPointColor(glm::vec3(1.0,0.0,0.0));
 	gl_camera_point_cloud->setNormalColor(glm::vec3(0.8,0.5,0.0));
 	gl_camera_point_cloud->setNormalGfxLength(0.02f);
+	gl_camera_point_cloud->enablePointRendering(true);
+
+
+	// line renderer for debugging nearest neighbors
+	gl_knn_lines = new isu_ar::GLLineRenderer(pc_ref.points, pc_camera.points, icp->getNN());
+	gl_knn_lines->updatePoints();
 
 
 	//thread_1.lock(); // block the start until the render window is up

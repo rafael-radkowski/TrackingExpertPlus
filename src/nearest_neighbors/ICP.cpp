@@ -97,22 +97,22 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 	// the loop expects that both vectors are already index aligned. 
 	int itr = 0;
 	// search for nearest neighbors
-	std::vector<Matches> local_matches;
+	
 	for (int i = 0; i < _max_iterations; i++)
 	{
 
-		local_matches.clear();
-		local_matches.reserve(_testPointsProcessing.size());
+		_local_matches.clear();
+		_local_matches.reserve(_testPointsProcessing.size());
 
 		// find nearest neighbors
-		_knn->knn(_testPointsProcessing, 1, local_matches);
+		_knn->knn(_testPointsProcessing, 1, _local_matches);
 
 		matching_points.clear();
 		accepted_points.clear();
 
 		// Reject nearest neighbors that are most likely outliers. 
 		// get a vector with all the matching points. 
-		for_each(local_matches.begin(), local_matches.end(), [&](Matches m )
+		for_each(_local_matches.begin(), _local_matches.end(), [&](Matches m )
 		{
 			if( _outlier_reject.testDistanceAngle(_testPointsProcessing.points[m.matches[0].first ], _cameraPoints.points[m.matches[0].second],
 												  _testPointsProcessing.normals[m.matches[0].first ], _cameraPoints.normals[m.matches[0].second]))
@@ -372,4 +372,30 @@ void ICP::setRejectMaxDistance(float max_distance)
 	float distance = std::min(100.f, std::max(0.01f, max_distance));
 
 	_outlier_reject.setMaxThreshold(distance);
+}
+
+
+
+
+/* DEBUG FUNCTION
+Return the last set of nearest neighbors from the knn search. 
+@return vector containing the nn pairs as indices pointing from the reference point set
+to the envrionment point set. 
+Note that this functionality is just for debugging. It is performance consuming and should not be used
+under normal operations. 
+*/
+std::vector<std::pair<int, int> >& ICP::getNN(void)
+{
+	_verbose_matches.clear();
+
+	for_each(_local_matches.begin(), _local_matches.end(),  [&](Matches m )
+	{
+		if( _outlier_reject.testDistanceAngle(_testPointsProcessing.points[m.matches[0].first ], _cameraPoints.points[m.matches[0].second],
+												_testPointsProcessing.normals[m.matches[0].first ], _cameraPoints.normals[m.matches[0].second]))
+		{
+			_verbose_matches.push_back(std::make_pair(m.matches[0].first, m.matches[0].second) );
+		}
+	});
+
+	return _verbose_matches;
 }
