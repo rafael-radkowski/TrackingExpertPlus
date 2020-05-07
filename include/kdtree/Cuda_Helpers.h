@@ -71,7 +71,7 @@ void Cuda_Helpers::DeviceToHost(T* device_data, T* host_data, size_t size)
 	// Copy input vectors from  GPU buffers to host memory.
 	cudaError_t cudaStatus = cudaMemcpy(host_data, device_data, size * sizeof(T), cudaMemcpyDeviceToHost);
 	if (cudaStatus != cudaSuccess) {
-		fprintf(stderr, "cudaMemcpy failed!\n");
+		fprintf(stderr, "[Cuda_Helpers::DeviceToHost] - cudaMemcpy failed! (3)\n");
 	}
 }
 
@@ -83,7 +83,7 @@ void Cuda_Helpers::HostToDevice(T* host_data, T * device_data, size_t size)
 	// Copy input vectors from host memory to GPU buffers.
 	cudaError_t cudaStatus = cudaMemcpy(device_data, host_data, size * sizeof(T), cudaMemcpyHostToDevice);
 	if (cudaStatus != cudaSuccess) {
-		fprintf(stderr, "cudaMemcpy failed!\n");
+		fprintf(stderr, "[Cuda_Helpers::HostToDevice] - cudaMemcpy failed! (4)\n");
 	}
 }
 

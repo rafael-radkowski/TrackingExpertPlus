@@ -19,6 +19,7 @@
 
 // local
 #include "ICaptureDevice.h"
+#include "CameraParameters.h"	// to read camera parameters
 
 namespace texpert {
 
@@ -61,6 +62,24 @@ class StructureCoreCaptureDevice : public ICaptureDevice
 		int getCols(CaptureDeviceComponent c);
 
 
+		/*!
+		Read camera parameters for the depth camera from a file.
+		@param path_and_file - string with a relative or absolute path pointing to the 
+		camera parameters
+		*/
+		bool readCameraParameters(std::string path_and_file, bool verbose = false);
+
+
+		/*!
+		Return the intrinsic camera parameters
+		@return 3x3 cv::Mat with
+			[ fx 0 cx ]
+			[ 0 fy cy ]
+			[ 0 0  1  ]
+		*/
+		cv::Mat& getCameraParam(void);
+
+
 		/*
 		Set a callback to be invoked as soon as a frame arrives
 		@param cb - function pointer for a callback. 
@@ -98,7 +117,6 @@ class StructureCoreCaptureDevice : public ICaptureDevice
 			bool depthValid;
 			int  frame_couter; // counts the number of frames that arrive
 
-
 			std::function<void()>	callback_function;
 		};
 
@@ -115,6 +133,10 @@ class StructureCoreCaptureDevice : public ICaptureDevice
 		int _color_width; //!< Image width
 		int _depth_height; //!< Image height
 		int _depth_width; //!< Image width
+		
+		// intrinsic camera parameters
+		cv::Mat _intrinsic;
+		cv::Mat _distortion;
 
 	};
 }

@@ -26,6 +26,10 @@ rafael@iastate.edu
 September 27, 2017
 MIT License
 ---------------------------------------------------------------
+Last edited:
+Feb 20, 2020, RR
+- Added a function to swap normal vectors. 
+
 */
 
 // stl
@@ -66,12 +70,13 @@ public:
 	@param focal_legnth - the focal length of the camera in pixel
 	@param step_size - for normal vector calculations. The interger specifies how many steps a neighbor sould be away no obtain a vector for normal vector calculation.
 					Minimum step_size is 1.
+	@param normal_flip - flip the normal vector with normal_flip = -1.0. The value is multiplies with the normal vector. 
 	@param points - a vector A(i) = {p0, p1, p2, ..., pN} with all points p_i = {px, py, pz} as float3.
 	@param normals - a vector A(i) = {n0, n1, n2, ..., nN} with all normal vectors n_i = {nx, ny, nz} as float3
 	@param to_host - if true, the device normals and points are copied back to the host. If false, this is skipped and the  data in points and normals remains empty.
 					NOTE, COPYING DATA REQUIRES A SIGNIFICANT AMOUNT OF TIME AND SHOULD ONLY BE EXECUTED AT THE VERY LAST STEP
 	*/
-	static int CreatePointCloud(float* src_image_ptr, int width, int height, int chanels, float focal_length_x, float focal_length_y, float cx, float cy, int step_size, vector<float3>& points, vector<float3>& normals, bool to_host = true);
+	static int CreatePointCloud(float* src_image_ptr, int width, int height, int chanels, float focal_length_x, float focal_length_y, float cx, float cy, int step_size, float normal_flip, vector<float3>& points, vector<float3>& normals, bool to_host = true);
 
 
 
@@ -159,12 +164,13 @@ public:
 	@param normal_radius - for normal vector calculations. The interger specifies how many steps a neighbor sould be away no obtain a vector for normal vector calculation.
 	Minimum normal_radius is 1.
 	@param cp_enabled - cutting plane enabled if true;
+	@param normal_flip - set this value to -1 to flip the normal vectors, otherwise to 1. Ignore all other values. normal_flip is multiplied with the normal vector.  
 	@param points - a vector A(i) = {p0, p1, p2, ..., pN} with all points p_i = {px, py, pz} as float3.
 	@param normals - a vector A(i) = {n0, n1, n2, ..., nN} with all normal vectors n_i = {nx, ny, nz} as float3
 	@param to_host - if true, the device normals and points are copied back to the host. If false, this is skipped and the  data in points and normals remains empty.
 	NOTE, COPYING DATA REQUIRES A SIGNIFICANT AMOUNT OF TIME AND SHOULD ONLY BE EXECUTED AT THE VERY LAST STEP
 	*/
-	static void UniformSampling(float* src_image_ptr, int width, int height, float focal_length_x, float focal_length_y, float cx, float cy, int normal_radius, bool cp_enabled,  vector<float3>& points, vector<float3>& normals, bool to_host = true);
+	static void UniformSampling(float* src_image_ptr, int width, int height, float focal_length_x, float focal_length_y, float cx, float cy, int normal_radius, float normal_flip, bool cp_enabled,  vector<float3>& points, vector<float3>& normals, bool to_host = true);
 
 
 
@@ -180,12 +186,13 @@ public:
 	@param focal_legnth - the focal length of the camera in pixel
 	@param normal_radius - for normal vector calculations. The interger specifies how many steps a neighbor sould be away no obtain a vector for normal vector calculation.
 	Minimum normal_radius is 1.
+	@param normal_flip - set this value to -1 to flip the normal vectors, otherwise to 1. Ignore all other values. normal_flip is multiplied with the normal vector.  
 	@param points - a vector A(i) = {p0, p1, p2, ..., pN} with all points p_i = {px, py, pz} as float3.
 	@param normals - a vector A(i) = {n0, n1, n2, ..., nN} with all normal vectors n_i = {nx, ny, nz} as float3
 	@param to_host - if true, the device normals and points are copied back to the host. If false, this is skipped and the  data in points and normals remains empty.
 	NOTE, COPYING DATA REQUIRES A SIGNIFICANT AMOUNT OF TIME AND SHOULD ONLY BE EXECUTED AT THE VERY LAST STEP
 	*/ 
-	static void RandomSampling(float* src_image_ptr, int width, int height, float focal_length, int normal_radius, bool cp_enabled, vector<float3>& points, vector<float3>& normals, bool to_host=true);
+	static void RandomSampling(float* src_image_ptr, int width, int height, float focal_length, int normal_radius, float normal_flip, bool cp_enabled, vector<float3>& points, vector<float3>& normals, bool to_host=true);
 
 
 
@@ -195,6 +202,9 @@ public:
 	// where a point gets removed if D - current_D > CP_THRESHOLD
 	*/
 	static void SetCuttingPlaneParams(float a, float b, float c, float d, float threshold);
+
+
+
 };
 
 

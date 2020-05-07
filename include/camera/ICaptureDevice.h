@@ -64,6 +64,19 @@ namespace texpert
 		*/
 		virtual int getCols(CaptureDeviceComponent c) = 0;
 
+
+
+		/*!
+		Return the intrinsic camera parameters
+		@return 3x3 cv::Mat with
+			[ fx 0 cx ]
+			[ 0 fy cy ]
+			[ 0 0  1  ]
+		*/
+		virtual cv::Mat& getCameraParam(void) = 0;
+
+
+
 	protected:
 
 		

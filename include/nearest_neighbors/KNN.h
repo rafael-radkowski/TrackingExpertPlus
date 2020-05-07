@@ -32,12 +32,12 @@ namespace texpert {
 
 using Matches = MyMatches;
 
-class NearestNeighbors
+class KNN
 {
 public:
 
-	NearestNeighbors();
-	~NearestNeighbors();
+	KNN();
+	~KNN();
 
 
 	/*
@@ -45,14 +45,9 @@ public:
 	This one goes into the kd-tree as soon as it is set. 
 	@param pc - reference to the point cloud model
 	*/
-	bool setReferenceModel(PointCloud& pc);
+	bool populate(PointCloud& pc);
 
-	/*
-	Set the test model, this is tested agains the 
-	reference model in the kd-tree
-	@param pc - reference to the point cloud model
-	*/
-	bool setTestModel(PointCloud& pc);
+	
 
 
 	/*
@@ -60,7 +55,7 @@ public:
 	@param k - the number of matches to return
 	@param matches - reference to the matches
 	*/
-	int knn(int k, vector<Matches>& matches);
+	int knn(PointCloud& pc, int k, vector<Matches>& matches);
 
 
 

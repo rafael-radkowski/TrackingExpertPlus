@@ -31,3 +31,7 @@ external/glew/src/glew.dir/
 external/glew/src/Release/
 external/glfw/src/glfw.dir/
 examples/gear_demo/src/GearTransmissionDemo.dir/
+tests/test_tracking/test_tracking.dir/
+tests/test_icp/test_icp.dir/
+tests/test_icp_camera/test_icp_camera.dir/
+data/test/stanford_bunny_desk/

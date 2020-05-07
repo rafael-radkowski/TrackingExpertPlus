@@ -47,6 +47,9 @@ Last edits:
 #include "GLViewer.h"
 #include "GLPointCloud.h"
 #include "GLPointCloudRenderer.h"
+#include "ReaderWriterOBJ.h"
+#include "ReaderWriterPLY.h"
+#include "TimeUtils.h"
 
 #define WITH_PERFORMANCE_MEASUREMENT
 
@@ -69,12 +72,64 @@ isu_ar::GLViewer* window;
 isu_ar::GLPointCloudRenderer* gl_point_cloud;
 
 
+int							gl_normal_rendering = 0;
+
 #ifdef WITH_PERFORMANCE_MEASUREMENT
 double	avg_all = 0.0;
 double	avg_process = 0.0;
 double	avg_rendering = 0.0;
 int		frame_count = 0;
 #endif 
+
+
+
+
+
+int file_counter = 1;
+string date = "";
+
+void keyboard_callback( int key, int action) {
+
+
+	cout << key << " : " << action << endl;
+	switch (action) {
+	case 0:  // key up
+	
+		switch (key) {
+		case 87: // w
+		{
+			string file = "model_";
+			file.append(to_string(file_counter));
+			file.append("_");
+			file.append(date);
+			file.append("_pc.obj");
+			
+			file_counter++;
+
+			ReaderWriterOBJ::Write(file, camera_point_cloud.points, camera_point_cloud.normals);
+			ReaderWriterPLY::Write(file, camera_point_cloud.points, camera_point_cloud.normals);
+			break;
+			} 
+		case 78: // n
+			{
+			gl_normal_rendering = (++gl_normal_rendering)%2;
+			gl_point_cloud->enableNormalRendering((gl_normal_rendering==1)? true :false);
+
+			break;
+			}
+		}
+		break;
+		
+		case 1: // key down
+
+			break;
+	}
+}
+
+
+
+
+
 
 /*
 The main render and processing loop. 
@@ -144,6 +199,7 @@ void render_loop(glm::mat4 pm, glm::mat4 vm) {
 
 int main(int argc, char* argv)
 {
+	date = TimeUtils::GetCurrentDateTime();
 
 	/*
 	Open a camera device. 
@@ -162,10 +218,10 @@ int main(int argc, char* argv)
 	point cloud (UNIFORM), and a randomly sampled (RANDOM) point cloud.
 	*/
 	SamplingParam sParam;
-	sParam.uniform_step = 8;
+	sParam.uniform_step = 4;
 	sParam.random_max_points = 5000;
 	producer->setSampingMode(UNIFORM, sParam);
-
+	producer->setNormalVectorParams(8);
 
 	/*
 	create the renderer.
@@ -174,8 +230,8 @@ int main(int argc, char* argv)
 	window = new isu_ar::GLViewer();
 	window->create(1280, 1280, "Camera test and point cloud test");
 	window->addRenderFcn(render_loop);
-	//window->addKeyboardCallback(std::bind(&FMEvalApp::keyboard_callback, this, _1, _2));
-	window->setViewMatrix(glm::lookAt(glm::vec3(1.0f, 0.0, -5.5f), glm::vec3(0.0f, 0.0f, 3.f), glm::vec3(0.0f, 1.0f, 0.0f)));
+	window->addKeyboardCallback(keyboard_callback);
+	window->setViewMatrix(glm::lookAt(glm::vec3(1.0f, 0.0, -2.5f), glm::vec3(0.0f, 0.0f, 3.f), glm::vec3(0.0f, 1.0f, 0.0f)));
 	window->setClearColor(glm::vec4(1, 1, 1, 1));
 
 	/*

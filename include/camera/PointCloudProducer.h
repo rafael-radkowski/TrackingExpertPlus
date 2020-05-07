@@ -17,6 +17,14 @@ rafael@iastate.edu
 -----------------------------------------------------------
 Last edits:
 
+Feb 7, 2020, RR
+- Added a camera parameter loader.
+
+Feb 20, 2020, RR
+- Added a point cloud storage as a member
+- Added a function that copies the point from the internal to the external storage. 
+	and removes all 0,0,0 points. 
+
 */
 #include <iostream>
 #include <vector>
@@ -60,6 +68,15 @@ public:
 	*/
 	void setNormalVectorParams(int step_size);
 
+
+	/*
+	Flip the normal vectors. They are not flipped by default.
+	But some cameras require them to be inverted. 
+	@param flip - true flips the normal vectors. 
+	*/
+	void setFlipNormalVectors(bool flip = false);
+
+
 	/*!
 	Process the current camera frame
 	@return true, if successful, otherwise false. 
@@ -67,7 +84,7 @@ public:
 	bool process(void);
 
 
-	
+
 
 private:
 	// raw point cloud sampling
@@ -79,6 +96,10 @@ private:
 	// random point cloud sampling
 	bool run_sampling_random(float* imgBuf);
 
+	// copy points from the internal storage to the external
+	// and remove all points with values (0,0,0)
+	bool copy_and_clear_points(void);
+
 	//----------------------------------------------------------------------------------
 
 	// the camera capture device. 
@@ -87,16 +108,36 @@ private:
 	int						_depth_rows;
 	int						_depth_cols;
 
+	// the depth camera focal length
+	// the default values are set for the structure core. 
+	float					_fx_depth;
+	float					_fy_depth;
+
+	// caemra principal points.
+	float					_cx_depth;
+	float					_cy_depth;
+
 	// location of an external storage to write the camera
 	// point cloud data to. 
 	PointCloud&				_the_cloud;
 
+	// Internal location for the point cloud.
+	// The external cloud in _the_cloud only contains valid values
+	// with points no 0,0,0. The return from cuda can still contain (0,0,0) points. 
+	PointCloud				_pc_storage;
 
+	// Parameters to inidcate the sampling method
 	SamplingMethod			_sampling_method;
 	SamplingParam			_sampling_param;
 
+	// step size for normal vector estimation. 
+	// The normal vectors are estimated using cross-products
+	// to adjacent pixels. The variable indicates the distance to the neighbor. 
 	int						_normal_vector_step_size;
 
+	float					_flip_normal_vectors;
+
+	// true, if all initialization steps were completed sucessfull.y
 	bool					_producer_ready;
 };
 

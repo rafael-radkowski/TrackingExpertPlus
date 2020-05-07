@@ -175,6 +175,7 @@ if (BUILD_GLEW)
     add_dependencies(${TEST_APP0} glew)
 endif()
 
+add_dependencies(${TEST_APP0} GLUtils)
 
 # Add libraries
 target_link_libraries(${TEST_APP0}  ${GLEW_LIBS} ${GLEW_LIBS} ${GLFW3_LIBS} ${OPENGL_LIBS} ${OPENGL_LIBRARIES}  )

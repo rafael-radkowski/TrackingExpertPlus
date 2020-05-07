@@ -23,6 +23,9 @@ bool LoaderObj::Read(string file, vector<Eigen::Vector3f >* dst_points, vector<E
     dst_points->clear();
     dst_normals->clear();
 
+
+
+
     std::ifstream infile(file);
 
     if(!infile.is_open()){

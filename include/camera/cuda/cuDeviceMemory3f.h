@@ -104,7 +104,8 @@ protected:
 
 
 	/*
-	An array for different parameters which are required on the device
+	An array for different parameters which are required on the device.
+	These are for the cutting plane
 	*/
 	static float* DevParamsPtr(void);
 

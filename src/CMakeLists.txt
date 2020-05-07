@@ -128,13 +128,8 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/detection/FDTools.h
 	${PROJECT_SOURCE_DIR}/include/detection/FDMatching.h
 	${PROJECT_SOURCE_DIR}/include/detection/FDClustering.h
+	${PROJECT_SOURCE_DIR}/include/detection/PCRegistration.h
 	${PROJECT_SOURCE_DIR}/include/detection/nurmur.h
-	${PROJECT_SOURCE_DIR}/include/kdtree/sort.h
-	${PROJECT_SOURCE_DIR}/include/kdtree/dequeue.h
-	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_KdTree.h
-	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Helpers.h
-	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Common.h
-	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Types.h
 	${PROJECT_SOURCE_DIR}/include/loader/Types.h
 	${PROJECT_SOURCE_DIR}/include/loader/SamplingTypes.h
 	${PROJECT_SOURCE_DIR}/include/loader/Sampling.h
@@ -142,8 +137,6 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/loader/NoiseFilter.h
 	${PROJECT_SOURCE_DIR}/include/loader/LoaderOBJ.h
 	${PROJECT_SOURCE_DIR}/include/loader/FileUtilsExt.h
-	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/NearestNeighbors.h
-	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/ICPTransform.h
 	${PROJECT_SOURCE_DIR}/include/pointcloud/PointCloudUtils.h
 	${PROJECT_SOURCE_DIR}/include/pointcloud/PointCloudTransform.h
 	${PROJECT_SOURCE_DIR}/include/pointcloud/PointCloudEval.h
@@ -154,12 +147,25 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/utils/LogTypes.h
 	${PROJECT_SOURCE_DIR}/include/utils/LogReaderWriter.h
 	${PROJECT_SOURCE_DIR}/include/utils/ArgParser.h
+	${PROJECT_SOURCE_DIR}/include/utils/FileUtilsX.h
+	${PROJECT_SOURCE_DIR}/include/utils/MSVerCheck.h
+	${PROJECT_SOURCE_DIR}/include/loader/ReaderWriter.h
+	${PROJECT_SOURCE_DIR}/include/loader/ReaderWriterOBJ.h
+	${PROJECT_SOURCE_DIR}/include/loader/ReaderWriterPLY.h
+	${PROJECT_SOURCE_DIR}/include/loader/ReaderWriterUtil.h
+	${PROJECT_SOURCE_DIR}/include/loader/ImgReaderWriter.h
+	${PROJECT_SOURCE_DIR}/include/loader/ImgReaderWriterPNG.h
+	${PROJECT_SOURCE_DIR}/include/loader/DataReaderWriter.h
+	
+
+
 
 #if( ENABLE_STRUCTURE_CORE)
 	${PROJECT_SOURCE_DIR}/include/camera/StructureCoreCaptureDevice.h
 	${PROJECT_SOURCE_DIR}/include/camera/ICaptureDevice.h
 	${PROJECT_SOURCE_DIR}/include/camera/ICaptureDeviceTypes.h
 	${PROJECT_SOURCE_DIR}/include/camera/PointCloudProducer.h
+	${PROJECT_SOURCE_DIR}/include/camera/CameraParameters.h
 
 	
 #endif()
@@ -185,6 +191,7 @@ set(Detection_SRC
 	detection/FDTools.cpp
 	detection/FDMatching.cpp
 	detection/FDClustering.cpp
+	detection/PCRegistration.cpp
 )
 
 set(Cuda_kdtree_SRC
@@ -193,6 +200,12 @@ set(Cuda_kdtree_SRC
 	kdtree/CudaErrorCheck.cu
 	kdtree/Cuda_KdTree.cu
 	kdtree/Cuda_Helpers.cpp
+	${PROJECT_SOURCE_DIR}/include/kdtree/sort.h
+	${PROJECT_SOURCE_DIR}/include/kdtree/dequeue.h
+	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_KdTree.h
+	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Helpers.h
+	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Common.h
+	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Types.h
 )
 
 set(Loader_SRC
@@ -200,12 +213,23 @@ set(Loader_SRC
 	loader/NoiseFilter.cpp
 	loader/LoaderOBJ.cpp
 	loader/FileUtilsExt.cpp
+	loader/ReaderWriterOBJ.cpp
+	loader/ReaderWriterPLY.cpp
+	loader/ReaderWriterUtil.cpp
+	loader/ImgReaderWriterPNG.cpp
+	loader/DataReaderWriter.cpp
 )
 
 
 set(NN_SRC
-	nearest_neighbors/NearestNeighbors.cpp
+	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/KNN.h
+	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/ICPTransform.h
+	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/ICP.h
+	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/ICPReject.h
+	nearest_neighbors/KNN.cpp
 	nearest_neighbors/ICPTransform.cpp
+	nearest_neighbors/ICP.cpp
+	nearest_neighbors/ICPReject.cpp
 )
 
 set( PointCloud_SRC
@@ -216,6 +240,7 @@ set( PointCloud_SRC
 #if( ENABLE_STRUCTURE_CORE)
 	cam/StructureCoreCaptureDevice.cpp
 	cam/PointCloudProducer.cpp
+	cam/CameraParameters.cpp
 #endif()
 #if( ENABLE_REAL_SENSE)
 #	cam/SensorRealSense.cpp
@@ -244,6 +269,7 @@ set( Utils_SRC
 	utils/RandomGenerator.cpp
 	utils/LogReaderWriter.cpp
 	utils/ArgParser.cpp
+	utils/FileUtilsX.cpp
 )
 
 
@@ -252,9 +278,9 @@ set( Utils_SRC
 #  SRC Groups, organize the tree
 
 source_group(Detection FILES ${Detection_SRC})
-source_group(Cuda kd-tree FILES ${Cuda_kdtree_SRC})
+source_group(kdtree FILES ${Cuda_kdtree_SRC})
 source_group(Loader FILES ${Loader_SRC})
-source_group(NN FILES ${NN_SRC})
+source_group(ICP FILES ${NN_SRC})
 source_group(PointCloud FILES ${PointCloud_SRC})
 source_group(Shader FILES ${Shader_SRC})
 source_group(Utils FILES ${Utils_SRC})

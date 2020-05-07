@@ -8,6 +8,9 @@ Feb 2018
 rafael@iastate.edu
 MIT License
 ---------------------------------------------------------------
+Last edited
+03/03/2020, RR
+- Added a parameter around_centroid to either rotate the point set around its centroid or in place. 
 */
 
 #include <iostream>
@@ -62,9 +65,11 @@ namespace texpert
 		@param pc_src -  pointer to the source point cloud of type PointCloud
 		@param translation - vec 3 with the translation in x, y, z
 		@param rotation - vec 3 with the Euler angles for a rotation arond x, y, z.
+		@param around_centroid - moves the entire point cloud set to its centroid before rotating. 
+			It rotates it in place otherwise. 
 		@return  true - if successful. 
 		*/
-		static bool Transform(PointCloud* pc_src, Eigen::Vector3f translation, Eigen::Vector3f  euler_angles);
+		static bool Transform(PointCloud* pc_src, Eigen::Vector3f translation, Eigen::Vector3f  euler_angles, bool around_centroid = true);
 
 	private:
 

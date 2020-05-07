@@ -49,7 +49,10 @@ Set the angle step
 */
 bool FDMatching::setAngleStep(float angele_step)
 {
-	if (angele_step < 0.0) return false;
+	if (angele_step < 3.0 && angele_step > 90.0){
+		std::cout << "[Warning] - angele_step not set; parameter must be in range [3.0, 90.0]" << endl;
+		return false;
+	}
 
 	_angle_step = angele_step / 180.0f * static_cast<float>(M_PI);;
 	_angle_bins = (int)(static_cast<float>(2 * M_PI) / _angle_step) + 1;
@@ -146,11 +149,17 @@ bool FDMatching::extract_feature_map(vector<Eigen::Vector3f>* points, vector<Eig
 	}
 
 	if(_verbose)
-		_cprintf("\n[PPFExtTracking] - Descriptors for %d points extracted. ", counter);
+		_cprintf("\n[PPFExtTracking] - Descriptors for %d points extracted. \n", counter);
 	return true;
 
 }
 
+
+
+bool  FDMatching::searchIn(vector<Eigen::Vector3f>* points, vector<Eigen::Vector3f>* normals, std::vector<Pose>& poses)
+{
+	return detect( points, normals,  poses);
+}
 
 
 /*

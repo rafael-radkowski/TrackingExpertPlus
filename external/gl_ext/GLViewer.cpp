@@ -5,6 +5,7 @@ using namespace isu_ar;
 
 GLViewer::GLViewer()
 {
+	_camera_control = true;
 	_init_ready = false;
 	_projMatrix = glm::perspective(1.2f, (float)800 / (float)600, 0.1f, 100.f);
 	_viewMatrix = glm::lookAt(glm::vec3(0.0f, 0.0, 4.5f), glm::vec3(0.0f, 0.0f, 00.f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -41,7 +42,7 @@ bool GLViewer::create(int window_width, int window_height, string name)
     cs557::initGlew();
 
 	// coordinate system
-	_cs.create(2000.0);
+	_cs.create(200.0);
 
 
 	return true;
@@ -84,12 +85,12 @@ void GLViewer::draw_loop(void)
         glClearBufferfv(GL_COLOR, 0, _clear_color);
         glClearBufferfv(GL_DEPTH, 0, _clear_depth);
 
-		glm::mat4 rotated_view =    cs557::GetCamera().getViewMatrix() ;//* glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f)) ;
+		glm::mat4 rotated_view =    cs557::GetCamera().getViewMatrix();// * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.0f)) ;
 
 		if (!_camera_control) {
-			rotated_view = glm::lookAt(glm::vec3(0.0,0.0,0.0), glm::vec3(0.0,0.0,1.0), glm::vec3(0.0,1.0,0.0));
+			rotated_view = glm::lookAt(glm::vec3(0.0,0.0, 0.0), glm::vec3(0.0,0.0,1.0), glm::vec3(0.0,1.0,0.0));
 		}
-
+	
 		// draw the coordinate frame
 		_cs.draw(_projMatrix, rotated_view, cs_modelMatrix);
 
