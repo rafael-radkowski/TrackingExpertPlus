@@ -1,6 +1,7 @@
 # TrackingExpert+
 TrackingExpert+ introduces a set of tools for augmented reality (AR) application development. In particular, it provides for 6-degree-of-freedom (DoF) pose measurement and 3D visualization capabilities. The focus is on industrial AR applications for tasks such as assembly training and task-support, maintenance, and others. 
 
+![Title figure](https://github.com/rafael-radkowski/TrackingExpertPlus/blob/master/data/media/Tracking_expert_V1.png)
 
 The software allows a user to detect objects and track their 6-DoF pose using point cloud data acquired from an RGB-D camera. The underlying pose estimation approach is model-based: it requires a 3D model of an object of interest as input data. Underneath the hood, TrackingExpert+ relies on features descriptors and statistical pattern matching to perform its task. Its feature descriptor employs surface curvatures of an object and the relative curvature distribution around a point. This approach renders the software highly robust in the presence of noise, occlusion, and other obstacles since it can work a minimum visible surface. 
 
