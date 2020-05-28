@@ -1,13 +1,4 @@
 #pragma once
-/*
-class sort 
-
-Rafael Radkowski
-Iowa State University
-rafael@iastate.edu
-MIT License
----------------------------------------------------------------
-*/
 
 #include "Cuda_Helpers.h"
 #include "Cuda_Common.h"
@@ -49,8 +40,8 @@ __device__ void partial_radixsort_func(int* arr, int max, const int start, const
 @param temp_memory - temporary memory to store the output data temporary. must be 2 * max_n.
 */
 //__global__ void parallel_radixsort(int* arr, const int n, const int max_n, int *index, int *temp_memory);
-__global__ void serial_radixsort(uint32_t* arr, int max, int n_chunks, double chunk_width, int* index, uint32_t* temp_memory, int N);
-__global__ void serial_insertionsort(uint32_t* arr, int max, int n_chunks, double chunk_width, int* index, int N);
+__global__ void serial_radixsort(uint32_t* arr, int max, int n_chunks, float chunk_width, int* index, uint32_t* temp_memory, int N);
+__global__ void serial_insertionsort(uint32_t* arr, int max, int n_chunks, float chunk_width, int* index, int N);
 
 class ChunkedSorter {
 public:

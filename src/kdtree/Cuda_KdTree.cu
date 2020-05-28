@@ -19,6 +19,7 @@ const int TPB = 256;
 int SORT_TPB = 128;
 const int POINT_RES = 1024; // Value to scale points by when converting to int
 
+#define MAX_Q 32
 
 using namespace texpert;
 
@@ -301,7 +302,7 @@ __global__ void knn_search(Cuda_KdNode* root, MyPoint* dev_search_points, MyMatc
 	MyPoint search_point = dev_search_points[index];
 	//printf("search for point %d; %f, %f, %f\n", search_point._id, search_point[0], search_point[1], search_point[2]);
 
-	PriorityQueue q = PriorityQueue();
+	PriorityQueue< Cuda_KdNode*, MAX_Q> q = PriorityQueue< Cuda_KdNode*, MAX_Q>();
 	double nn_dist = INFINITY; // initial distance
 	//int u_idx;
 	Cuda_KdNode* u;
@@ -311,7 +312,7 @@ __global__ void knn_search(Cuda_KdNode* root, MyPoint* dev_search_points, MyMatc
 	double rd;  // distance to rectangle
 	double old_off, new_rd;
 	while (q.size != 0) {
-		Q_Node closest = q.removeMin();
+		Q_Node< Cuda_KdNode*> closest = q.removeMin();
 		rd = closest.priority;
 		//u_idx = closest.idx; // closest node to query point
 		//u = d_tree[u_idx];
@@ -416,7 +417,7 @@ __global__ void knn_search(Cuda_KdNode* root, MyPoint* dev_search_points, MyMatc
 	MyPoint search_point = dev_search_points[index];
 	//printf("search for point %d; %f, %f, %f\n", search_point._id, search_point[0], search_point[1], search_point[2]);
 
-	PriorityQueue q = PriorityQueue();
+	PriorityQueue< Cuda_KdNode*, MAX_Q> q = PriorityQueue< Cuda_KdNode*, MAX_Q>();
 	double nn_dist = INFINITY; // initial distance
 	double nn_largest_dist = 0; // stores the largest value
 	int nn_largest_idx = -1;
@@ -430,7 +431,7 @@ __global__ void knn_search(Cuda_KdNode* root, MyPoint* dev_search_points, MyMatc
 	double rd;  // distance to rectangle
 	double old_off, new_rd;
 	while (q.size != 0) {
-		Q_Node closest = q.removeMin();
+		Q_Node<Cuda_KdNode*> closest = q.removeMin();
 		rd = closest.priority;
 		//u_idx = closest.idx; // closest node to query point
 		//u = d_tree[u_idx];
@@ -587,7 +588,7 @@ __global__ void knn_radius_search(Cuda_KdNode* root, MyPoint* dev_search_points,
 	MyPoint search_point = dev_search_points[index];
 	//printf("search for point %d; %f, %f, %f\n", search_point._id, search_point[0], search_point[1], search_point[2]);
 
-	PriorityQueue q = PriorityQueue();
+	PriorityQueue< Cuda_KdNode*, MAX_Q> q = PriorityQueue< Cuda_KdNode*, MAX_Q>();
 	double nn_dist = INFINITY; // initial distance
 	double nn_largest_dist = 0; // stores the largest value
 	int nn_largest_idx = -1;
@@ -601,7 +602,7 @@ __global__ void knn_radius_search(Cuda_KdNode* root, MyPoint* dev_search_points,
 	double rd;  // distance to rectangle
 	double old_off, new_rd;
 	while (q.size != 0) {
-		Q_Node closest = q.removeMin();
+		Q_Node< Cuda_KdNode*> closest = q.removeMin();
 		rd = closest.priority;
 		//u_idx = closest.idx; // closest node to query point
 		//u = d_tree[u_idx];

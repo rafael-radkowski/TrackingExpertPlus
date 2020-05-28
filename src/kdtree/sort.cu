@@ -2,13 +2,14 @@
 // cuda
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
-#include <device_functions.h>
+//#include <device_functions.h>
 #include <conio.h>
 
 //local
 #include "sort.h"
 //#define SEQ_ONLY
 
+// local
 #include "CudaErrorCheck.cu"
 
 __constant__ int SORT_BASE;
@@ -22,7 +23,7 @@ __host__ __device__ inline T ceil_div(T a, T b) {
 }
 
 
-__global__ void serial_radixsort(uint32_t* arr, int max, int n_chunks, double chunk_width, int* index, uint32_t* temp_memory, int N) {
+__global__ void serial_radixsort(uint32_t* arr, int max, int n_chunks, float chunk_width, int* index, uint32_t* temp_memory, int N) {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 	if (idx >= n_chunks) {
 		return;
@@ -80,7 +81,7 @@ __global__ void serial_radixsort(uint32_t* arr, int max, int n_chunks, double ch
 	}
 }
 
-__global__ void serial_insertionsort(uint32_t* arr, int max, int n_chunks, double chunk_width, int* index, int N) {
+__global__ void serial_insertionsort(uint32_t* arr, int max, int n_chunks, float chunk_width, int* index, int N) {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 	if (idx >= n_chunks) {
 		return;
@@ -234,8 +235,9 @@ __global__ void PC_count(uint32_t* arr, int* global_hist, int N, float chunk_wid
 	int blocks_per_chunk = 1 + (int)ceil(chunk_width / tpb);
 	//V2: int blocks_per_chunk = ceil_div((int)chunk_width - tpb, 2*tpb) * 2 + (((int)chunk_width & tpb - 1) != 0);
 	// Index of first point in this chunk
-	int chunk_first_idx = this_chunk == 0 ? chunk_width * this_chunk : (int)(chunk_width * this_chunk) + 1;
+	//int chunk_first_idx = this_chunk == 0 ? chunk_width * this_chunk : (int)(chunk_width * this_chunk) + 1;
 	// V2: int chunk_first_idx = base_chunk == 0 ? chunk_width * base_chunk : (int)(chunk_width * base_chunk) + 1;
+	int chunk_first_idx = this_chunk == 0 ? chunk_width * base_chunk : (int)(chunk_width * base_chunk) + 1;
 	// Block index of the first block in this chunk
 	int chunk_first_block = chunk_first_idx / tpb;
 	int relative_block_idx = blockIdx.x - chunk_first_block;

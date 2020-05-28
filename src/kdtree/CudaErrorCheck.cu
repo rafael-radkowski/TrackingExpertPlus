@@ -6,7 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <cassert>
-
+#include <conio.h>
 
 // Define this to turn on error checking
 #if _DEBUG
@@ -28,6 +28,8 @@ __device__ __host__ inline void __cudaSafeCall(cudaError err, const char *file, 
 			file, line, cudaGetErrorString(err));
 	#else
 		fprintf(stderr, "cudaSafeCall() failed at %s:%i : %s\n",
+			file, line, cudaGetErrorString(err));
+		_cprintf( "cudaSafeCall() failed at %s:%i : %s\n",
 			file, line, cudaGetErrorString(err));
 	#endif
 	}

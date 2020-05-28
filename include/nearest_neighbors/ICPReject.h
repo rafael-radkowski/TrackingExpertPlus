@@ -44,8 +44,19 @@ Last edited:
 class ICPReject{
 
 public:
+
+		typedef enum {
+			NONE,
+			DIST,
+			ANG,
+			DIST_ANG
+		}Testcase;
+
+
 		ICPReject();
 		~ICPReject();
+
+
 
 		/*
 		Test whether two points are close enough to be considered as inliers. 
@@ -73,6 +84,18 @@ public:
 		@return true - if the points are inliers, false if the are outliers. 
 		*/
 		bool testDistanceAngle(const Eigen::Vector3f& p0, const Eigen::Vector3f& p1, Eigen::Vector3f n0, Eigen::Vector3f n1);
+
+
+
+		/*
+		Test for outliers and select the case. 
+		@param p0 - reference to the first point of type Vector3f with (x, y, z) coordinates. 
+		@param p1 - reference to the second point of type Vector3f with (x, y, z) coordinates. 
+		@param n0 - reference to the first normal vectors of type Vector3f with (nx, ny, nz) coordinates. 
+		@param n1 - reference to the second normal vectors of type Vector3f with (nx, ny, nz) coordinates. 
+		@return true - if the points are inliers, false if the are outliers. 
+		*/
+		bool test(const Eigen::Vector3f& p0, const Eigen::Vector3f& p1, Eigen::Vector3f n0, Eigen::Vector3f n1, Testcase testcase );
 
 
 		/*
