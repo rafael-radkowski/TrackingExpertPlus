@@ -50,6 +50,13 @@ namespace texpert
 		static glm::mat4 Affine3f2Mat4(Eigen::Affine3f& matrix);
 
 
+
+		/*
+		Convert an Einge4f matrix to an glm::mat4 matrix. 
+		*/
+		static glm::mat4 Matrix4f2Mat4(Eigen::Matrix4f& matrix);
+
+
 		/*
 		Print an affine3 Eigen matrix.
 		@param matrix - the matrix in column-major order

@@ -66,6 +66,33 @@ bool ICPReject::testDistanceAngle(const Eigen::Vector3f& p0, const Eigen::Vector
 }
 
 
+
+/*
+Test for outliers and select the case. 
+@param p0 - reference to the first point of type Vector3f with (x, y, z) coordinates. 
+@param p1 - reference to the second point of type Vector3f with (x, y, z) coordinates. 
+@param n0 - reference to the first normal vectors of type Vector3f with (nx, ny, nz) coordinates. 
+@param n1 - reference to the second normal vectors of type Vector3f with (nx, ny, nz) coordinates. 
+@return true - if the points are inliers, false if the are outliers. 
+*/
+bool ICPReject::test(const Eigen::Vector3f& p0, const Eigen::Vector3f& p1, Eigen::Vector3f n0, Eigen::Vector3f n1, Testcase testcase )
+{
+	switch (testcase) {
+		case NONE:
+		break;
+		case DIST:
+			return testDistance(p0,  p1);
+			break;
+		case ANG:
+			return testAngle(n0, n1);
+			break;
+		case DIST_ANG:
+			return testDistanceAngle(p0, p1, n0, n1);
+			break;
+	}
+}
+
+
 /*
 Set the maximum distance limit for two points to be considered as inliers. 
 @param max_distance - float value with a limit > 0.0;

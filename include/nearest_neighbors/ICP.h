@@ -169,7 +169,9 @@ private:
 	// Note that this function does not use any nearest neighbors function and assumes that 
 	// _testPoints and _cameraPoints are equal and index aligned. 
 	bool test_transformation(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_pose, float& rms);
+	bool test_rejection(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_pose, float& rms);
 
+	
 
 	/*
 	Check if this class is ready to run.

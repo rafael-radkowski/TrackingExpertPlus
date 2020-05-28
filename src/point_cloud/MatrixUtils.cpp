@@ -20,6 +20,20 @@ glm::mat4 MatrixUtils::Affine3f2Mat4(Eigen::Affine3f& matrix)
 }
 
 
+
+/*
+Convert an Einge4f matrix to an glm::mat4 matrix. 
+*/
+//static 
+glm::mat4 MatrixUtils::Matrix4f2Mat4(Eigen::Matrix4f& matrix)
+{
+	glm::mat4 m;
+	for (int i = 0; i < 16; i++) {
+		m[i/4][i%4] =  matrix.data()[i];
+	}
+	return m;
+}
+
 /*
 Print an affine3 Eigen matrix.
 @param matrix - the matrix in column-major order
