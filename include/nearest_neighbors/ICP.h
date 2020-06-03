@@ -58,6 +58,9 @@ March 16, 2020, RR
 - Added a api that returns the last nearest neighbors vectors. This is a debug 
  api that allows one to understand the nn better. It is not meant for general use. 
 
+ June 3rd, 2020, RR
+ - Added an api to set the outlier rejection method. 
+
 */
 
 
@@ -147,6 +150,14 @@ public:
 
 
 
+	/*
+	Set the ICP outlier rejection mechanism. 
+	@param method - NONE, DIST, ANG, DIST_ANG
+	*/
+	void setRejectionMethod(ICPReject::Testcase method);
+
+
+
 
 	//-------------------------------------------------------------------------------
 
@@ -197,6 +208,7 @@ private:
 
 	// tests for outlier rejection
 	ICPReject				_outlier_reject;
+	ICPReject::Testcase		_outlier_rejectmethod;
 
 	// icp params
 	float					_max_error;

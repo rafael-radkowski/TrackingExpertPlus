@@ -14,6 +14,7 @@ ICP::ICP() {
 
 	_knn = new KNN();
 
+	_outlier_rejectmethod = ICPReject::DIST_ANG;
 	_outlier_reject.setMaxNormalVectorAngle(45.0);
 	_outlier_reject.setMaxThreshold(0.1);
 
@@ -126,7 +127,7 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 		for_each(_local_matches.begin(), _local_matches.end(), [&](Matches m )
 		{
 			if( _outlier_reject.test(_testPointsProcessing.points[m.matches[0].first ], _cameraPoints.points[m.matches[0].second],
-									 _testPointsProcessing.normals[m.matches[0].first ], _cameraPoints.normals[m.matches[0].second], ICPReject::DIST_ANG))
+									 _testPointsProcessing.normals[m.matches[0].first ], _cameraPoints.normals[m.matches[0].second], _outlier_rejectmethod))
 			{
 				 matching_points.push_back(_cameraPoints.points[m.matches[0].second]);
 				 accepted_points.push_back(_testPointsProcessing.points[m.matches[0].first ] );
@@ -135,7 +136,7 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 
 		// Check if sufficient points are available to register the points
 		if (matching_points.size() < 16) {
-			cout << "insufficient points" << endl;
+			cout << "[ICP] - Break: insufficient points after outlier rejection." << endl;
 			result_pose = overall;
 			if(_verbose && _verbose_level == 2)
 				MatrixUtils::PrintMatrix4f(result_pose);
@@ -149,29 +150,30 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 
 		result = Matrix4f::Identity();
 		// maintaining row-major
-		result(0) = 1.0;//R_inv(0);
-		result(1) = 0.0;//R_inv(1);
-		result(2) = 0.0;//R_inv(2);
+		result(0) = R_inv(0);
+		result(1) = R_inv(1);
+		result(2) = R_inv(2);
 
-		result(4) = 0.0;//R_inv(3);
-		result(5) = 1.0;//R_inv(4);
-		result(6) = 0.0;//R_inv(5);
+		result(4) = R_inv(3);
+		result(5) = R_inv(4);
+		result(6) = R_inv(5);
 
-		result(8) =  0.0;//R_inv(6);
-		result(9) = 0.0;// R_inv(7);
-		result(10) = 1.0;//R_inv(8);
+		result(8) = R_inv(6);
+		result(9) = R_inv(7);
+		result(10) = R_inv(8);
 
 		result(12) = t.x();
 		result(13) = t.y();
 		result(14) = t.z();
 
-
-		cout << "T -> "  << t.x() << "\t" << t.y() << "\t" << t.z() << std::endl;
+		//cout << "R -> "  << R << endl;
+		//cout << "T -> "  << t.x() << "\t" << t.y() << "\t" << t.z() << std::endl;
 
 		// update the point transformation
 		/// TODO: performance teste. Which function is faster for_each vs. std::transform
 		// p' = (R * p) + t;
 		for_each(accepted_points.begin(), accepted_points.end(), [&](Vector3f& p){p = (R * p) + t;});
+
 
 		// transform the original points and normal vectors
 		for_each(_testPointsProcessing.points.begin(), _testPointsProcessing.points.end(), [&](Vector3f& p){p = (R * p) + t;});
@@ -200,7 +202,7 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 		MatrixUtils::PrintMatrix4f(result_pose);
 
 
-	cout << "[ICP] - ICP OVerall : " << overall(12) << " : " << overall(13) << " : " << overall(14) << endl;
+	//cout << "[ICP] - ICP Overall : " << overall(12) << " : " << overall(13) << " : " << overall(14) << endl;
 
 
 	if(_verbose)
@@ -372,7 +374,7 @@ bool ICP::test_rejection(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& res
 		for(int i=0; i<_testPointsProcessing.size(); i++)
 		{
 			if( _outlier_reject.test(_testPointsProcessing.points[i], _cameraPoints.points[i],
-									 _testPointsProcessing.normals[i], _cameraPoints.normals[i], ICPReject::DIST_ANG))
+									 _testPointsProcessing.normals[i], _cameraPoints.normals[i],_outlier_rejectmethod))
 			{
 				 matching_points.push_back(_cameraPoints.points[i]);
 				 accepted_points.push_back(_testPointsProcessing.points[i] );
@@ -524,6 +526,16 @@ void ICP::setRejectMaxDistance(float max_distance)
 	float distance = std::min(100.f, std::max(0.01f, max_distance));
 
 	_outlier_reject.setMaxThreshold(distance);
+}
+
+
+/*
+Set the ICP outlier rejection mechanism. 
+@param method - NONE, DIST, ANG, DIST_ANG
+*/
+void ICP::setRejectionMethod(ICPReject::Testcase method)
+{
+	_outlier_rejectmethod = method;
 }
 
 

@@ -21,7 +21,8 @@ MIT License
 ------------------------------------------------------------------------------------------------------
 Last edited:
 
-
+June 3, 2020, RR
+- Fixed a bug in testDistance, which computed the wrong length for the max distance. 
 
 
 */
