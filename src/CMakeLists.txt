@@ -226,10 +226,12 @@ set(NN_SRC
 	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/ICPTransform.h
 	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/ICP.h
 	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/ICPReject.h
+	${PROJECT_SOURCE_DIR}/include/nearest_neighbors/cuICP.h
 	nearest_neighbors/KNN.cpp
 	nearest_neighbors/ICPTransform.cpp
 	nearest_neighbors/ICP.cpp
 	nearest_neighbors/ICPReject.cpp
+	nearest_neighbors/cuICP.cpp
 )
 
 set( PointCloud_SRC

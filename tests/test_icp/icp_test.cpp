@@ -50,7 +50,7 @@ PointCloud			pc_camera_as_loaded;
 
 
 std::string			ref_file = "../data/stanford_bunny_pc.obj ";
-std::string			camera_file = "../data/stanford_bunny_pc.obj ";
+std::string			camera_file = "../data/stanford_bunny_cam.obj ";
 
 // ICP
 texpert::ICP*		icp;
@@ -114,16 +114,52 @@ void runTestManual(void)
 {
 	if(current_set >= initial_pos.size()) current_set = 0;
 
+	cout << "\n";
 	pc_ref = pc_ref_as_loaded;
 	// Move the point cloud to a different position. 
 	PointCloudTransform::Transform(&pc_ref, initial_pos[current_set], initial_rot[current_set] );
+	pc_ref.centroid0 = PointCloudUtils::CalcCentroid(&pc_ref);
+
 	Pose pose;
 	pose.t =  Eigen::Matrix4f::Identity();
 	icp->compute(pc_ref, pose, pose_result, rms);
 	current_set++;
 	N++;
 
-	overall_rms = overall_rms * (N - 1)/N + rms / N;
+	//---------------------------------------------------------------------------
+	// Apply the ICP pose to the initial point cloud
+	Matrix3f R;
+	Vector3f t;
+		
+	R(0) = pose_result(0);
+	R(1) = pose_result(1);
+	R(2) = pose_result(2);
+	R(3) = pose_result(4);
+	R(4) = pose_result(5);
+	R(5) = pose_result(6);
+	R(6) = pose_result(8);
+	R(7) = pose_result(9);
+	R(8) = pose_result(10);
+	t.x() = pose_result(12);
+	t.y() = pose_result(13);
+	t.z() = pose_result(14);
+
+
+	PointCloud test_cloud = pc_ref;
+	for_each(test_cloud.points.begin(), test_cloud.points.end(), [&](Vector3f& p){p = (R * p) + t;});		
+	test_cloud.centroid0 = PointCloudUtils::CalcCentroid(&test_cloud);
+
+	//---------------------------------------------------------------------------
+	// Compare the centroid of both point clouds and the RMS
+
+	float centroid_dist =  (pc_camera_as_loaded.centroid0 - test_cloud.centroid0).norm();
+
+	if (centroid_dist > 0.025) {
+		std::cout << "[ERROR] - test: " << N+1 << ", centroid distance is " << centroid_dist << endl;
+	}else
+	{
+		std::cout << "[SUCCESS] - test: " << N+1 << " successful, with centroid distance is " << centroid_dist << endl;
+	}
 
 
 	Eigen::Affine3f a_mat;
@@ -146,31 +182,66 @@ void runTest(void)
 
 	while(current_set < initial_pos.size()){
 
+		cout << "\n";
 		pc_ref = pc_ref_as_loaded;
+
+		// -------------------------------------------------------------------------
 		// Move the point cloud to a different position. 
 		PointCloudTransform::Transform(&pc_ref, initial_pos[current_set], initial_rot[current_set] );
+
+		pc_ref.centroid0 = PointCloudUtils::CalcCentroid(&pc_ref);
+		
+		// --------------------------------------------------------------------------
+		// Compute ICP
 		Pose pose;
 		pose.t =  Eigen::Matrix4f::Identity();
 		icp->compute(pc_ref, pose, pose_result, rms);
 
-		if(std::abs(ground_truth_rms[current_set] - rms) > 0.00001 ) {
-			error_count++;
-			std::cout << "[ERROR] - test: " << N+1 << ", Ground truth  " << ground_truth_rms[current_set] <<  " deviates from result " <<  rms << std::endl;
+		//---------------------------------------------------------------------------
+		// Apply the ICP pose to the initial point cloud
+		Matrix3f R;
+		Vector3f t;
+		
+		R(0) = pose_result(0);
+		R(1) = pose_result(1);
+		R(2) = pose_result(2);
+		R(3) = pose_result(4);
+		R(4) = pose_result(5);
+		R(5) = pose_result(6);
+		R(6) = pose_result(8);
+		R(7) = pose_result(9);
+		R(8) = pose_result(10);
+		t.x() = pose_result(12);
+		t.y() = pose_result(13);
+		t.z() = pose_result(14);
+
+		PointCloud test_cloud = pc_ref;
+		for_each(test_cloud.points.begin(), test_cloud.points.end(), [&](Vector3f& p){p = (R * p) + t;});		
+		test_cloud.centroid0 = PointCloudUtils::CalcCentroid(&test_cloud);
+
+		//---------------------------------------------------------------------------
+		// Compare the centroid of both point clouds and the RMS
+
+		float centroid_dist =  (pc_camera_as_loaded.centroid0 - test_cloud.centroid0).norm();
+
+		if (centroid_dist > 0.025) {
+			std::cout << "[ERROR] - test: " << N+1 << ", centroid distance is " << centroid_dist << endl;
+		}else
+		{
+			std::cout << "[SUCCESS] - test: " << N+1 << " successful, with centroid distance is " << centroid_dist << endl;
 		}
+
 
 		current_set++;
 		N++;
 
-		overall_rms = overall_rms * (N - 1)/N + rms / N;
 
+		//---------------------------------------------------------------------------
+		// Set the matrix to obtain a visual image for comparisons.
 
 		Eigen::Affine3f a_mat;
 		a_mat = pose_result;
 		gl_reference_eval->setModelmatrix(MatrixUtils::Affine3f2Mat4(a_mat));
-
-		std::cout << "[INFO] - test: " << N << " case " << current_set-1 << ", mean rms: " << overall_rms << std::endl;
-
-		
 
 		Sleep(200);
 				
@@ -205,11 +276,34 @@ void render_loop(glm::mat4 pm, glm::mat4 vm) {
 }
 
 
+class RenderLoop {
+
+public:
+
+	static void fcn(glm::mat4 pm, glm::mat4 vm) {
+
+		//thread_1.unlock();
+
+		//-----------------------------------------------------------
+		// Rendering
+		gl_reference_point_cloud->draw(pm, vm);
+
+		gl_camera_point_cloud->draw(pm, vm);
+
+		gl_reference_eval->draw(pm, vm);
+
+	
+		Sleep(25);
+	}
+};
+
 
 
 int main(int argc, char** argv)
 {
 	bool err = false;
+
+
 
 	date = TimeUtils::GetCurrentDateTime();
 
@@ -218,13 +312,13 @@ int main(int argc, char** argv)
 	initial_pos.push_back(Eigen::Vector3f(0.0, 0.0, 0.2)); initial_rot.push_back(Eigen::Vector3f(0.0, 0.0, 0.0)); ground_truth_rms.push_back(0.0015498);
 	initial_pos.push_back(Eigen::Vector3f(0.2, 0.15, 0.0)); initial_rot.push_back(Eigen::Vector3f(0.0, 0.0, 0.0));ground_truth_rms.push_back(0.0015492);
 	initial_pos.push_back(Eigen::Vector3f(0.0, 0.2, 0.15)); initial_rot.push_back(Eigen::Vector3f(0.0, 0.0, 0.0));ground_truth_rms.push_back(0.0015492);
-	initial_pos.push_back(Eigen::Vector3f(0.0, 0.4, 0.3)); initial_rot.push_back(Eigen::Vector3f(0.0, 0.0, 0.0));ground_truth_rms.push_back(0.0015501);
-	initial_pos.push_back(Eigen::Vector3f(0.0, 0.4, 0.0)); initial_rot.push_back(Eigen::Vector3f(90.0, 0.0, 0.0));ground_truth_rms.push_back(0.0015504);
-	initial_pos.push_back(Eigen::Vector3f(0.2, 0.0, 0.0)); initial_rot.push_back(Eigen::Vector3f(45.0, 0.0, 0.0));ground_truth_rms.push_back(0.0015504);
-	initial_pos.push_back(Eigen::Vector3f(0.0, 0.0, 0.6)); initial_rot.push_back(Eigen::Vector3f(0.0, 45.0, 20.0));ground_truth_rms.push_back(0.0015504);
-	initial_pos.push_back(Eigen::Vector3f(0.2, 0.2, 0.0)); initial_rot.push_back(Eigen::Vector3f(20.0, 10.0, -40.0));ground_truth_rms.push_back(0.0015483);
+	initial_pos.push_back(Eigen::Vector3f(0.05, 0.2, 0.05)); initial_rot.push_back(Eigen::Vector3f(0.0, 0.0, 0.0));ground_truth_rms.push_back(0.0015501);
+	initial_pos.push_back(Eigen::Vector3f(0.0, 0.2, 0.0)); initial_rot.push_back(Eigen::Vector3f(10.0, 0.0, 0.0));ground_truth_rms.push_back(0.0015504);
+	initial_pos.push_back(Eigen::Vector3f(0.2, 0.0, 0.0)); initial_rot.push_back(Eigen::Vector3f(25.0, 0.0, 0.0));ground_truth_rms.push_back(0.0015504);
+	initial_pos.push_back(Eigen::Vector3f(0.0, 0.0, 0.2)); initial_rot.push_back(Eigen::Vector3f(0.0, 25.0, 20.0));ground_truth_rms.push_back(0.0015504);
+	initial_pos.push_back(Eigen::Vector3f(0.2, 0.2, 0.0)); initial_rot.push_back(Eigen::Vector3f(20.0, 10.0, -10.0));ground_truth_rms.push_back(0.0015483);
 	initial_pos.push_back(Eigen::Vector3f(0.0, 0.2, 0.2)); initial_rot.push_back(Eigen::Vector3f(10.0, 10.0, 0.0));ground_truth_rms.push_back(0.0015492);
-	initial_pos.push_back(Eigen::Vector3f(0.0, 0.2, 0.2)); initial_rot.push_back(Eigen::Vector3f(2.0, 20.0, 60.0));ground_truth_rms.push_back(0.00247738);
+	initial_pos.push_back(Eigen::Vector3f(0.0, 0.2, 0.2)); initial_rot.push_back(Eigen::Vector3f(2.0, 45.0, 10.0));ground_truth_rms.push_back(0.00247738);
 
 
 
@@ -242,19 +336,21 @@ int main(int argc, char** argv)
 	Sampling::Run(pc_ref_as_loaded, pc_ref_as_loaded);
 	pc_ref = pc_ref_as_loaded;
 
+	pc_ref.centroid0 = PointCloudUtils::CalcCentroid(&pc_ref);
+
 
 	// Move the point cloud to a different position. 
-	PointCloudTransform::Transform(&pc_ref,  Eigen::Vector3f(0.0, 0.2, 0.0), Eigen::Vector3f(0.0, 0.0, 90.0));
-
+	PointCloudTransform::Transform(&pc_ref,  Eigen::Vector3f(0.0, 0.2, 0.0), Eigen::Vector3f(0.0, 0.0, 0.0));
 	
+
 	/*------------------------------------------------------------------------
 	Load the second object for the test. 
 	*/
 	ReaderWriterOBJ::Read(camera_file, pc_camera_as_loaded.points, pc_camera_as_loaded.normals, false, false);
 	//LoaderObj::Read(camera_file, &pc_camera_as_loaded.points, &pc_camera_as_loaded.normals, false, true);
 	Sampling::Run(pc_camera_as_loaded, pc_camera_as_loaded);
+	pc_camera_as_loaded.centroid0 = PointCloudUtils::CalcCentroid(&pc_camera_as_loaded);
 	pc_camera = pc_camera_as_loaded;
-
 
 		
 	/*------------------------------------------------------------------------
@@ -266,14 +362,15 @@ int main(int argc, char** argv)
 	
 
 	icp = new texpert::ICP();
-	icp->setMinError(0.0001);
+	icp->setMinError(0.00000001);
 	icp->setMaxIterations(100);
+	icp->setRejectionMethod(ICPReject::DIST_ANG);
 	icp->setVerbose(true, 1);
-
+	icp->setRejectMaxDistance(0.2);
+	icp->setRejectMaxAngle(25.0);
 	icp->setCameraData(pc_camera_as_loaded);
 	icp->compute(pc_ref, pose, pose_result, rms);
 	
-
 
 
 	/*-------------------------------------------------------------------------------------
@@ -283,7 +380,7 @@ int main(int argc, char** argv)
 	glm::mat4 vm = glm::lookAt(glm::vec3(0.0f, 0.0, -0.5f), glm::vec3(0.0f, 0.0f, 0.5), glm::vec3(0.0f, 1.0f, 0.0f));
 	window = new isu_ar::GLViewer();
 	window->create(1280, 1280, "Tracking test");
-	window->addRenderFcn(render_loop);
+	window->addRenderFcn(std::bind(RenderLoop::fcn, std::placeholders::_1, std::placeholders::_2));
 	window->addKeyboardCallback(keyboard_callback);
 	window->setViewMatrix(vm);
 	window->setClearColor(glm::vec4(1, 1, 1, 1));
