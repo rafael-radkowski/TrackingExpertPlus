@@ -132,3 +132,54 @@ bool PointCloudTransform::Transform(PointCloud* pc_src, Eigen::Vector3f translat
 
 	return true;
 }
+
+
+/*
+Transform the point cloud points.
+@param pc_src -  pointer to the source point cloud of type PointCloud
+@param transformation - a 4x4 transformation matrix. 
+@param around_centroid - moves the entire point cloud set to its centroid before rotating. 
+	It rotates it in place otherwise. 
+@return  true - if successful. 
+*/
+ 
+bool PointCloudTransform::Transform(PointCloud* pc_src, Eigen::Matrix4f transformation, bool around_centroid )
+{
+	assert(pc_src != NULL );
+
+	// get centroid
+	Eigen::Vector3f centroid = PointCloudUtils::CalcCentroid(pc_src);
+
+	if(!around_centroid) centroid = Eigen::Vector3f(0,0,0);
+
+	// Move all points to the centroid
+	Translate(pc_src, -centroid);
+
+	Eigen::Affine3f m;
+	m.matrix() = transformation;
+	m.data()[3] = 0;
+	m.data()[7] = 0;
+	m.data()[11] = 0;
+	m.data()[15] = 0;
+	m.data()[12] = 0;
+	m.data()[13] = 0;
+	m.data()[14] = 0;
+
+	// rotate all points
+	int c = 0;
+	size_t size = pc_src->size();
+	vector<Eigen::Vector3f>::iterator itr = pc_src->points.begin();
+	while (itr != pc_src->points.end()) {
+		(*itr) = m * (*itr);
+		pc_src->normals[c] = m * pc_src->normals[c];
+		itr++;
+		c++;
+	}
+
+	Eigen::Vector3f trans(transformation(12), transformation(13), transformation(14));
+
+	// Move all points back
+	Translate(pc_src, centroid + trans );
+
+	return true;
+}

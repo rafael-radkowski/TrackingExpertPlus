@@ -24,6 +24,8 @@ MIT License
 ---------------------------------------------------------------
 
 Last edited:
+June 11, 2020, RR
+- Added a function to return the centroid of a object. 
 
 */
 
@@ -91,6 +93,13 @@ public:
 	*/
 	static float CheckRMS(vector<Vector3f>& pVec0, vector<Vector3f>& pVec1);
 
+
+	/*!
+	Return the centroid of a set of points. 
+	@param pVec0 - a vector with points (x, y, z).
+	@return a vector containing the centroid of the object in local space. 
+	*/
+	static Vector3f CalculateCentroid(vector<Vector3f>& pVec0);
 
 };
 

@@ -182,6 +182,60 @@ void GLLineRenderer::updatePoints(void)
 
 
 /*
+Update the points using the existing references.
+This will copy the points to a vertex buffer object and render them. 
+*/
+void GLLineRenderer::updatePoints(vector<Eigen::Vector3f>& src_points0, vector<Eigen::Vector3f>& src_points1, std::vector<std::pair<int, int>>& knn_matches)
+{
+	// update the points
+	int size = knn_matches.size();
+
+	//cout << "[GLLineRenderer] Info - update " << size << " valid matches" << endl;
+
+	if (size > MAX_LINES) {
+		size = MAX_LINES;
+		std::cout << "[GLLineRenderer]  - ERROR: insufficient space for points" << std::endl;
+	}
+
+	int count  = 0;
+	for(int i=0; i<size; i++)
+	{
+		int p0 = knn_matches[i].first;
+		int p1 = knn_matches[i].second;
+
+		_gl_points0[i*2] = glm::vec3( src_points0[p0].x(),  src_points0[p0].y(),  src_points0[p0].z());
+		glm::vec4 dst =   glm::vec4( _src_points1[p1].x(),  _src_points1[p1].y(),  _src_points1[p1].z(), 1.0f);
+
+		_gl_points0[i*2+1] = glm::vec3(dst.x, dst.y,  dst.z);
+		_gl_normals0[i*2] = _line_color;
+		_gl_normals0[i*2+1] = _line_color;
+
+		count+=2;
+      
+	}
+	_N = count;
+
+	_block.lock();
+
+	glUseProgram(_program);
+
+	glBindBuffer(GL_ARRAY_BUFFER, _vboID[0]); // Bind our Vertex Buffer Object
+	glBufferSubData(GL_ARRAY_BUFFER, 0, (GLsizeiptr)(_N *3* sizeof(GLfloat)),(void*)&_gl_points0[0]); // Set the size and data of our VBO and set it to STATIC_DRAW
+
+	//Normal vectors
+	glBindBuffer(GL_ARRAY_BUFFER, _vboID[1]); // Bind our second Vertex Buffer Object
+	glBufferSubData(GL_ARRAY_BUFFER, 0, (GLsizeiptr)(_N * 3* sizeof(GLfloat)), (void*) &_gl_normals0[0]); // Set the size and data of our VBO and set it to STATIC_DRAW
+
+	glBindVertexArray(0); // Disable our Vertex Buffer Object
+
+
+	glUseProgram(_program);
+	
+	_block.unlock();
+}
+
+
+/*
 Draw the obj model
 @param viewMatrix - a view matrix object
 @param modelMatrix - a model matrix object.

@@ -33,6 +33,9 @@ MIT License
 //-----------------------------------------------------------------------
 Last edits:
 
+June 11, 2020, RR
+- Update the function updatePoints, to pass the latest points to the gpu. 
+
 */
 
 // stl include
@@ -91,6 +94,13 @@ public:
 	This will copy the points to a vertex buffer object and render them. 
 	*/
 	void updatePoints(void);
+
+
+	/*
+	Update the points using the existing references.
+	This will copy the points to a vertex buffer object and render them. 
+	*/
+	void updatePoints(vector<Eigen::Vector3f>& src_points0, vector<Eigen::Vector3f>& src_points1, std::vector<std::pair<int, int>>& knn_matches);
 
 
 	/*

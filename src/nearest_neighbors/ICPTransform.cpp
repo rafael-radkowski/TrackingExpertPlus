@@ -207,3 +207,10 @@ float ICPTransform::CheckRMS(vector<Vector3f>& pVec0, vector<Vector3f>& pVec1)
 	return sqrt(abs(sum2));
 }
 
+
+
+Vector3f ICPTransform::CalculateCentroid(vector<Vector3f>& pVec0)
+{
+	Vector3f avg0 = accumulate(pVec0.begin(), pVec0.end(), Vector3f(0, 0, 0), [currIndex = 0U, lastIndex = pVec0.size()](Vector3f x, Vector3f y) mutable { return x + y; }) / pVec0.size();
+	return avg0;
+}

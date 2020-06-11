@@ -11,6 +11,9 @@ MIT License
 Last edited
 03/03/2020, RR
 - Added a parameter around_centroid to either rotate the point set around its centroid or in place. 
+
+June 11, 2020, RR
+- Added a function to transform a point cloud in local space that works with a 4x4 matrix. 
 */
 
 #include <iostream>
@@ -70,6 +73,17 @@ namespace texpert
 		@return  true - if successful. 
 		*/
 		static bool Transform(PointCloud* pc_src, Eigen::Vector3f translation, Eigen::Vector3f  euler_angles, bool around_centroid = true);
+
+
+		/*
+		Transform the point cloud points.
+		@param pc_src -  pointer to the source point cloud of type PointCloud
+		@param transformation - a 4x4 transformation matrix. 
+		@param around_centroid - moves the entire point cloud set to its centroid before rotating. 
+			It rotates it in place otherwise. 
+		@return  true - if successful. 
+		*/
+		static bool Transform(PointCloud* pc_src, Eigen::Matrix4f transformation, bool around_centroid = true);
 
 	private:
 
