@@ -26,14 +26,17 @@
 # Feb 14, 2020, RR
 # - Changed TBB_Libs cache name; removed space. 
 # 
+# June 16, 2020, RR
+# - Added a path to the Intel free version of tbb. The previous one was for the open source version. 
 
 
 
 if (WIN32)
  
-    set(_TBB_DEFAULT_INSTALL_DIR "C:/SDK/tbb2017_20170226oss" 
+    set(_TBB_DEFAULT_INSTALL_DIR 
 				"C:/Program Files/Intel/TBB" 
 				"C:/Program Files (x86)/Intel/TBB" 
+				"C:/Program Files (x86)/IntelSWTools/compilers_and_libraries/windows/tbb"
 				"$ENV{TBB_ROOT}"
 				"$ENV{TBB_DIR}"
 				"$ENV{tbb_DIR}"
@@ -79,17 +82,25 @@ set(_TBB_LIB_NAME "tbb")
 endif (WIN32)
 
 
+
 #-- Clear the public variables
 set (TBB_FOUND "NO")
 
 
+#find_path(TBB_DIR 
+#	NAMES bin/intel64/${_TBB_COMPILER}/tbb.dll
+#	lib/intel64_win/${_TBB_COMPILER}/tbb.dll
+#	
+#	PATHS ${_TBB_DEFAULT_INSTALL_DIR}
+#	PATH_SUFFIXES bin lib
+#)
+
 find_path(TBB_DIR 
-	NAMES bin/intel64/${_TBB_COMPILER}/tbb.dll
+	NAMES 	bin/intel64/${_TBB_COMPILER}/tbb.dll
+			../redist/intel64_win/tbb/${_TBB_COMPILER}/tbb.dll
 	PATHS ${_TBB_DEFAULT_INSTALL_DIR}
-	PATH_SUFFIXES bin
+	PATH_SUFFIXES bin redist
 )
-
-
 
 # look for tbb in typical include dirs
 find_path (TBB_INCLUDE_DIR NAMES tbb/tbb.h
