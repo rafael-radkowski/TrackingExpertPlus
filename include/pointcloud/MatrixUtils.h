@@ -10,6 +10,10 @@ Feb 2018
 rafael@iastate.edu
 MIT License
 ---------------------------------------------------------------
+Last edited:
+
+June 11, 2020, RR
+- Added a function to convert a 4x4 eigen matrix into a glm matrix. 
 */
 
 #include <iostream>
@@ -55,6 +59,15 @@ namespace texpert
 		Convert an Einge4f matrix to an glm::mat4 matrix. 
 		*/
 		static glm::mat4 Matrix4f2Mat4(Eigen::Matrix4f& matrix);
+
+
+		/*!
+		Convert the ICP->Rt() result into a glm::mat4 matrix
+		@param matrix - a 4x4 matrix with the pose of the object.
+		@return - a glm 4x4 matrix with the translation of the reference object. 
+		*/
+		static glm::mat4 ICPRt3Mat4(Eigen::Matrix4f& matrix);
+
 
 
 		/*

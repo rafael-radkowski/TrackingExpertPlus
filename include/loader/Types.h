@@ -6,6 +6,11 @@ Iowa State University
 rafael@iastate.edu
 MIT License
 ---------------------------------------------------------------
+
+Last edits:
+
+June 3, 2020, RR
+- Added a vector to store the centroid of the point cloud. 
 */
 
 #ifndef __TYPES__
@@ -32,6 +37,8 @@ typedef struct PointCloud
 
     Eigen::Matrix4f             pose;
 
+	Eigen::Vector3f				centroid0; // the centroid of the object as loaded or as initially added. 
+
     PointCloud(){
         N = 0;
         id = 0;
@@ -39,6 +46,8 @@ typedef struct PointCloud
                 0,1,0,0,
                 0,0,1,0,
                 0,0,0,1;
+
+		centroid0 << 0.0, 0.0, 0.0;
     }
 
     int size(void){

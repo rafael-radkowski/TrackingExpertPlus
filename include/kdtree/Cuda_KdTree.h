@@ -35,6 +35,10 @@ MIT License
 #include "Cuda_Common.h"
 #include "Cuda_Types.h"
 
+// the kd-tree class shares the gpu memory with ICP since both use the same 
+// point set. Remove this line if somethig else manages the memory. 
+#include "cuICPMemory.h"
+
 #define _WITH_PERFORMANCE
 
 #define MAX_NUM_POINTS 500000

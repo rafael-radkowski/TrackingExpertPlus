@@ -23,7 +23,8 @@
 #---------------------------------------------------------------------
 #
 # Last edits:
-#
+# Feb 14, 2020, RR
+# - Changed TBB_Libs cache name; removed space. 
 # 
 
 
@@ -113,6 +114,7 @@ find_library(TBB_MALLOC_LIBRARY_DEBUG ${_TBB_LIB_MALLOC_DEBUG_NAME}
 		PATHS ${TBB_DIR}/lib/intel64/${_TBB_COMPILER}
 )
 
+
 find_library(TBB_MALLOC_LIBRARY ${_TBB_LIB_MALLOC_NAME} 
 		PATHS ${TBB_DIR}/lib/intel64/${_TBB_COMPILER}
 )
@@ -134,7 +136,7 @@ set(TBB_LIBS
     optimized ${TBB_LIBRARY} 
 	debug ${TBB_MALLOC_LIBRARY_DEBUG} 
 	debug ${TBB_LIBRARY_DEBUG}
-	CACHE PATH "TBB libraries")
+	CACHE PATH "TBB_libraries")
 	
 mark_as_advanced(${TBB_LIBS})
 

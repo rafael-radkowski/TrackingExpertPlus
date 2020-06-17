@@ -20,7 +20,7 @@ Test whether two points are close enough to be considered as inliers.
 */
 bool ICPReject::testDistance(const Eigen::Vector3f& p0, const Eigen::Vector3f& p1)
 {
-	return ( ((p0 - p1).norm() < (_max_distance*_max_distance)) ? true : false );
+	return ( ((p0 - p1).norm() < (_max_distance)) ? true : false );
 }
 
 

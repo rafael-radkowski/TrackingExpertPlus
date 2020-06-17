@@ -51,6 +51,16 @@ void MatrixUtils::PrintAffine3f(Eigen::Affine3f& matrix)
 }
 
 
+glm::mat4 MatrixUtils::ICPRt3Mat4(Eigen::Matrix4f& matrix)
+{
+	glm::mat4 Rt;
+	for (int i = 0; i < 16; i++) {
+		Rt[i/4][i%4] = matrix(i/4, i%4);
+	}
+
+	return Rt;
+}
+
 /*
 Print an a glm::mat4  matrix.
 @param matrix - the matrix in column-major order

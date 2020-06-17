@@ -810,6 +810,12 @@ Cuda_KdTree::~Cuda_KdTree()
 	cudaStreamDestroy(streams[1]);
 	cudaStreamDestroy(streams[2]);
 	delete sorter;
+
+	//--------------------------------------------------------
+	// share the data on the gpu 
+	cuICPMemory::SetCameraDataPtr(NULL);
+	cuICPMemory::SetQuerryDataPtr(NULL);
+	cuICPMemory::SetSearchResultsPtr(NULL);
 	
 #ifdef _DEBUG
 	free(_host_data_arr_x);
@@ -1148,8 +1154,11 @@ void Cuda_KdTree::allocateMemory(void)
 	_host_index = (int*)malloc(MAX_NUM_POINTS * sizeof(int));
 #endif
 
-
-
+	//--------------------------------------------------------
+	// share the data on the gpu 
+	cuICPMemory::SetCameraDataPtr(_dev_data_arr);
+	cuICPMemory::SetQuerryDataPtr(d_query_points);
+	cuICPMemory::SetSearchResultsPtr(d_query_results);
 }
 
 

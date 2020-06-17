@@ -129,7 +129,7 @@ Matrix3f ICPTransform::CalcRotationArun(vector<Vector3f>& pVec0, vector<Vector3f
 		R = Matrix3f::Identity();
 	}
 	//std::cout << det << std::endl; 
-
+	//R = Matrix3f::Identity();
 	return R;
 }
 
@@ -148,6 +148,41 @@ Vector3f ICPTransform::CalculateTranslation(vector<Vector3f>& pVec0, vector<Vect
 	Vector3f avg0 = accumulate(pVec0.begin(), pVec0.end(), Vector3f(0, 0, 0), [currIndex = 0U, lastIndex = pVec0.size()](Vector3f x, Vector3f y) mutable { return x + y; }) / pVec0.size();
 	Vector3f avg1 = accumulate(pVec1.begin(), pVec1.end(), Vector3f(0, 0, 0), [currIndex = 0U, lastIndex = pVec1.size()](Vector3f x, Vector3f y) mutable { return x + y; }) / pVec1.size();
 
+
+//#define AVG_NAIVE
+#ifdef AVG_NAIVE
+	Vector3f avg0n(0.0,0.0,0.0);
+	Vector3f avg1n(0.0,0.0,0.0);
+
+	if (pVec0.size() != pVec1.size()) {
+		cout << "[ICPTransform] - Error: vectors with different size (1)." << endl;
+	}
+
+	for (int i = 0; i < pVec0.size(); i++) {
+		avg0n += pVec0[i];
+		avg1n += pVec1[i];
+	}
+
+	avg0n /= pVec0.size();
+	avg1n /= pVec0.size();
+
+	cout << "T0 avg: " << avg0 << " == " << avg0n << endl;
+	cout << "T1 avg: " << avg1 << " == " << avg1n << endl;
+
+	if ((avg0 - avg0n).norm() > 0.0001) {
+			cout << "[ERROR] T0 avg  " << endl;
+	}
+	if ((avg1 - avg1n).norm() > 0.0001) {
+			cout << "[ERROR] T1 avg " << endl;
+	}
+	Vector3f delta_n = avg1n - avg0n;
+	Vector3f delta = avg1 - avg0;
+	if ((delta_n - delta).norm() > 0.0001) {
+			cout << "[ERROR] Delta error " << endl;
+	}
+
+#endif
+
 	return avg1 - avg0;
 }
 
@@ -165,8 +200,17 @@ float ICPTransform::CheckRMS(vector<Vector3f>& pVec0, vector<Vector3f>& pVec1)
 	Vector3f avg0 = accumulate(pVec0.begin(), pVec0.end(), Vector3f(0, 0, 0), [currIndex = 0U, lastIndex = pVec0.size()](Vector3f x, Vector3f y) mutable { return x + y; }) / pVec0.size();
 	Vector3f avg1 = accumulate(pVec1.begin(), pVec1.end(), Vector3f(0, 0, 0), [currIndex = 0U, lastIndex = pVec1.size()](Vector3f x, Vector3f y) mutable { return x + y; }) / pVec1.size();
 
+	//cout << "A0 -> " << avg0 << "\tA1 -> " << avg1 << endl;
+
 	float sum2 = (avg1.transpose() * avg1);
 	sum2 -= avg0.transpose() * avg0;
 	return sqrt(abs(sum2));
 }
 
+
+
+Vector3f ICPTransform::CalculateCentroid(vector<Vector3f>& pVec0)
+{
+	Vector3f avg0 = accumulate(pVec0.begin(), pVec0.end(), Vector3f(0, 0, 0), [currIndex = 0U, lastIndex = pVec0.size()](Vector3f x, Vector3f y) mutable { return x + y; }) / pVec0.size();
+	return avg0;
+}

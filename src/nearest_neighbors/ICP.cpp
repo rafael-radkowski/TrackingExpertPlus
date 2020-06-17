@@ -1,12 +1,12 @@
 #include "ICP.h"
 
-
+#define _WITH_CUDAICP
 
 using namespace  texpert;
 
 ICP::ICP() {
 
-	_max_error = 0.0001;
+	_max_error = 0.0001f;
 	_max_iterations = 10;
 
 	_verbose = true;
@@ -14,14 +14,21 @@ ICP::ICP() {
 
 	_knn = new KNN();
 
-	_outlier_reject.setMaxNormalVectorAngle(45.0);
-	_outlier_reject.setMaxThreshold(0.1);
+	_outlier_rejectmethod = ICPReject::DIST_ANG;
+	_outlier_reject.setMaxNormalVectorAngle(45.0f);
+	_outlier_reject.setMaxThreshold(0.1f);
 
+#ifdef _WITH_CUDAICP
+	_cuicp = new cuICP();
+#endif
 }
 
 ICP::~ICP(){
 
 	delete _knn;
+#ifdef _WITH_CUDAICP
+	delete _cuicp;
+#endif
 }
 
 
@@ -74,10 +81,13 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 	}
 
 	Matrix4f overall = Matrix4f::Identity();
+	
 	Matrix4f result = Matrix4f::Identity();
 
 	rms = 100000000.0;
 
+	_R_all = Eigen::Matrix3f::Identity();
+	_t_all = Eigen::Vector3f(0.0, 0.0, 0.0);
 
 	// copy test points into a new struct
 	vector<Vector3f> in0, nn0;
@@ -109,6 +119,8 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 	int itr = 0;
 	// search for nearest neighbors
 	
+	float overall_time = 0;
+
 	for (int i = 0; i < _max_iterations; i++)
 	{
 
@@ -121,21 +133,55 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 		matching_points.clear();
 		accepted_points.clear();
 
+#ifdef _WITH_CUDAICP
+
+		auto start = std::chrono::high_resolution_clock::now();
+		
+		std::vector<float> results;
+		//_cuicp->process( _testPointsProcessing.N, &_testPointsProcessing.points[0].x(), &test_ref_normals[0], 
+		//				 _cameraPoints.N, &_cameraPoints.points[0].x(), &test_cam_normals[0], results);
+
+		_cuicp->process( _testPointsProcessing.N, &_testPointsProcessing.points[0].x(), (float*)&(_testPointsProcessing.normals[0].x()), 
+						 _cameraPoints.N, &_cameraPoints.points[0].x(), (float*)&(_cameraPoints.normals[0].x()), results );
+
+		for (int i = 0; i < _local_matches.size(); i++) {
+			if(results[i] > 0.1){
+				 matching_points.push_back(_cameraPoints.points[_local_matches[i].matches[0].second]);
+				 accepted_points.push_back(_testPointsProcessing.points[_local_matches[i].matches[0].first ] );
+			}
+		}
+		
+		auto stop = std::chrono::high_resolution_clock::now();
+		auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+		cout << "[CUDA] " << elapsed.count() << " ms" << endl;
+		
+	
+#else
 		// Reject nearest neighbors that are most likely outliers. 
 		// get a vector with all the matching points. 
+		auto start = std::chrono::high_resolution_clock::now();
+
 		for_each(_local_matches.begin(), _local_matches.end(), [&](Matches m )
 		{
 			if( _outlier_reject.test(_testPointsProcessing.points[m.matches[0].first ], _cameraPoints.points[m.matches[0].second],
-									 _testPointsProcessing.normals[m.matches[0].first ], _cameraPoints.normals[m.matches[0].second], ICPReject::DIST_ANG))
+									 _testPointsProcessing.normals[m.matches[0].first ], _cameraPoints.normals[m.matches[0].second], _outlier_rejectmethod))
 			{
 				 matching_points.push_back(_cameraPoints.points[m.matches[0].second]);
 				 accepted_points.push_back(_testPointsProcessing.points[m.matches[0].first ] );
 			}
 		});
 
+		auto stop = std::chrono::high_resolution_clock::now();
+		auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+		cout << "[CUDA] " << elapsed.count() << " ms" << endl;
+
+#endif
+		
+		overall_time+= elapsed.count();
+
 		// Check if sufficient points are available to register the points
 		if (matching_points.size() < 16) {
-			cout << "insufficient points" << endl;
+			cout << "[ICP] - Break: insufficient points after outlier rejection." << endl;
 			result_pose = overall;
 			if(_verbose && _verbose_level == 2)
 				MatrixUtils::PrintMatrix4f(result_pose);
@@ -146,39 +192,52 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 		Matrix3f R = ICPTransform::CalcRotationArun(accepted_points, matching_points);
 		Vector3f t = ICPTransform::CalculateTranslation(accepted_points, matching_points);
 		Matrix3f R_inv = R;// Matrix3f::Identity();
+		//R =  Matrix3f::Identity();
+	
 
 		result = Matrix4f::Identity();
 		// maintaining row-major
-		result(0) = 1.0;//R_inv(0);
-		result(1) = 0.0;//R_inv(1);
-		result(2) = 0.0;//R_inv(2);
+		result(0) = R_inv(0);
+		result(1) = R_inv(1);
+		result(2) = R_inv(2);
 
-		result(4) = 0.0;//R_inv(3);
-		result(5) = 1.0;//R_inv(4);
-		result(6) = 0.0;//R_inv(5);
+		result(4) = R_inv(3);
+		result(5) = R_inv(4);
+		result(6) = R_inv(5);
 
-		result(8) =  0.0;//R_inv(6);
-		result(9) = 0.0;// R_inv(7);
-		result(10) = 1.0;//R_inv(8);
+		result(8) = R_inv(6);
+		result(9) = R_inv(7);
+		result(10) = R_inv(8);
 
 		result(12) = t.x();
 		result(13) = t.y();
 		result(14) = t.z();
+		result(15) = 1.0;
+
+		//cout << "R -> "  << R << endl;
+		//cout << "T -> "  << t.x() << "\t" << t.y() << "\t" << t.z() << std::endl;
 
 
-		cout << "T -> "  << t.x() << "\t" << t.y() << "\t" << t.z() << std::endl;
+		_testPoint_centroid = ICPTransform::CalculateCentroid(_testPointsProcessing.points);
 
 		// update the point transformation
 		/// TODO: performance teste. Which function is faster for_each vs. std::transform
 		// p' = (R * p) + t;
-		for_each(accepted_points.begin(), accepted_points.end(), [&](Vector3f& p){p = (R * p) + t;});
+		for_each(accepted_points.begin(), accepted_points.end(), [&](Vector3f& p){p = (R * (p - _testPoint_centroid)) + (t + _testPoint_centroid) ;});
 
+		
+
+	//	cout << "before " << _testPointsProcessing.points[0].x() <<  ",  " << _testPointsProcessing.points[0].y() <<  ", " << _testPointsProcessing.points[0].z() << endl;
 		// transform the original points and normal vectors
-		for_each(_testPointsProcessing.points.begin(), _testPointsProcessing.points.end(), [&](Vector3f& p){p = (R * p) + t;});
+		for_each(_testPointsProcessing.points.begin(), _testPointsProcessing.points.end(), [&](Vector3f& p){p = (R * (p - _testPoint_centroid)) + (t + _testPoint_centroid) ;});
 		for_each(_testPointsProcessing.normals.begin(), _testPointsProcessing.normals.end(), [&](Vector3f& n){n = (R * n);});
+	//	cout << "after " << _testPointsProcessing.points[0].x() <<  ",  " << _testPointsProcessing.points[0].y() << ", " << _testPointsProcessing.points[0].z() << endl;
 	
+		overall =    result * overall;
 	
-		overall =  result * overall;
+		_R_all = R * _R_all;
+		_t_all = t + _t_all;
+
 
 		if(_verbose && _verbose_level == 2)
 				MatrixUtils::PrintMatrix4f(result);
@@ -188,6 +247,9 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 
 		if(_verbose && _verbose_level == 2)
 			cout << "[ICP] - RMS: " << rms << " at " << itr << "." << endl;
+
+
+
 
 		if (rms < _max_error) break;
 
@@ -200,11 +262,14 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 		MatrixUtils::PrintMatrix4f(result_pose);
 
 
-	cout << "[ICP] - ICP OVerall : " << overall(12) << " : " << overall(13) << " : " << overall(14) << endl;
+	//cout << "[ICP] - ICP Overall : " << overall(12) << " : " << overall(13) << " : " << overall(14) << endl;
 
 
 	if(_verbose)
 		cout << "[INFO] - ICP terminated with RMS: " << rms << " with " << itr << " interations." << endl;
+
+
+	cout << "[CUDA - ALL] " << overall_time  << " ms" << endl;
 
 	return true;
 
@@ -212,6 +277,47 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 
 }
 
+
+Matrix4f ICP::Rt(void){
+
+	Eigen::Matrix4f finalRt = Eigen::Matrix4f::Identity();
+
+	Eigen::Vector3f tall = t();
+	Eigen::Matrix3f Rall = R();
+
+	
+	Eigen::Vector3f centroid = ICPTransform::CalculateCentroid(_testPoints.points);
+
+
+	Affine3f transform(Translation3f(-centroid.x(), -centroid.y(), -centroid.z()));
+	Eigen::Matrix4f centInv  = transform.matrix().transpose();
+
+	Affine3f transform2(Translation3f(centroid.x(), centroid.y(), centroid.z()));
+	Eigen::Matrix4f cent  = transform2.matrix().transpose();
+
+	Affine3f transform3(Translation3f(tall.x(), tall.y(), tall.z()));
+	Eigen::Matrix4f t2  = transform3.matrix().transpose();
+
+	Eigen::Matrix4f R2 = Eigen::Matrix4f::Identity();
+	R2.block<3,3>(0,0) = Rall;
+
+	//finalRt = t2 * cent * R2 * centInv;
+	finalRt = centInv * R2 * cent * t2;
+
+//		glm::mat4 centInv = glm::translate(glm::vec3(-centroid.x(), -centroid.y(), -centroid.z() ));
+//	glm::mat4 cent = glm::translate(glm::vec3(centroid.x(), centroid.y(), centroid.z() ));
+//	glm::mat4 tInv = glm::translate(glm::vec3(-m[3][0],-m[3][1], -m[3][2]));
+//	//glm::mat4 t = glm::translate(glm::vec3(m[3][0],m[3][1], m[3][2]));
+//	glm::mat4 t = glm::translate(glm::vec3(tall.x(),tall.y(),tall.z()));
+
+	//finalRt = tall
+
+	//glm::mat4 all = t *  cent * Rglm *  centInv;
+
+	//_testPoint_centroid
+
+	return finalRt;
+}
 
 
 bool ICP::test_transformation(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_pose, float& rms)
@@ -372,7 +478,7 @@ bool ICP::test_rejection(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& res
 		for(int i=0; i<_testPointsProcessing.size(); i++)
 		{
 			if( _outlier_reject.test(_testPointsProcessing.points[i], _cameraPoints.points[i],
-									 _testPointsProcessing.normals[i], _cameraPoints.normals[i], ICPReject::DIST_ANG))
+									 _testPointsProcessing.normals[i], _cameraPoints.normals[i],_outlier_rejectmethod))
 			{
 				 matching_points.push_back(_cameraPoints.points[i]);
 				 accepted_points.push_back(_testPointsProcessing.points[i] );
@@ -393,7 +499,7 @@ bool ICP::test_rejection(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& res
 		//  Calculate the rotation delta
 		Matrix3f R = ICPTransform::CalcRotationArun(accepted_points, matching_points);
 		Vector3f t = ICPTransform::CalculateTranslation(accepted_points, matching_points);
-		Matrix3f R_inv = R;// Matrix3f::Identity();
+		Matrix3f R_inv =  Matrix3f::Identity();
 
 		// maintaining row-major
 		result(0) = R_inv(0);
@@ -527,6 +633,16 @@ void ICP::setRejectMaxDistance(float max_distance)
 }
 
 
+/*
+Set the ICP outlier rejection mechanism. 
+@param method - NONE, DIST, ANG, DIST_ANG
+*/
+void ICP::setRejectionMethod(ICPReject::Testcase method)
+{
+	_outlier_rejectmethod = method;
+}
+
+
 
 
 /* DEBUG FUNCTION
@@ -542,8 +658,8 @@ std::vector<std::pair<int, int> >& ICP::getNN(void)
 
 	for_each(_local_matches.begin(), _local_matches.end(),  [&](Matches m )
 	{
-		if( _outlier_reject.testDistanceAngle(_testPointsProcessing.points[m.matches[0].first ], _cameraPoints.points[m.matches[0].second],
-												_testPointsProcessing.normals[m.matches[0].first ], _cameraPoints.normals[m.matches[0].second]))
+		if( _outlier_reject.test(_testPointsProcessing.points[m.matches[0].first ], _cameraPoints.points[m.matches[0].second],
+									 _testPointsProcessing.normals[m.matches[0].first ], _cameraPoints.normals[m.matches[0].second], _outlier_rejectmethod))
 		{
 			_verbose_matches.push_back(std::make_pair(m.matches[0].first, m.matches[0].second) );
 		}

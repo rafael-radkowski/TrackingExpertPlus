@@ -58,6 +58,15 @@ March 16, 2020, RR
 - Added a api that returns the last nearest neighbors vectors. This is a debug 
  api that allows one to understand the nn better. It is not meant for general use. 
 
+ June 3rd, 2020, RR
+ - Added an api to set the outlier rejection method. 
+
+ June 11, 2020, RR
+ - Added two variables (R, t) to keep track of the rotation and translation individually. 
+ - Fixed a bug: the ICP code rotated an object around the wrong centroid. 
+ - Added a function to return the overall translation and rotation. The transformation can be applied on 
+	a reference object to register it with its counterpart. 
+
 */
 
 
@@ -67,6 +76,7 @@ March 16, 2020, RR
 #include <numeric>
 #include <algorithm>
 #include <functional>
+#include <chrono>
 
 // Eigen 3
 #include <Eigen/Dense>
@@ -78,6 +88,8 @@ March 16, 2020, RR
 #include "KNN.h"
 #include "Types.h"
 #include "MatrixUtils.h"
+#include "PointCloudUtils.h"
+#include "cuICP.h"
 
 namespace texpert{
 
@@ -102,6 +114,7 @@ public:
 	@param pc - reference to the point cloud model
 	*/
 	bool compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_pose, float& rms);
+
 
 
 	/*
@@ -147,6 +160,37 @@ public:
 
 
 
+	/*
+	Set the ICP outlier rejection mechanism. 
+	@param method - NONE, DIST, ANG, DIST_ANG
+	*/
+	void setRejectionMethod(ICPReject::Testcase method);
+
+
+	/*!
+	Return the overall rotation after ICP terminates. 
+	@return a 3x3 matrix with the last rotation. 
+	*/
+	Matrix3f R(void) {return _R_all.inverse();}		
+
+	/*!
+	Return the overall translation after ICP terminates. 
+	@return - a vector 3 with x, y, z coordinates. 
+	*/
+	Vector3f t(void) {return _t_all;} 
+
+
+	/*!
+	Return a 4x4 matrix (homogenous space) with the rotation and translation. 
+	Note the the matrix rotates the reference object around its centroid. 
+	The function internally computes 
+			T = t * centroid * R * centroid_inverse;
+
+	@return - 4x4 matrix with the object transformation to register the reference point set with 
+	its counterpart in the camera point set. 
+	*/
+	Matrix4f Rt(void);
+
 
 	//-------------------------------------------------------------------------------
 
@@ -158,7 +202,6 @@ public:
 	   under normal operations. 
 	*/
 	std::vector<std::pair<int, int> >& getNN(void);
-
 
 
 private:
@@ -188,15 +231,24 @@ private:
 	PointCloud				_cameraPoints;
 	PointCloud				_testPoints;
 	PointCloud				_testPointsProcessing;
+	Vector3f				_testPoint_centroid;
 
+	// translation and rotation for all iterations. 
+	Matrix3f				_R_all;
+	Vector3f				_t_all; 
 
 	std::vector<Matches>	_local_matches;
 
 	// k-nearest neighbors implementation
 	KNN*					_knn;		
 
+	// cuda class to run icp
+	cuICP*					_cuicp;
+
+
 	// tests for outlier rejection
 	ICPReject				_outlier_reject;
+	ICPReject::Testcase		_outlier_rejectmethod;
 
 	// icp params
 	float					_max_error;

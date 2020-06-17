@@ -50,7 +50,7 @@ PointCloud			pc_camera_as_loaded;
 
 
 std::string			ref_file = "../data/stanford_bunny_pc.obj ";
-std::string			camera_file = "../data/stanford_bunny_cam.obj ";
+std::string			camera_file = "../data/stanford_bunny_pc.obj ";
 
 // ICP
 texpert::ICP*		icp;
@@ -276,27 +276,6 @@ void render_loop(glm::mat4 pm, glm::mat4 vm) {
 }
 
 
-class RenderLoop {
-
-public:
-
-	static void fcn(glm::mat4 pm, glm::mat4 vm) {
-
-		//thread_1.unlock();
-
-		//-----------------------------------------------------------
-		// Rendering
-		gl_reference_point_cloud->draw(pm, vm);
-
-		gl_camera_point_cloud->draw(pm, vm);
-
-		gl_reference_eval->draw(pm, vm);
-
-	
-		Sleep(25);
-	}
-};
-
 
 
 int main(int argc, char** argv)
@@ -318,7 +297,7 @@ int main(int argc, char** argv)
 	initial_pos.push_back(Eigen::Vector3f(0.0, 0.0, 0.2)); initial_rot.push_back(Eigen::Vector3f(0.0, 25.0, 20.0));ground_truth_rms.push_back(0.0015504);
 	initial_pos.push_back(Eigen::Vector3f(0.2, 0.2, 0.0)); initial_rot.push_back(Eigen::Vector3f(20.0, 10.0, -10.0));ground_truth_rms.push_back(0.0015483);
 	initial_pos.push_back(Eigen::Vector3f(0.0, 0.2, 0.2)); initial_rot.push_back(Eigen::Vector3f(10.0, 10.0, 0.0));ground_truth_rms.push_back(0.0015492);
-	initial_pos.push_back(Eigen::Vector3f(0.0, 0.2, 0.2)); initial_rot.push_back(Eigen::Vector3f(2.0, 45.0, 10.0));ground_truth_rms.push_back(0.00247738);
+	initial_pos.push_back(Eigen::Vector3f(0.0, 0.2, 0.2)); initial_rot.push_back(Eigen::Vector3f(2.0, 20.0, 10.0));ground_truth_rms.push_back(0.00247738);
 
 
 
@@ -337,6 +316,7 @@ int main(int argc, char** argv)
 	pc_ref = pc_ref_as_loaded;
 
 	pc_ref.centroid0 = PointCloudUtils::CalcCentroid(&pc_ref);
+
 
 
 	// Move the point cloud to a different position. 
@@ -363,11 +343,11 @@ int main(int argc, char** argv)
 
 	icp = new texpert::ICP();
 	icp->setMinError(0.00000001);
-	icp->setMaxIterations(100);
+	icp->setMaxIterations(25);
 	icp->setRejectionMethod(ICPReject::DIST_ANG);
 	icp->setVerbose(true, 1);
 	icp->setRejectMaxDistance(0.2);
-	icp->setRejectMaxAngle(25.0);
+	icp->setRejectMaxAngle(65.0);
 	icp->setCameraData(pc_camera_as_loaded);
 	icp->compute(pc_ref, pose, pose_result, rms);
 	
@@ -380,7 +360,7 @@ int main(int argc, char** argv)
 	glm::mat4 vm = glm::lookAt(glm::vec3(0.0f, 0.0, -0.5f), glm::vec3(0.0f, 0.0f, 0.5), glm::vec3(0.0f, 1.0f, 0.0f));
 	window = new isu_ar::GLViewer();
 	window->create(1280, 1280, "Tracking test");
-	window->addRenderFcn(std::bind(RenderLoop::fcn, std::placeholders::_1, std::placeholders::_2));
+	window->addRenderFcn(render_loop);
 	window->addKeyboardCallback(keyboard_callback);
 	window->setViewMatrix(vm);
 	window->setClearColor(glm::vec4(1, 1, 1, 1));

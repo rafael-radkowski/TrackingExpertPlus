@@ -16,7 +16,9 @@
 # Last edits:
 # Feb 5th, 2020, RR
 # - Added dependencies for GLUtils and TrackingX
-# 
+# Feb 14, 2020, RR
+# - Added OpenCV_WORLD_DEBUG to the libs since FindOpenCV does not add it to its lib macro.
+
 cmake_minimum_required(VERSION 2.6)
 
 # cmake modules
@@ -140,6 +142,7 @@ add_dependencies(${ProjectName} GLUtils)
 # preporcessor properties
 
 target_link_libraries(${ProjectName}  ${OpenCV_LIBS})
+target_link_libraries(${ProjectName}  ${OpenCV_WORLD_DEBUG})
 target_link_libraries(${ProjectName}  ${TBB_LIBS})
 target_link_libraries(${ProjectName}  ${GLEW_LIBS})
 target_link_libraries(${ProjectName}  ${GLFW3_LIBS})
