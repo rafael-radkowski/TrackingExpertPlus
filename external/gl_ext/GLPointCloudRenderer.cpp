@@ -205,6 +205,8 @@ void GLPointCloudRenderer::updatePoints(void)
 
 	_N = _points.size();
 
+	if(_N <= 0) return;
+
 	_block.lock();
 
 //	glUseProgram(program);

@@ -62,8 +62,8 @@ public:
 
 	/*
 	Create a point cloud from a depth image with all points
-	@param src_image_ptr - a pointer to the image of size [wdith x height x channels ] stored as an array of type unsigned short which stores the depth values as
-						A(i) = {d0, d1, d2, ..., dN}
+	@param src_image_ptr - a pointer to the image of size [wdith x height x channels ] stored as an array of type float which stores the depth values as
+			A(i) = {d0, d1, d2, ..., dN} in mm.
 	@param width - the width of the image in pixels
 	@param height - the height of the image in pixels
 	@param channels - the number of channels. A depth image should have only 1 channel.

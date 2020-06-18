@@ -26,7 +26,15 @@ option( TRAKINGX_BUILD_TEST_TRACKING "TrackingX Build Tracking Test" OFF)
 option( TRAKINGX_BUILD_TEST_ICP "TrackingX Build ICP Test" OFF)
 
 add_subdirectory(test_detection)
-add_subdirectory(test_camera)
+
+if(ENABLE_STRUCTURE_CORE)
+	add_subdirectory(test_camera)
+endif()
+
+
+if(${ENABLE_AZURE_KINECT} STREQUAL  ON )
+	add_subdirectory(test_azure_camera)
+endif()
 
 # Build the trackaing test class
 if(TRAKINGX_BUILD_TEST_TRACKING)

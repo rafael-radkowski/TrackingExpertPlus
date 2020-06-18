@@ -142,6 +142,14 @@ set( TRACKINGX_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/tests/Test.cmd
      DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/bin/)
+	 
+
+#--------------------------------------------
+# Camera options
+option(ENABLE_REAL_SENSE "Enable Intel Real sense support" OFF)
+option(ENABLE_STRUCTURE_CORE "Enable Structure Core support" OFF)
+option(ENABLE_AZURE_KINECT "Enable Structure Core support" OFF)
+
 
 ################################################################
 add_subdirectory(src)

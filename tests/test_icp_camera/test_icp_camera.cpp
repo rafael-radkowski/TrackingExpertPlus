@@ -170,7 +170,6 @@ void startICP(void)
 
 	std::cout << "Manual ---------------------------------\n";
 
-	icp->total = Eigen::Matrix4f::Identity();
 	icp->setMaxIterations(1);
 
 	pc_ref = pc_ref_as_loaded;

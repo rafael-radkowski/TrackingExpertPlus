@@ -83,7 +83,7 @@ find_package(GLFW3 REQUIRED)
 FIND_PACKAGE(Cuda REQUIRED)
 FIND_PACKAGE(Cub REQUIRED)
 FIND_PACKAGE(OpenGL REQUIRED)
-FIND_PACKAGE(Structure REQUIRED)
+
 
 #include dir
 include_directories(${OpenCV_INCLUDE_DIR})
@@ -91,7 +91,7 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${TBB_INCLUDE_DIR})
 include_directories(${GLM_INCLUDE_DIR})
 include_directories(${GLFW3_INCLUDE_DIR})
-include_directories(${STRUCTURE_INCLUDE_DIR})
+
 
 # local 
 include_directories(${PROJECT_SOURCE_DIR}/include/camera)
@@ -102,7 +102,19 @@ include_directories(${PROJECT_SOURCE_DIR}/include/loader)
 include_directories(${PROJECT_SOURCE_DIR}/include/nearest_neighbors)
 include_directories(${PROJECT_SOURCE_DIR}/include/pointcloud)
 include_directories(${PROJECT_SOURCE_DIR}/include/utils)
-include_directories(C:/SDK/StructureSDK/Libraries/Structure/Headers)
+
+
+if(${ENABLE_STRUCTURE_CORE} STREQUAL  ON )
+	FIND_PACKAGE(Structure REQUIRED)
+	include_directories(${STRUCTURE_INCLUDE_DIR})
+	include_directories(C:/SDK/StructureSDK/Libraries/Structure/Headers)
+endif()
+
+if(${ENABLE_AZURE_KINECT} STREQUAL  ON )
+	#FIND_PACKAGE(AzureKinect REQUIRED)
+	#include_directories(${AZUREKINECT_INCLUDE_DIR})
+	include_directories("C:/Program Files/Azure Kinect SDK v1.4.0/sdk/include")
+endif()
 
 
 
@@ -113,10 +125,7 @@ set("CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG" "${CMAKE_SOURCE_DIR}/bin")
 set("CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE" "${CMAKE_SOURCE_DIR}/bin")
 
 
-#--------------------------------------------
-# Camera options
-option(ENABLE_REAL_SENSE "Enable Intel Real sense support" OFF)
-option(ENABLE_STRUCTURE_CORE "Enable Structure Core support" ON)
+
 
 
 #--------------------------------------------
@@ -157,15 +166,15 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/loader/ImgReaderWriterPNG.h
 	${PROJECT_SOURCE_DIR}/include/loader/DataReaderWriter.h
 	
-
-
-
-#if( ENABLE_STRUCTURE_CORE)
+	${PROJECT_SOURCE_DIR}/include/camera/KinectAzureCaptureDevice.h
 	${PROJECT_SOURCE_DIR}/include/camera/StructureCoreCaptureDevice.h
 	${PROJECT_SOURCE_DIR}/include/camera/ICaptureDevice.h
 	${PROJECT_SOURCE_DIR}/include/camera/ICaptureDeviceTypes.h
 	${PROJECT_SOURCE_DIR}/include/camera/PointCloudProducer.h
 	${PROJECT_SOURCE_DIR}/include/camera/CameraParameters.h
+	
+	
+	
 
 	
 #endif()
@@ -237,7 +246,7 @@ set( PointCloud_SRC
 	point_cloud/PointCloudTransform.cpp
 	point_cloud/PointCloudEval.cpp
 	point_cloud/MatrixUtils.cpp
-#if( ENABLE_STRUCTURE_CORE)
+	cam/KinectAzureCaptureDevice.cpp
 	cam/StructureCoreCaptureDevice.cpp
 	cam/PointCloudProducer.cpp
 	cam/CameraParameters.cpp
@@ -271,6 +280,21 @@ set( Utils_SRC
 	utils/ArgParser.cpp
 	utils/FileUtilsX.cpp
 )
+
+
+
+#-----------------------------------------------------------------
+#  Remove files in the case the cameras are not ebabled.
+
+if(${ENABLE_STRUCTURE_CORE} STREQUAL  OFF )
+	list(REMOVE_ITEM PointCloud_SRC cam/StructureCoreCaptureDevice.cpp)
+	list(REMOVE_ITEM Header_SRC ${PROJECT_SOURCE_DIR}/include/camera/StructureCoreCaptureDevice.h)
+endif()
+
+if(${ENABLE_AZURE_KINECT} STREQUAL  OFF )
+	list(REMOVE_ITEM PointCloud_SRC cam/KinectAzureCaptureDevice.cpp)
+	list(REMOVE_ITEM Header_SRC ${PROJECT_SOURCE_DIR}/include/camera/KinectAzureCaptureDevice.h)
+endif()
 
 
 
@@ -314,7 +338,13 @@ target_link_libraries(trackingx  ${TBB_LIBS})
 target_link_libraries(trackingx  ${GLEW_LIBS})
 target_link_libraries(trackingx  ${GLFW3_LIBS})
 
-target_link_libraries(trackingx  "C:/SDK/StructureSDK/Libraries/Structure/Windows/x86_64/Structure.lib")
+if(${ENABLE_STRUCTURE_CORE} STREQUAL  ON )
+	target_link_libraries(trackingx  "C:/SDK/StructureSDK/Libraries/Structure/Windows/x86_64/Structure.lib")
+endif()
+
+if(${ENABLE_AZURE_KINECT} STREQUAL  ON )
+	target_link_libraries(trackingx  "C:/Program Files/Azure Kinect SDK v1.4.0/sdk/windows-desktop/amd64/release/lib/k4a.lib")
+endif()
 
 
 #----------------------------------------------------------------------
