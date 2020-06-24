@@ -138,7 +138,8 @@ set_target_properties (${ProjectName} PROPERTIES
 
 add_dependencies(${ProjectName} trackingx)
 add_dependencies(${ProjectName} GLUtils)
-
+add_dependencies(${ProjectName} glfw)
+add_dependencies(${ProjectName} glew)
 # preporcessor properties
 
 target_link_libraries(${ProjectName}  ${OpenCV_LIBS})
