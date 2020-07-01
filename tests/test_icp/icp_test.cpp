@@ -1,4 +1,36 @@
+/*
+@file icp_test.cpp
 
+This file implements an ICP test to determine whether or not the ICP algorithm for 
+TrackingExpert+ is running correctly. This test is a simple base test. It works with two 
+identical objects and matches object A to object B. 
+All objects are loaded from a file.
+
+The scene contains the following point sets:
+Red points: camera point cloud, or the simulated camera point cloud. The object does not move and remains at its global position. 
+Green point set: reference point set at its original position.
+Yellow point set: evaluation point set at the ICP pose after ICP terminates. 
+
+The file runs one test set automatically. 
+
+Manual operations:
+- Press 'space' to run through all test steps manually. 
+
+Graphics keyboard layout:
+- n - enable or disable normal vector rendering
+
+
+Rafael Radkowski
+Iowa State University
+rafael@iastate.edu
+January 2020
+MIT License
+-----------------------------------------------------------------------------------------------------------------------------
+Last edited:
+
+
+
+*/
 
 // STL
 #include <iostream>
@@ -25,54 +57,67 @@
 
 using namespace texpert;
 
-
-
 // The OpenGL window
 isu_ar::GLViewer* window;
+
+// OpenGL point cloud objects showing the point cloud
 isu_ar::GLPointCloudRenderer* gl_camera_point_cloud;
 isu_ar::GLPointCloudRenderer* gl_reference_point_cloud;
 isu_ar::GLPointCloudRenderer* gl_reference_eval; // evaluation point cloud for visual evaluation
 
+
+// helper variable to enable/disable the gl renderer. 
 int							gl_normal_rendering = 0;
 
-
+// Helper variables to set the point cloud sampling. 
 SamplingParam		sampling_param;
 SamplingMethod		sampling_method;
 
 
-// The reference point cloud
+// The reference point cloud.
+// The first one is the point cloud for all ICP purposes.
+// The second one is the raw point cloud as loaded. 
 PointCloud			pc_ref;
 PointCloud			pc_ref_as_loaded;
 
+
 // The test point cloud
+// The first one is the point cloud for all ICP purposes.
+// The second one is the raw point cloud as loaded. 
 PointCloud			pc_camera;
 PointCloud			pc_camera_as_loaded;
 
+// the two test files to load. 
+std::string			ref_file = "../data/stanford_bunny_pc.obj";
+std::string			camera_file = "../data/stanford_bunny_pc.obj";
 
-std::string			ref_file = "../data/stanford_bunny_pc.obj ";
-std::string			camera_file = "../data/stanford_bunny_pc.obj ";
-
+//////////////////////////////////////////////////////////////////////
 // ICP
 texpert::ICP*		icp;
 
+// IPC parameters and parameters for testing. 
 std::vector< Eigen::Vector3f>	initial_pos;
 std::vector< Eigen::Vector3f>	initial_rot;
 std::vector< float>				ground_truth_rms;
 int								current_set = 0;
 
 Eigen::Matrix4f pose_result;
-float rms = 1000.0;
-float overall_rms = 0.0;
 int N = 0;
 
 int file_counter = 1;
 string date = "";
-std::mutex thread_1;
 
 
-void runTest(void);
-void runTestManual(void);
+//--------------------------------------------------------------------------------
+// Function prototypes
 
+float runTest(void);
+void runAllTests(void);
+
+
+/*
+Keyboard callback function
+*/
 void keyboard_callback( int key, int action) {
 
 
@@ -97,8 +142,8 @@ void keyboard_callback( int key, int action) {
 			}
 		case 32: // space
 			{
-			runTestManual();
-			break;
+				runTest();
+				break;
 			}
 		}
 		break;
@@ -110,147 +155,120 @@ void keyboard_callback( int key, int action) {
 }
 
 
-void runTestManual(void)
+/*
+Compare two identical point sets. 
+The function compares the two point sets and determines the rms.
+Note that this function assumes that the point sets a and b are of the same object and
+the same point configuration. Only the global pose is different. 
+Thus, do not use the function for two different oobjects. 
+*/
+float comparePointSets(PointCloud& a, PointCloud& b) {
+
+	if (a.size() != b.size()) {
+		std::cout << "[ERROR] Points sets a and b are of different size -> " << a.size() << " vs. " << b.size() << std::endl;
+		return 100000.0;
+	}
+
+	float dist = 0.0;
+	for (int i = 0; i < a.size(); i++) {
+		dist += (a.points[i] - b.points[i]).norm();
+	}
+	dist /= a.size();
+
+	return dist;
+
+}
+
+
+/*
+This function run the test manually, each time the user presses the space button. 
+*/
+float runTest(void)
 {
 	if(current_set >= initial_pos.size()) current_set = 0;
 
 	cout << "\n";
 	pc_ref = pc_ref_as_loaded;
+
+	//---------------------------------------------------------------------------
 	// Move the point cloud to a different position. 
 	PointCloudTransform::Transform(&pc_ref, initial_pos[current_set], initial_rot[current_set] );
 	pc_ref.centroid0 = PointCloudUtils::CalcCentroid(&pc_ref);
 
+	//---------------------------------------------------------------------------
+	// Apply ICP
+	float icp_rms = 0.0;
 	Pose pose;
 	pose.t =  Eigen::Matrix4f::Identity();
-	icp->compute(pc_ref, pose, pose_result, rms);
-	current_set++;
-	N++;
-
+	icp->compute(pc_ref, pose, pose_result, icp_rms);
+	
 	//---------------------------------------------------------------------------
 	// Apply the ICP pose to the initial point cloud
-	Matrix3f R;
-	Vector3f t;
-		
-	R(0) = pose_result(0);
-	R(1) = pose_result(1);
-	R(2) = pose_result(2);
-	R(3) = pose_result(4);
-	R(4) = pose_result(5);
-	R(5) = pose_result(6);
-	R(6) = pose_result(8);
-	R(7) = pose_result(9);
-	R(8) = pose_result(10);
-	t.x() = pose_result(12);
-	t.y() = pose_result(13);
-	t.z() = pose_result(14);
+	Eigen::Vector3f t = icp->t();
+	Eigen::Matrix3f R = icp->R().inverse();
 
 
 	PointCloud test_cloud = pc_ref;
-	for_each(test_cloud.points.begin(), test_cloud.points.end(), [&](Vector3f& p){p = (R * p) + t;});		
-	test_cloud.centroid0 = PointCloudUtils::CalcCentroid(&test_cloud);
+	for_each(test_cloud.points.begin(), test_cloud.points.end(), [&](Vector3f& p){p = (R * (p - test_cloud.centroid0)) + (t + test_cloud.centroid0);});		
+	
 
 	//---------------------------------------------------------------------------
 	// Compare the centroid of both point clouds and the RMS
 
-	float centroid_dist =  (pc_camera_as_loaded.centroid0 - test_cloud.centroid0).norm();
-
-	if (centroid_dist > 0.025) {
-		std::cout << "[ERROR] - test: " << N+1 << ", centroid distance is " << centroid_dist << endl;
+	float rms =  comparePointSets(pc_camera_as_loaded, test_cloud);
+	
+	if (rms > 0.025) {
+		std::cout << "[ERROR] - test: " << N+1 << ", rms is " << rms << endl;
 	}else
 	{
-		std::cout << "[SUCCESS] - test: " << N+1 << " successful, with centroid distance is " << centroid_dist << endl;
+		std::cout << "[SUCCESS] - test: " << N+1 << " successful, with rms is " << rms << endl;
 	}
 
 
 	Eigen::Affine3f a_mat;
 	a_mat = pose_result;
-	gl_reference_eval->setModelmatrix(MatrixUtils::Affine3f2Mat4(a_mat));
+	gl_reference_eval->setModelmatrix(MatrixUtils::ICPRt3Mat4( icp->Rt()));
 
-	std::cout << "[INFO] - test: " << N << " case " << current_set-1 << ", mean rms: " << overall_rms << std::endl;
+	current_set++;
+	N++;
+	
+
+	std::cout << "[INFO] - test: " << N << " case " << current_set-1 << ", rms: " << rms << std::endl;
 
 	if(current_set >= initial_pos.size()) current_set = 0;
+
+	return rms;
 }
 
 
-
-void runTest(void)
+/*
+Run all the tests automatically. 
+*/
+void runAllTests(void)
 {
 	
-	//thread_1.lock();
 
 	int error_count = 0;
+	int count = 0;
+	float overall_rms = 0.0;
 
-	while(current_set < initial_pos.size()){
+	while(count < initial_pos.size()){
 
 		cout << "\n";
 		pc_ref = pc_ref_as_loaded;
 
-		// -------------------------------------------------------------------------
-		// Move the point cloud to a different position. 
-		PointCloudTransform::Transform(&pc_ref, initial_pos[current_set], initial_rot[current_set] );
-
-		pc_ref.centroid0 = PointCloudUtils::CalcCentroid(&pc_ref);
-		
-		// --------------------------------------------------------------------------
-		// Compute ICP
-		Pose pose;
-		pose.t =  Eigen::Matrix4f::Identity();
-		icp->compute(pc_ref, pose, pose_result, rms);
-
-		//---------------------------------------------------------------------------
-		// Apply the ICP pose to the initial point cloud
-		Matrix3f R;
-		Vector3f t;
-		
-		R(0) = pose_result(0);
-		R(1) = pose_result(1);
-		R(2) = pose_result(2);
-		R(3) = pose_result(4);
-		R(4) = pose_result(5);
-		R(5) = pose_result(6);
-		R(6) = pose_result(8);
-		R(7) = pose_result(9);
-		R(8) = pose_result(10);
-		t.x() = pose_result(12);
-		t.y() = pose_result(13);
-		t.z() = pose_result(14);
-
-		PointCloud test_cloud = pc_ref;
-		for_each(test_cloud.points.begin(), test_cloud.points.end(), [&](Vector3f& p){p = (R * p) + t;});		
-		test_cloud.centroid0 = PointCloudUtils::CalcCentroid(&test_cloud);
-
-		//---------------------------------------------------------------------------
-		// Compare the centroid of both point clouds and the RMS
-
-		float centroid_dist =  (pc_camera_as_loaded.centroid0 - test_cloud.centroid0).norm();
-
-		if (centroid_dist > 0.025) {
-			std::cout << "[ERROR] - test: " << N+1 << ", centroid distance is " << centroid_dist << endl;
-		}else
-		{
-			std::cout << "[SUCCESS] - test: " << N+1 << " successful, with centroid distance is " << centroid_dist << endl;
-		}
+		// run one test 
+		overall_rms += runTest();
 
 
-		current_set++;
-		N++;
-
-
-		//---------------------------------------------------------------------------
-		// Set the matrix to obtain a visual image for comparisons.
-
-		Eigen::Affine3f a_mat;
-		a_mat = pose_result;
-		gl_reference_eval->setModelmatrix(MatrixUtils::Affine3f2Mat4(a_mat));
-
+		count++;
 		Sleep(200);
 				
 	}
+	overall_rms /= (count);
 
 	std::cout << "\n[INFO] - All " <<  initial_pos.size() << " completed with a mean rms: " << overall_rms << " , " << error_count <<  " false results" << std::endl;
-	//if(current_set >= initial_pos.size()) current_set = 0;
-
-	//thread_1.unlock();
+	
 }
 
 
@@ -280,8 +298,22 @@ void render_loop(glm::mat4 pm, glm::mat4 vm) {
 
 int main(int argc, char** argv)
 {
-	bool err = false;
+	std::cout << "ICP test.\n" << std::endl;
+	std::cout << "This application implements a simple ICP test to determine whether or not the ICP algorithm for" << std::endl;
+	std::cout << "TrackingExpert+ is running correctly. It works with one set of points and registers the set of  " << std::endl;
+	std::cout << "points agains each other. \n" << std::endl;
+	std::cout << "Note that the test files are stored in ../data/stanford_bunny_pc.obj.\n " << std::endl;
+	
+	std::cout << "Rafael Radkowski\nIowa State University\nrafael@iastate.edu" << std::endl;
+	std::cout << "-----------------------------------------------------------------------------------------\n" << std::endl;
+	std::cout << "Keyboard layout" << std::endl;
 
+	std::cout << "space \tTo step through all tests manually after the automatic run terminates." << std::endl;
+	std::cout << "n \tenable or disable normal vector rendering." << std::endl;
+
+	std::cout << "\n\n" << std::endl;
+
+	bool err = false;
 
 
 	date = TimeUtils::GetCurrentDateTime();
@@ -295,7 +327,7 @@ int main(int argc, char** argv)
 	initial_pos.push_back(Eigen::Vector3f(0.0, 0.2, 0.0)); initial_rot.push_back(Eigen::Vector3f(10.0, 0.0, 0.0));ground_truth_rms.push_back(0.0015504);
 	initial_pos.push_back(Eigen::Vector3f(0.2, 0.0, 0.0)); initial_rot.push_back(Eigen::Vector3f(25.0, 0.0, 0.0));ground_truth_rms.push_back(0.0015504);
 	initial_pos.push_back(Eigen::Vector3f(0.0, 0.0, 0.2)); initial_rot.push_back(Eigen::Vector3f(0.0, 25.0, 20.0));ground_truth_rms.push_back(0.0015504);
-	initial_pos.push_back(Eigen::Vector3f(0.2, 0.2, 0.0)); initial_rot.push_back(Eigen::Vector3f(20.0, 10.0, -10.0));ground_truth_rms.push_back(0.0015483);
+	initial_pos.push_back(Eigen::Vector3f(0.2, 0.1, 0.0)); initial_rot.push_back(Eigen::Vector3f(20.0, 10.0, -10.0));ground_truth_rms.push_back(0.0015483);
 	initial_pos.push_back(Eigen::Vector3f(0.0, 0.2, 0.2)); initial_rot.push_back(Eigen::Vector3f(10.0, 10.0, 0.0));ground_truth_rms.push_back(0.0015492);
 	initial_pos.push_back(Eigen::Vector3f(0.0, 0.2, 0.2)); initial_rot.push_back(Eigen::Vector3f(2.0, 20.0, 10.0));ground_truth_rms.push_back(0.00247738);
 
@@ -338,7 +370,7 @@ int main(int argc, char** argv)
 	*/
 	Pose pose;
 	pose.t = Eigen::Matrix4f::Identity();
-
+	float icp_rms = 0.0;
 	
 
 	icp = new texpert::ICP();
@@ -349,7 +381,7 @@ int main(int argc, char** argv)
 	icp->setRejectMaxDistance(0.2);
 	icp->setRejectMaxAngle(65.0);
 	icp->setCameraData(pc_camera_as_loaded);
-	icp->compute(pc_ref, pose, pose_result, rms);
+	icp->compute(pc_ref, pose, pose_result, icp_rms);
 	
 
 
@@ -392,7 +424,7 @@ int main(int argc, char** argv)
 
 
 	//thread_1.lock(); // block the start until the render window is up
-	std::thread test_run_static(runTest);  
+	std::thread test_run_static(runAllTests);  
 
 	Sleep(100);
 	// start the window along with  point cloud processing
