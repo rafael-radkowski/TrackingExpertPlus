@@ -38,6 +38,10 @@
 # Feb 14, 2020, RR
 # - Fixed a bug that pointed cmake to a wrong version file. 
 # - Added a lib search path that incorporates the build folder into the search path. 
+#
+# June 24, 2020, RR
+# - Prevented that the script looks for OpenCV V2 if a V3 was found.
+# - Added a global OpenCV_LIBS variable to prevent that its content gets lost. 
 
 
 
@@ -46,6 +50,7 @@
 set (OpenCV_FOUND FALSE)
 set (OpenCV_Version)
 set (OpenCV_LIBRARY_DIR_FOUND FALSE)
+set (OpenCV_LIBS )
 
 
 # Default OpenCV folders 
@@ -67,6 +72,7 @@ if (NOT OpenCV_DIR)
   endif ()
 endif ()
 
+
 # 2. Look at typical install pathes for OpenCV
 #if (NOT OpenCV_DIR)
 #  find_path ( OpenCV_DIR 
@@ -82,7 +88,10 @@ endif ()
 
 # OpenCV Version 3 support
 find_file(__find_version "version.hpp"  PATHS  "${OpenCV_DIR}/modules/core/include/opencv2/core/" 
-												"${OpenCV_DIR}/include/opencv2/core")
+												"${OpenCV_DIR}/include/opencv2/core"
+												"${OpenCV_DIR}/build/include/opencv2/core")
+									
+									
 if(__find_version)
 	SET(OPENCV_VERSION_FILE "${__find_version}")
 	file(STRINGS "${OPENCV_VERSION_FILE}" OPENCV_VERSION_PARTS REGEX "#define CV_VERSION_[A-Z]+[ ]+" )
@@ -102,29 +111,31 @@ if(__find_version)
 	mark_as_advanced(OpenCV_VERSION)
 	message(STATUS "[FindOpenCV] - Found OpenCV at " ${OpenCV_DIR} ", Version "  ${OpenCV_VERSION})
 endif()
-unset(__find_version CACHE)
+#unset(__find_version CACHE)
 
+if(${__find_version} STREQUAL  "")
 # OpenCV Version 2 support
-find_file(__find_version "version.hpp"  PATHS  "${OpenCV_DIR}/sources/modules/core/include/opencv2/core/"  )
-if(__find_version)
-	SET(OPENCV_VERSION_FILE "${OpenCV_DIR}/sources/modules/core/include/opencv2/core/version.hpp")
-	file(STRINGS "${OPENCV_VERSION_FILE}" OPENCV_VERSION_PARTS REGEX "#define CV_VERSION_[A-Z]+[ ]+" )
+	find_file(__find_version "version.hpp"  PATHS  "${OpenCV_DIR}/sources/modules/core/include/opencv2/core/"  )
+	if(__find_version)
+		SET(OPENCV_VERSION_FILE "${OpenCV_DIR}/sources/modules/core/include/opencv2/core/version.hpp")
+		file(STRINGS "${OPENCV_VERSION_FILE}" OPENCV_VERSION_PARTS REGEX "#define CV_VERSION_[A-Z]+[ ]+" )
 
-	string(REGEX REPLACE ".+CV_VERSION_EPOCH[ ]+([0-9]+).*" "\\1" OPENCV_VERSION_MAJOR "${OPENCV_VERSION_PARTS}")
-	string(REGEX REPLACE ".+CV_VERSION_MAJOR[ ]+([0-9]+).*" "\\1" OPENCV_VERSION_MINOR "${OPENCV_VERSION_PARTS}")
-	string(REGEX REPLACE ".+CV_VERSION_MINOR[ ]+([0-9]+).*" "\\1" OPENCV_VERSION_PATCH "${OPENCV_VERSION_PARTS}")
-	
-	set(OPENCV_VERSION_PLAIN "${OPENCV_VERSION_MAJOR}.${OPENCV_VERSION_MINOR}.${OPENCV_VERSION_PATCH}")
-	set(OPENCV_VERSION "${OPENCV_VERSION_PLAIN}${OPENCV_VERSION_STATUS}")
-	set(OPENCV_SOVERSION "${OPENCV_VERSION_MAJOR}.${OPENCV_VERSION_MINOR}")
-	set(OPENCV_LIBVERSION "${OPENCV_VERSION_MAJOR}.${OPENCV_VERSION_MINOR}.${OPENCV_VERSION_PATCH}")
-	set(OpenCV_VERSION "${OPENCV_VERSION_MAJOR}.${OPENCV_VERSION_MINOR}.${OPENCV_VERSION_PATCH}" CACHE PATH "Install version")
-	set(OpenCV_LIBVERSION "${OPENCV_VERSION_MAJOR}${OPENCV_VERSION_MINOR}${OPENCV_VERSION_PATCH}")
-
-
-	mark_as_advanced(OpenCV_VERSION)
-	message(STATUS "[FindOpenCV] - Found OpenCV at " ${OpenCV_DIR} ", Version "  ${OpenCV_VERSION})
+		string(REGEX REPLACE ".+CV_VERSION_EPOCH[ ]+([0-9]+).*" "\\1" OPENCV_VERSION_MAJOR "${OPENCV_VERSION_PARTS}")
+		string(REGEX REPLACE ".+CV_VERSION_MAJOR[ ]+([0-9]+).*" "\\1" OPENCV_VERSION_MINOR "${OPENCV_VERSION_PARTS}")
+		string(REGEX REPLACE ".+CV_VERSION_MINOR[ ]+([0-9]+).*" "\\1" OPENCV_VERSION_PATCH "${OPENCV_VERSION_PARTS}")
+		
+		set(OPENCV_VERSION_PLAIN "${OPENCV_VERSION_MAJOR}.${OPENCV_VERSION_MINOR}.${OPENCV_VERSION_PATCH}")
+		set(OPENCV_VERSION "${OPENCV_VERSION_PLAIN}${OPENCV_VERSION_STATUS}")
+		set(OPENCV_SOVERSION "${OPENCV_VERSION_MAJOR}.${OPENCV_VERSION_MINOR}")
+		set(OPENCV_LIBVERSION "${OPENCV_VERSION_MAJOR}.${OPENCV_VERSION_MINOR}.${OPENCV_VERSION_PATCH}")
+		set(OpenCV_VERSION "${OPENCV_VERSION_MAJOR}.${OPENCV_VERSION_MINOR}.${OPENCV_VERSION_PATCH}" CACHE PATH "Install version")
+		set(OpenCV_LIBVERSION "${OPENCV_VERSION_MAJOR}${OPENCV_VERSION_MINOR}${OPENCV_VERSION_PATCH}")
+		
+		mark_as_advanced(OpenCV_VERSION)
+		message(STATUS "[FindOpenCV] - Found OpenCV at " ${OpenCV_DIR} ", Version "  ${OpenCV_VERSION})
+	endif()
 endif()
+
 unset(__find_version CACHE)
 
 # ----------------------------------------------------------------------------
@@ -157,6 +168,7 @@ set(__LIBRARY_DIRS
 	${OpenCV_DIR}/build/lib/Release
 	${OpenCV_DIR}/build/lib/Debug
 	${OpenCV_DIR}/x64/vc15/lib
+	${OpenCV_DIR}/build/x64/vc15/lib
 )
 
 
@@ -223,7 +235,6 @@ endif()
 
 ##------------------------------------------
 ## Get the libraries
-
 
 if(${OPENCV_VERSION_MAJOR} EQUAL "3")
 
@@ -394,7 +405,6 @@ if(${OPENCV_VERSION_MAJOR} EQUAL "3")
 	else()
 		message(STATUS "[FindOpenCV] - ERROR - Did not find any OpenCV library")
 	endif ()
-
 
 
 	##------------------------------------------
@@ -749,27 +759,30 @@ if(${OPENCV_VERSION_MAJOR} EQUAL "3")
 	#	message(${arg})
 	#endforeach(arg)
 	
-	set(OpenCV_LIBS
-		${OpenCV_CALIB3D} ${OpenCV_CORE} ${OpenCV_CUDEV} 
-		${OpenCV_DNN} ${OpenCV_FEATURED2D} ${OpenCV_FLANN} ${OpenCV_HIGHGUI} ${OpenCV_IMGCODECS}
-		${OpenCV_IMGPROC} ${OpenCV_ML} ${OpenCV_OBJDETECT} ${OpenCV_PHOTO} ${OpenCV_SHAPE}
-		${OpenCV_STITCHING} ${OpenCV_SUPERRES} ${OpenCV_TS}  ${OpenCV_VIDEO}  ${OpenCV_VIDEOIO}
-		${OpenCV_VIDEOSTAB} ${OpenCV_CUDA_ARITHM} ${OpenCV_CUDA_BGSEGM}
-		${OpenCV_CUDA_CODEC} ${OpenCV_CUDA_FEATURES2D} ${OpenCV_CUDA_FILTERS}  ${OpenCV_CUDA_IMGPROC} 
-		${OpenCV_CUDA_LEGACY} ${OpenCV_CUDA_OBJDETECT} ${OpenCV_CUDA_OPTFLOW} ${OpenCV_CUDA_STEREO} 
-		${OpenCV_CUDA_WARPING}
-		${OpenCV_CALIB3D_DEBUG} ${OpenCV_CORE_DEBUG} ${OpenCV_CUDEV_DEBUG}
-		${OpenCV_DNN_DEBUG} ${OpenCV_FEATURED2D_DEBUG} ${OpenCV_FLANN_DEBUG} ${OpenCV_HIGHGUI_DEBUG} 
-		${OpenCV_IMGCODECS_DEBUG} ${OpenCV_IMGPROC_DEBUG}  ${OpenCV_ML_DEBUG} ${OpenCV_OBJDETECT_DEBUG} 
-		${OpenCV_PHOTO_DEBUG} ${OpenCV_SHAPE_DEBUG} ${OpenCV_STITCHING_DEBUG} ${OpenCV_SUPERRES_DEBUG} 
-		${OpenCV_TS_DEBUG} ${OpenCV_VIDEO_DEBUG} ${OpenCV_VIDEOIO_DEBUG} ${OpenCV_VIDEOSTAB_DEBUG}
-		${OpenCV_CUDA_ARITHM_DEBUG} ${OpenCV_CUDA_BGSEGM_DEBUG}
-		${OpenCV_CUDA_CODEC_DEBUG} ${OpenCV_CUDA_FEATURES2D_DEBUG} ${OpenCV_CUDA_FILTERS_DEBUG} ${OpenCV_CUDA_IMGPROC_DEBUG} 
-		${OpenCV_CUDA_LEGACY_DEBUG} ${OpenCV_CUDA_OBJDETECT_DEBUG} ${OpenCV_CUDA_OPTFLOW_DEBUG} ${OpenCV_CUDA_STEREO_DEBUG} 
-		${OpenCV_CUDA_WARPING_DEBUG}
-		${OpenCV_WORLD} ${OpenCV_WORLD_DEBUG}
-		CACHE PATH "Libraries")
-
+	if(NOT "${OpenCV_WORLD}" STREQUAL  "")
+		set(OpenCV_LIBS ${OpenCV_WORLD} ${OpenCV_WORLD_DEBUG})
+	else()
+		set(OpenCV_LIBS
+			${OpenCV_CALIB3D} ${OpenCV_CORE} ${OpenCV_CUDEV} 
+			${OpenCV_DNN} ${OpenCV_FEATURED2D} ${OpenCV_FLANN} ${OpenCV_HIGHGUI} ${OpenCV_IMGCODECS}
+			${OpenCV_IMGPROC} ${OpenCV_ML} ${OpenCV_OBJDETECT} ${OpenCV_PHOTO} ${OpenCV_SHAPE}
+			${OpenCV_STITCHING} ${OpenCV_SUPERRES} ${OpenCV_TS}  ${OpenCV_VIDEO}  ${OpenCV_VIDEOIO}
+			${OpenCV_VIDEOSTAB} ${OpenCV_CUDA_ARITHM} ${OpenCV_CUDA_BGSEGM}
+			${OpenCV_CUDA_CODEC} ${OpenCV_CUDA_FEATURES2D} ${OpenCV_CUDA_FILTERS}  ${OpenCV_CUDA_IMGPROC} 
+			${OpenCV_CUDA_LEGACY} ${OpenCV_CUDA_OBJDETECT} ${OpenCV_CUDA_OPTFLOW} ${OpenCV_CUDA_STEREO} 
+			${OpenCV_CUDA_WARPING}
+			${OpenCV_CALIB3D_DEBUG} ${OpenCV_CORE_DEBUG} ${OpenCV_CUDEV_DEBUG}
+			${OpenCV_DNN_DEBUG} ${OpenCV_FEATURED2D_DEBUG} ${OpenCV_FLANN_DEBUG} ${OpenCV_HIGHGUI_DEBUG} 
+			${OpenCV_IMGCODECS_DEBUG} ${OpenCV_IMGPROC_DEBUG}  ${OpenCV_ML_DEBUG} ${OpenCV_OBJDETECT_DEBUG} 
+			${OpenCV_PHOTO_DEBUG} ${OpenCV_SHAPE_DEBUG} ${OpenCV_STITCHING_DEBUG} ${OpenCV_SUPERRES_DEBUG} 
+			${OpenCV_TS_DEBUG} ${OpenCV_VIDEO_DEBUG} ${OpenCV_VIDEOIO_DEBUG} ${OpenCV_VIDEOSTAB_DEBUG}
+			${OpenCV_CUDA_ARITHM_DEBUG} ${OpenCV_CUDA_BGSEGM_DEBUG}
+			${OpenCV_CUDA_CODEC_DEBUG} ${OpenCV_CUDA_FEATURES2D_DEBUG} ${OpenCV_CUDA_FILTERS_DEBUG} ${OpenCV_CUDA_IMGPROC_DEBUG} 
+			${OpenCV_CUDA_LEGACY_DEBUG} ${OpenCV_CUDA_OBJDETECT_DEBUG} ${OpenCV_CUDA_OPTFLOW_DEBUG} ${OpenCV_CUDA_STEREO_DEBUG} 
+			${OpenCV_CUDA_WARPING_DEBUG}
+			${OpenCV_WORLD} ${OpenCV_WORLD_DEBUG}
+			CACHE PATH "Libraries")
+	endif()
 	set (OpenCV_FOUND TRUE CACHE PATH "Found opencv")
 
 
