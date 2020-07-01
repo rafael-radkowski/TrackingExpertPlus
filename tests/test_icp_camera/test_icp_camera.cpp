@@ -63,7 +63,8 @@ PointCloud			pc_eval_as_loaded;
 
 std::string			ref_file = "../data/stanford_bunny_pc.obj";
 std::string			camera_file = "";
-
+std::vector<std::string> files;
+int					run_test = 0;
 
 // ground truth pose data
 std::vector<std::pair<Eigen::Vector3f, Eigen::Vector3f>> gt_pose;
@@ -92,6 +93,8 @@ void runTest(void);
 void runTestManual(void);
 void startICP(void);
 void startAutoICP(void);
+void loadNewObject(void);
+
 void keyboard_callback( int key, int action) {
 
 
@@ -153,6 +156,15 @@ void keyboard_callback( int key, int action) {
 			runTestManual();
 			break;
 			}
+		case 61: // =
+			{
+			run_test++;
+			if(run_test>4) run_test = 0;
+
+			std::cout << "Current test: " << run_test << std::endl;
+			loadNewObject();
+			break;
+			}
 		}
 		break;
 		
@@ -172,6 +184,7 @@ void startICP(void)
 
 	icp->setMaxIterations(1);
 
+	current_set = run_test;
 	pc_ref = pc_ref_as_loaded;
 	pc_eval = pc_ref_as_loaded;
 	// Move the point cloud to a different position. 
@@ -259,6 +272,7 @@ void runTestManual(void)
 
 void startAutoICP(void)
 { 
+	current_set = run_test;
 	if(current_set >= initial_pos.size()) current_set = 0;
 	std::cout << "Auto ---------------------------------\n";
 	icp->setMaxIterations(100);
@@ -275,7 +289,7 @@ void startAutoICP(void)
 	Pose pose;
 	pose.t =  Eigen::Matrix4f::Identity();
 	icp->compute(pc_ref, pose, pose_result, rms);
-	current_set++;
+	
 
 
 	 /* glm computation: todo -> add to another class
@@ -350,6 +364,18 @@ void runTest(void)
 }
 
 
+void loadNewObject(void) {
+	
+	camera_file = files[run_test];
+	ReaderWriterUtil::Read(camera_file, pc_camera_as_loaded.points, pc_camera_as_loaded.normals, true, false);
+	//LoaderObj::Read(camera_file, &pc_camera_as_loaded.points, &pc_camera_as_loaded.normals, false, true);
+	//Sampling::Run(pc_camera_as_loaded, pc_camera_as_loaded);
+	pc_camera = pc_camera_as_loaded;
+
+	icp->setCameraData(pc_camera_as_loaded);
+}
+
+
 /*
 The main render and processing loop. 
 @param pm - projection matrix
@@ -380,7 +406,7 @@ int main(int argc, char** argv)
 {
 
 	std::string data_path = "../data/test/stanford_bunny_desk";
-	std::vector<std::string> files;
+	
 	bool ret = ReadFiles::GetFileList(data_path, "ply", files);
 
 	if (!ret) {
@@ -393,18 +419,18 @@ int main(int argc, char** argv)
 	date = TimeUtils::GetCurrentDateTime();
 
 
+	initial_pos.push_back(Eigen::Vector3f(0.1, -0.0, 0.60)); initial_rot.push_back(Eigen::Vector3f(45.0, 0.0, 180.0)); ground_truth_rms.push_back(0.0015492);
+	initial_pos.push_back(Eigen::Vector3f(0.1, -0.0, 0.60)); initial_rot.push_back(Eigen::Vector3f(45.0, 0.0, 180.0)); ground_truth_rms.push_back(0.0015501);
+	initial_pos.push_back(Eigen::Vector3f(0.1, 0.0, 0.6)); initial_rot.push_back(Eigen::Vector3f(45.0, 0.0, 180.0)); ground_truth_rms.push_back(0.0015498);
+	initial_pos.push_back(Eigen::Vector3f(0.1, 0.00, 0.65)); initial_rot.push_back(Eigen::Vector3f(45.0, 0.0, 180.0));ground_truth_rms.push_back(0.0015492);
 	initial_pos.push_back(Eigen::Vector3f(0.0, -0.0, 0.65)); initial_rot.push_back(Eigen::Vector3f(45.0, 0.0, 180.0)); ground_truth_rms.push_back(0.0015492);
-//	initial_pos.push_back(Eigen::Vector3f(-0.02, -0.04, 0.65)); initial_rot.push_back(Eigen::Vector3f(45.0, 0.0, 180.0)); ground_truth_rms.push_back(0.0015501);
-	/*initial_pos.push_back(Eigen::Vector3f(0.0, 0.0, 0.2)); initial_rot.push_back(Eigen::Vector3f(0.0, 0.0, 0.0)); ground_truth_rms.push_back(0.0015498);
-	initial_pos.push_back(Eigen::Vector3f(0.2, 0.15, 0.0)); initial_rot.push_back(Eigen::Vector3f(0.0, 0.0, 0.0));ground_truth_rms.push_back(0.0015492);
-	initial_pos.push_back(Eigen::Vector3f(0.0, 0.2, 0.15)); initial_rot.push_back(Eigen::Vector3f(0.0, 0.0, 0.0));ground_truth_rms.push_back(0.0015492);
 	initial_pos.push_back(Eigen::Vector3f(0.05, 0.2, 0.05)); initial_rot.push_back(Eigen::Vector3f(0.0, 0.0, 0.0));ground_truth_rms.push_back(0.0015501);
 	initial_pos.push_back(Eigen::Vector3f(0.0, 0.2, 0.0)); initial_rot.push_back(Eigen::Vector3f(10.0, 0.0, 0.0));ground_truth_rms.push_back(0.0015504);
 	initial_pos.push_back(Eigen::Vector3f(0.2, 0.0, 0.0)); initial_rot.push_back(Eigen::Vector3f(25.0, 0.0, 0.0));ground_truth_rms.push_back(0.0015504);
 	initial_pos.push_back(Eigen::Vector3f(0.0, 0.0, 0.2)); initial_rot.push_back(Eigen::Vector3f(0.0, 25.0, 20.0));ground_truth_rms.push_back(0.0015504);
 	initial_pos.push_back(Eigen::Vector3f(0.2, 0.2, 0.0)); initial_rot.push_back(Eigen::Vector3f(20.0, 10.0, -10.0));ground_truth_rms.push_back(0.0015483);
 	initial_pos.push_back(Eigen::Vector3f(0.0, 0.2, 0.2)); initial_rot.push_back(Eigen::Vector3f(10.0, 10.0, 0.0));ground_truth_rms.push_back(0.0015492);
-	initial_pos.push_back(Eigen::Vector3f(0.0, 0.2, 0.2)); initial_rot.push_back(Eigen::Vector3f(2.0, 45.0, 10.0));ground_truth_rms.push_back(0.00247738);*/
+	initial_pos.push_back(Eigen::Vector3f(0.0, 0.2, 0.2)); initial_rot.push_back(Eigen::Vector3f(2.0, 45.0, 10.0));ground_truth_rms.push_back(0.00247738);
 
 
 	// ground truth pose data
@@ -414,7 +440,7 @@ int main(int argc, char** argv)
 	gt_pose.push_back( std::make_pair( Eigen::Vector3f(0.0, 0.0, 0.7), Eigen::Vector3f(45.0, 0.0, 180.0)));
 	gt_pose.push_back( std::make_pair( Eigen::Vector3f(-0.0, -0.05, 0.67), Eigen::Vector3f(45.0, 0.0, 180.0)));
 
-	int run_test = 4;
+
 
 	/*------------------------------------------------------------------------
 	Load the first object for the test
