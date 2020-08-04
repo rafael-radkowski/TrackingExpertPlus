@@ -103,7 +103,45 @@ int KNN::knn(PointCloud& pc, int k,  vector<Matches>& matches)
 	if (!_ready) return -1;
 	if (_tpoints.size() == 0) return -1;
 
-	_kdtree->knn(_tpoints, matches, 1);
+	_kdtree->knn(_tpoints, matches, k);
+
+	return 1;
+}
+
+
+/*
+Run a radius search on the kd-tree and find the points in vicinity to the 
+search point. 
+@param pc - the search point cloud. 
+@param radius - the search radius
+@param matches - reference to the matches
+*/
+int KNN::radius(PointCloud& pc, float radius, vector<Matches>& matches)
+{
+	// copy all models into the cuda structure. 
+
+	_tpoints.clear();
+
+	vector<Eigen::Vector3f>& p = pc.points ;
+
+	for (int i = 0; i < pc.points.size(); i++) {
+		Cuda_Point k = Cuda_Point(p[i].x(), p[i].y(), p[i].z());
+		k._id = i;
+		_tpoints.push_back(k);
+	}
+
+	_testPoint = &pc;
+
+	// check if ready
+	_ready = ready();
+
+
+	assert(_kdtree);
+
+	if (!_ready) return -1;
+	if (_tpoints.size() == 0) return -1;
+
+	_kdtree->radius_search(_tpoints, matches, radius);
 
 	return 1;
 }

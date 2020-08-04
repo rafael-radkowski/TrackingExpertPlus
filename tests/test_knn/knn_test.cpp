@@ -20,7 +20,8 @@ MIT License
 -----------------------------------------------------------------------------------------------------------------------------
 Last edited:
 
-
+July 7, 2020, RR
+- Added a function to test the radius search. 
 
 */
 
@@ -204,6 +205,55 @@ int RunTest(int num_points, float min_range, float max_range) {
 }
 
 
+int RunRadiusTest(int num_points, int num_serach_points, float min_range, float max_range, float search_radius) {
+
+
+	// generate two set of random point clouds. 
+	GenerateRandomPointCloud( cameraPoints0, num_points, min_range, max_range);
+	GenerateRandomPointCloud( cameraPoints1, num_serach_points, min_range, max_range);
+
+	matches0.clear();
+	matches1.clear();
+
+	// populate the kd-tree
+	knn->reset();
+	knn->populate(cameraPoints0);
+
+	// search for the neaarest neighbors
+	knn->radius(cameraPoints1,search_radius,matches0);
+
+	int error_count = 0;
+	int print = 0;
+	for (int i = 0; i < matches0.size(); i++) {
+		
+		MyMatches m = matches0[i];
+
+		for (int j = 0; j < 21; j++) {
+			if( m.matches[j].distance > 0.0){
+				if(m.matches[j].distance > search_radius*search_radius){
+					error_count++;
+					if(print < 100){
+						std::cout  << "[ERROR] " << m.matches[j].second << ": distance: " <<  m.matches[j].distance << std::endl;
+						print++;
+					}
+				}
+			}
+		}
+	}
+	
+
+	if (error_count == 0) {
+		std::cout << "[INFO] - Found " << error_count << ", all distances are within the margin of " << search_radius << "." << std::endl;
+	}
+	else
+	{
+		std::cout << "[ERROR] - Found " << error_count << " points which exceeds the distance of " << search_radius << "." << std::endl;
+	}
+
+	return matches0.size();
+}
+
+
 
 int main(int argc, char** argv)
 {
@@ -266,6 +316,18 @@ int main(int argc, char** argv)
 
 		RunTest( k, -1.0, 1.0);
 	}
+
+	//-------------------------------------------------
+	// Run a radius test
+
+	std::cout << "\n[Info] 4. Run a radius search test." << endl;
+
+	for(int i = 0; i< 15; i++){
+		float radius = 0.1 * i + 0.1;
+		float max = i * 1.0;
+		RunRadiusTest(10000, 2000, -max, max, radius);
+	}
+	RunRadiusTest(10000, 2000, -15.0, 15.0, 1.5);
 
 	delete knn;
 

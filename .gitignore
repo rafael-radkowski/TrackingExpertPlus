@@ -37,3 +37,4 @@ tests/test_icp_camera/test_icp_camera.dir/
 data/test/stanford_bunny_desk/
 tests/test_knn/test_knn.dir/
 tests/test_azure_camera/test_Azure_Kinect_camera.dir/
+tests/dev_detection/dev_detection.dir/

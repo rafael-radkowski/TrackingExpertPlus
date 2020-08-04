@@ -38,7 +38,8 @@ Feb 21, 2020, RR
 Feb 22, 2020, RR
 - Added a parameter to change between static and dynamic vertex buffer usage.
 
-
+July 7, 2020, RR
+- Added a per-vertex-color function to color-code each point individually. 
 */
 
 // stl include
@@ -121,6 +122,13 @@ namespace isu_ar {
 
 
 		/*
+		Set a color value per vertex.
+		Note, this requires to define #define _USE_PER_VERTEX_COLOR in GLPointCloudRenderer.cpp
+		@param per_vertex_color - a list with one color per vertex. 
+		*/
+		void setPointColors(vector<glm::vec3> per_vertex_color);
+
+		/*
 		Set the color for the normal vectors
 		@param color  -  a color values in RGB format with each value in the range [0,1].
 		*/
@@ -166,13 +174,13 @@ namespace isu_ar {
 	//-------------------------------------------------------------------
 
 		int vaoID[1]; // Our Vertex Array Object
-		int vboID[2]; // Our Vertex Buffer Object
+		int vboID[3]; // Our Vertex Buffer Object
 		int iboID[1]; // Our Index  Object
 		texpertgfx::GLDataUsage _data_usage; // indicates whether the vertex buffer data is static or dynamic. 
 
 		int program;
 		int program_normals;
-		int program_normals_locations[6];
+		int program_normals_locations[7];
 
 		int viewMatrixLocation;
 		int modelMatrixLocation;
@@ -184,9 +192,11 @@ namespace isu_ar {
 
 		std::vector<glm::vec3> points;
 		std::vector<glm::vec3> normals;
+		std::vector<glm::vec3> colors;
 
 		int _pos_location;
 		int _norm_location;
+		int _color_location;
 
 		std::mutex	_block; // to prevent concurrent access when updating points
 

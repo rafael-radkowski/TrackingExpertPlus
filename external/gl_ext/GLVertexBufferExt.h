@@ -18,7 +18,8 @@ Feb 2020.
 -------------------------------------------------------------------------------
 Last edited:
 
-. 
+July 7, 2020, RR
+- Added the function CreateVertexObjects333 to add per-vertex colors to the renderer.
 
 */
 #pragma once
@@ -62,6 +63,10 @@ namespace texpertgfx
 	*/
 	bool CreateVertexObjects33(int* vaoID, int* vboID, float* vertices, float* colors, int N, bool static_data_usage = true,
 								int vertices_location = 0, int normals_location = 1);
+
+
+	bool CreateVertexObjects333(int* vaoID, int* vboID, float* vertices, float* normals, float* colors, int N, bool static_data_usage = true,
+								int vertices_location = 0, int normals_location = 1, int color_location = 2);
 
 
 }

@@ -172,6 +172,10 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/camera/ICaptureDeviceTypes.h
 	${PROJECT_SOURCE_DIR}/include/camera/PointCloudProducer.h
 	${PROJECT_SOURCE_DIR}/include/camera/CameraParameters.h
+
+	
+
+	
 	
 	
 	
@@ -201,6 +205,16 @@ set(Detection_SRC
 	detection/FDMatching.cpp
 	detection/FDClustering.cpp
 	detection/PCRegistration.cpp
+
+	detection/CPFMatchingExp.cpp
+	${PROJECT_SOURCE_DIR}/include/detection/CPFMatchingExp.h
+	detection/CPFTools.cpp
+	${PROJECT_SOURCE_DIR}/include/detection/CPFTools.h
+	${PROJECT_SOURCE_DIR}/include/detection/CPFTypes.h
+
+	${PROJECT_SOURCE_DIR}/include/detection/CPFRenderHelpers.h
+	detection/CPFRenderHelpers.cpp
+
 )
 
 set(Cuda_kdtree_SRC

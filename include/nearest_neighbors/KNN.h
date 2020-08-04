@@ -7,6 +7,11 @@ Iowa State University
 rafael@iastate.edu
 MIT License
 ---------------------------------------------------------------
+
+Last edited:
+
+July 7, 2020, RR
+- Added a function to support radius search. 
 */
 
 
@@ -58,6 +63,14 @@ public:
 	int knn(PointCloud& pc, int k, vector<Matches>& matches);
 
 
+	/*
+	Run a radius search on the kd-tree and find the points in vicinity to the 
+	search point. 
+	@param pc - the search point cloud. 
+	@param radius - the search radius
+	@param matches - reference to the matches
+	*/
+	int radius(PointCloud& pc, float radius, vector<Matches>& matches);
 
 
 	/*
