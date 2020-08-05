@@ -1,10 +1,22 @@
 #include "KNN.h"
 
+#include "ResourceManager.h"
+
 using namespace  texpert;
 
 KNN::KNN() {
 
-	_kdtree = new Cuda_KdTree();
+	/*
+	The kd-tree runs on cuda and requires plenty of
+	memory. This makes sure that only one instance 
+	exists in the entire app. 
+	*/
+	_kdtree = ResourceManager::GetKDTree();
+	if(_kdtree == NULL){
+		_kdtree = new Cuda_KdTree();
+		ResourceManager::SetKDTree(_kdtree);
+	}
+
 	_ready = false;
 
 	_refPoint = NULL;
@@ -12,7 +24,9 @@ KNN::KNN() {
 
 }
 KNN::~KNN(){
-	delete _kdtree;
+	
+	ResourceManager::UnrefKDTree(_kdtree);
+	//delete _kdtree;
 }
 
 

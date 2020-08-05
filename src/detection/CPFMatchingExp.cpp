@@ -1,5 +1,7 @@
 #include "CPFMatchingExp.h"
 
+#include "ResourceManager.h"
+
 using namespace texpert;
 
 #define M_PI 3.14159265359
@@ -13,12 +15,12 @@ CPFMatchingExp::CPFMatchingExp()
 	m_angle_bins = (int)(static_cast<float>(2 * M_PI) / angle_step_rad) + 1;
 
 
-
+	m_knn = new KNN();
 }
 
 CPFMatchingExp::~CPFMatchingExp()
 {
-
+	
 }
 
 
@@ -170,12 +172,12 @@ void CPFMatchingExp::calculateDescriptors(PointCloud& pc, float radius, std::vec
 	std::vector<Matches> matches;
 	size_t s = pc.size();
 
-	KNN* knn = new KNN();
-	knn->populate(pc);
+	
+	m_knn->populate(pc);
 
 	matches.clear();
 	
-	knn->radius(pc, radius, matches);
+	m_knn->radius(pc, radius, matches);
 
 	//----------------------------------------------------------------------------------------------------------
 	// Calculate point curvatures

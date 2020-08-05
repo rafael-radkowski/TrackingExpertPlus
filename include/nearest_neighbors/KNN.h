@@ -12,6 +12,11 @@ Last edited:
 
 July 7, 2020, RR
 - Added a function to support radius search. 
+
+Aug 5, 2020, RR
+- Added a KNN resource manager to the class. 
+  The resource manager makes sure that only one instance of the kd-tree exists. 
+  The kd-tree eats up a lot of gpu memory. Multiple instances exhaust the gpu resources too fast. 
 */
 
 

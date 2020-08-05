@@ -223,12 +223,14 @@ set(Cuda_kdtree_SRC
 	kdtree/CudaErrorCheck.cu
 	kdtree/Cuda_KdTree.cu
 	kdtree/Cuda_Helpers.cpp
+	
 	${PROJECT_SOURCE_DIR}/include/kdtree/sort.h
 	${PROJECT_SOURCE_DIR}/include/kdtree/dequeue.h
 	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_KdTree.h
 	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Helpers.h
 	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Common.h
 	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Types.h
+	
 )
 
 set(Loader_SRC
@@ -253,6 +255,8 @@ set(NN_SRC
 	nearest_neighbors/ICPTransform.cpp
 	nearest_neighbors/ICP.cpp
 	nearest_neighbors/ICPReject.cpp
+	${PROJECT_SOURCE_DIR}/include/kdtree/ResourceManager.h
+	kdtree/ResourceManager.cpp
 )
 
 set( PointCloud_SRC

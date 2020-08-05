@@ -19,7 +19,10 @@ MIT License
 -------------------------------------------------------------------------------------------------------
 Last edits:
 
-
+Aug 5, 2020, RR
+- Added a KNN resource manager to the class. 
+  The resource manager makes sure that only one instance of the kd-tree exists. 
+  The kd-tree eats up a lot of gpu memory. Multiple instances exhaust the gpu resources too fast. 
 */
 
 //stl 
@@ -151,6 +154,9 @@ public:
 	bool setParams(CPFParams params);
 
 
+	//-----------------------------------------------------------------------------------------------------------------
+	// Render and debug helpers
+
 	/*!
 	The class contains a tool that generates extra data for rendering and visual debugging. 
 	However, this requires time and memory, thus, can be disabled or enabled on demand. 
@@ -238,6 +244,9 @@ private:
 
 	// descriptor parameterss
 	CPFParams					m_params;
+
+
+	KNN*						m_knn;
 
 	//--------------------------------------------------------------
 	// the model
