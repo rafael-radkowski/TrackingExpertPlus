@@ -73,9 +73,8 @@ FIND_PACKAGE(Cub REQUIRED)
 FIND_PACKAGE(OpenGL REQUIRED)
 
 if(${ENABLE_AZURE_KINECT} STREQUAL  ON )
-	#FIND_PACKAGE(AzureKinect REQUIRED)
-	#include_directories(${AZUREKINECT_INCLUDE_DIR})
-	include_directories("C:/Program Files/Azure Kinect SDK v1.4.0/sdk/include")
+	FIND_PACKAGE(AzureKinect REQUIRED)
+	include_directories(${AZUREKINECT_INCLUDE_DIR})
 endif()
 
 
@@ -161,8 +160,7 @@ target_link_libraries(${ProjectName} debug  cudart.lib )
 target_link_libraries(${ProjectName} ${GLEW_LIBS} ${GLEW_LIBS} ${GLFW3_LIBS} ${OPENGL_LIBS} ${OPENGL_LIBRARIES} )
 
 if(${ENABLE_AZURE_KINECT} STREQUAL  ON )
-	target_link_libraries(${ProjectName}  "C:/Program Files/Azure Kinect SDK v1.4.0/sdk/windows-desktop/amd64/release/lib/k4a.lib")
-	target_link_libraries(${ProjectName}  "C:/Program Files/Azure Kinect SDK v1.4.0/sdk/windows-desktop/amd64/release/lib/k4arecord.lib")
+	target_link_libraries(${ProjectName}  ${AZUREKINECT_LIBRARY})
 endif()
 
 

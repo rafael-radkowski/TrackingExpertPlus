@@ -74,7 +74,7 @@ void GLLineRenderer::init(void)
 	_line_color = glm::vec3(0.0,0.0,1.0);
 	_modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 	_draw_lines = false;
-	
+	_line_width = 1.0;
 
 
 	
@@ -231,7 +231,7 @@ void GLLineRenderer::updatePoints(vector<Eigen::Vector3f>& src_points0, vector<E
 
 	glUseProgram(_program);
 	
-	_block.unlock();
+ 	_block.unlock();
 }
 
 
@@ -248,7 +248,7 @@ void GLLineRenderer::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
 	_projectionMatrix = projectionMatrix;
 	_viewMatrix = viewMatrix;
 
-
+	glEnable(GL_LINE_SMOOTH);
 	glUseProgram(_program);
 
 	// Bind the buffer and switch it to an active buffer
@@ -260,7 +260,7 @@ void GLLineRenderer::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
 	glUniformMatrix4fv(_program_locations[0] , 1, GL_FALSE, &projectionMatrix[0][0]); // send the projection matrix to our shader
 	
 
-	
+	glLineWidth(_line_width);
 	// Draw the triangles
  	glDrawArrays(GL_LINES, 0, _N);
 	
@@ -290,4 +290,13 @@ void GLLineRenderer::setLineColor(glm::vec3 color)
 	_line_color = color;
 	glUseProgram(_program);
 	glUniform3fv(  glGetUniformLocation(_program, "pointcolor") ,  1, &_line_color[0] );
+}
+
+
+/*
+Set the line width for the renderer
+*/
+void GLLineRenderer::setLineWidth(float line_width)
+{
+	_line_width = (std::max)( 1.0f, (std::min)( line_width, 10.0f));
 }

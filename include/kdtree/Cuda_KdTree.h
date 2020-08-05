@@ -37,9 +37,9 @@ MIT License
 
 #define _WITH_PERFORMANCE
 
-#define MAX_NUM_POINTS 500000
+#define MAX_NUM_POINTS 800000
 #define MAX_SEARCH_POINTS 100000
-#define MAX_OUTPUT_POINTS 250000
+#define MAX_OUTPUT_POINTS 450000
 #define RELOC_TPB 64
 using namespace std;
 using namespace std::chrono;

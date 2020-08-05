@@ -172,6 +172,10 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/camera/ICaptureDeviceTypes.h
 	${PROJECT_SOURCE_DIR}/include/camera/PointCloudProducer.h
 	${PROJECT_SOURCE_DIR}/include/camera/CameraParameters.h
+
+	
+
+	
 	
 	
 	
@@ -201,6 +205,16 @@ set(Detection_SRC
 	detection/FDMatching.cpp
 	detection/FDClustering.cpp
 	detection/PCRegistration.cpp
+
+	detection/CPFMatchingExp.cpp
+	${PROJECT_SOURCE_DIR}/include/detection/CPFMatchingExp.h
+	detection/CPFTools.cpp
+	${PROJECT_SOURCE_DIR}/include/detection/CPFTools.h
+	${PROJECT_SOURCE_DIR}/include/detection/CPFTypes.h
+
+	${PROJECT_SOURCE_DIR}/include/detection/CPFRenderHelpers.h
+	detection/CPFRenderHelpers.cpp
+
 )
 
 set(Cuda_kdtree_SRC
@@ -209,12 +223,14 @@ set(Cuda_kdtree_SRC
 	kdtree/CudaErrorCheck.cu
 	kdtree/Cuda_KdTree.cu
 	kdtree/Cuda_Helpers.cpp
+	
 	${PROJECT_SOURCE_DIR}/include/kdtree/sort.h
 	${PROJECT_SOURCE_DIR}/include/kdtree/dequeue.h
 	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_KdTree.h
 	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Helpers.h
 	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Common.h
 	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Types.h
+	
 )
 
 set(Loader_SRC
@@ -239,6 +255,8 @@ set(NN_SRC
 	nearest_neighbors/ICPTransform.cpp
 	nearest_neighbors/ICP.cpp
 	nearest_neighbors/ICPReject.cpp
+	${PROJECT_SOURCE_DIR}/include/kdtree/ResourceManager.h
+	kdtree/ResourceManager.cpp
 )
 
 set( PointCloud_SRC

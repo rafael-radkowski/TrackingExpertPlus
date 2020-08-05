@@ -7,7 +7,7 @@ using namespace  texpert;
 ICP::ICP() {
 
 	_max_error = 0.0001;
-	_max_iterations = 10;
+	_max_iterations = 20;
 
 	_verbose = true;
 	_verbose_level = 2;
