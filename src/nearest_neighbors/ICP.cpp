@@ -12,6 +12,8 @@ ICP::ICP() {
 	_verbose = true;
 	_verbose_level = 2;
 
+	_Rt_initial = Eigen::Matrix4f::Identity();
+
 	_knn = new KNN();
 
 	_outlier_rejectmethod = ICPReject::DIST_ANG;
@@ -64,10 +66,12 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 // note that the two point clouds must be equal for this test. 
 	return test_rejection(pc, initial_pose,  result_pose,  rms);
 #endif
-
+	_Rt_initial = initial_pose.t.matrix();
+	_Rt_affine = initial_pose.t;
 	
-
+	// TODO: copies all points into a new object. Line 90, 91 does the same. Why?
 	// remember the test points
+	// this makes a copy of the test points. 
 	_testPoints = pc;
 
 	if (!ready()) {
@@ -83,6 +87,7 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 	_R_all = Eigen::Matrix3f::Identity();
 	_t_all = Eigen::Vector3f(0.0, 0.0, 0.0);
 
+	// TODO: Remove teh manual copy since the code in line 70 already copies the points. 
 	// copy test points into a new struct
 	vector<Vector3f> in0, nn0;
 	std::copy(_testPoints.points.begin(), _testPoints.points.end(), back_inserter(in0));
@@ -235,6 +240,9 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 
 Matrix4f ICP::Rt(void){
 
+
+	// TODO: Check the pose calculation. 
+
 	Eigen::Matrix4f finalRt = Eigen::Matrix4f::Identity();
 
 	Eigen::Vector3f tall = t();
@@ -256,8 +264,20 @@ Matrix4f ICP::Rt(void){
 	Eigen::Matrix4f R2 = Eigen::Matrix4f::Identity();
 	R2.block<3,3>(0,0) = Rall;
 
+	Affine3f m;     
+	m  = Translation3f(_Rt_affine.translation());
+	Matrix4f ti;
+	ti = m.matrix();
+
+	Matrix4f Ri;
+	Ri = Matrix4f::Identity();
+	Ri.block(0,0,3,3) = _Rt_affine.rotation().matrix();
+
 	//finalRt = t2 * cent * R2 * centInv;
-	finalRt = centInv * R2 * cent * t2;
+	finalRt = Ri.transpose()  *  (  centInv  * R2 * cent * t2 ) * ti.transpose();
+
+	MatrixUtils::PrintMatrix4f(Ri);
+	MatrixUtils::PrintMatrix4f(finalRt);
 
 //		glm::mat4 centInv = glm::translate(glm::vec3(-centroid.x(), -centroid.y(), -centroid.z() ));
 //	glm::mat4 cent = glm::translate(glm::vec3(centroid.x(), centroid.y(), centroid.z() ));

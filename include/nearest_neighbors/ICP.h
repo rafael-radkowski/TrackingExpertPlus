@@ -1,4 +1,4 @@
-#pragma once
+ #pragma once
 /*
 class ICP
 files: ICP.h/.cpp
@@ -66,6 +66,11 @@ March 16, 2020, RR
  - Fixed a bug: the ICP code rotated an object around the wrong centroid. 
  - Added a function to return the overall translation and rotation. The transformation can be applied on 
 	a reference object to register it with its counterpart. 
+
+Aug, 06, 2020, RR
+- Incorporated the initial pose into the final pose so that the result of this class is 
+  a complete pose. 
+- Set default values for all parameters. 
 
 */
 
@@ -234,6 +239,8 @@ private:
 	// translation and rotation for all iterations. 
 	Matrix3f				_R_all;
 	Vector3f				_t_all; 
+	Matrix4f				_Rt_initial;//inintial pose
+	Affine3f				_Rt_affine; // initial pose
 
 	std::vector<Matches>	_local_matches;
 

@@ -26,6 +26,15 @@ void TrackingExpertRegistration::init(void)
 	m_fd_params.search_radius = 0.1;
 	m_fd_params.angle_step = 12.0;
 	m_fd->setParams(m_fd_params);
+
+
+	m_icp->setMinError(0.00000001);
+	m_icp->setMaxIterations(200);
+	m_icp->setVerbose(true, 2);
+	m_icp->setRejectMaxAngle(45.0);
+	m_icp->setRejectMaxDistance(0.1);
+	m_icp->setRejectionMethod(ICPReject::DIST_ANG);
+
 }
 
 
@@ -42,6 +51,9 @@ int TrackingExpertRegistration::addReferenceModel(PointCloud& points, std::strin
 
 	if(m_model_id != -1) return -1;
 
+	m_ptr_model_pc = &points;
+
+	// copies the point cloud (too much copies in this code).
 	m_model_pc = points;
 
 	m_model_id = m_fd->addModel(points, label);
@@ -61,7 +73,10 @@ bool TrackingExpertRegistration::updateScene(PointCloud& points)
 	assert(m_fd != NULL);
 	assert(m_icp != NULL);
 
+	// copies the point cloud (too much copies in this code).
 	m_scene_pc = points;
+
+	m_ptr_model_pc = &points;
 
 	return m_fd->setScene(points);
 }

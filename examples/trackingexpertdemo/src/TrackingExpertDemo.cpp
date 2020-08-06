@@ -243,7 +243,7 @@ void TrackingExpertDemo::initGfx(void)
 
 	// point cloud for evaluation.
 	gl_reference_eval = new	isu_ar::GLPointCloudRenderer(pc_ref.points, pc_ref.normals);
-	gl_reference_eval->setPointColor(glm::vec3(1.0,0.0,1.0));
+	gl_reference_eval->setPointColor(glm::vec3(1.0,1.0,0.0));
 	gl_reference_eval->setNormalColor(glm::vec3(0.5,0.8,0.8));
 	gl_reference_eval->setNormalGfxLength(0.05f);
 
@@ -328,7 +328,6 @@ void TrackingExpertDemo::trackObject(void)
 	// set to false after processing, so that the scene does not get re-processed. 
 	m_new_scene = false;
 
-
 	// update the final pose
 	upderRenderPose();
 }
@@ -406,12 +405,12 @@ void TrackingExpertDemo::upderRenderPose(void) {
 	}
 
 	
-	//gl_reference_eval->setModelmatrix(MatrixUtils::ICPRt3Mat4(m_reg->getICPPose()));
+	gl_reference_eval->setModelmatrix(MatrixUtils::ICPRt3Mat4(m_reg->getICPPose()));
 
-	gl_reference_eval->setModelmatrix(m);
+	//gl_reference_eval->setModelmatrix(m);
 	gl_reference_eval->enablePointRendering(true);
 
-	std::cout << "RENDER POSE" << std::endl;
+//	std::cout << "RENDER POSE" << std::endl;
 }
 
 

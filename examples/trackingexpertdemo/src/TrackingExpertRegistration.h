@@ -1,5 +1,15 @@
 #pragma once
 
+/*
+
+----------------------------------------------------------------------------------
+Last edits:
+
+Aug 6, 2020, RR
+- Added two pointers for the point cloud addresses (The current version of the code has too many
+  point cloud copies. 
+*/
+
 // STL
 #include <iostream>
 #include <string>
@@ -153,4 +163,7 @@ private:
 	// Point clouds
 	PointCloud			m_model_pc;
 	PointCloud			m_scene_pc;
+
+	PointCloud*			m_ptr_model_pc;
+	PointCloud*			m_ptr_scene_pc;
 };

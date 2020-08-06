@@ -1,5 +1,13 @@
 #pragma once
 
+/*
+--------------------------------------------------------------------------------
+Last edits:
+
+Aug 06, 2020, RR
+- Changed the final pose source. It comes from ICP instead of the descriptor.
+*/
+
 // STL
 #include <iostream>
 #include <string>
