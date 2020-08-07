@@ -32,7 +32,7 @@ Aug 6, 2020, RR
 // TrackingExpert
 #include "CPFMatchingExp.h"
 #include "ICP.h"
-
+#include "TrackingExpertParams.h"
 
 class TrackingExpertRegistration
 {
@@ -80,6 +80,12 @@ public:
 
 
 	/*!
+	Reset registration and move the reference model to its original start position.
+	*/
+	bool reset(void);
+
+
+	/*!
 	Returns the pose after ICP was applied. 
 	@return a 4x4 matrix in homogenous coordinates with the pose. 
 	*/
@@ -98,7 +104,7 @@ public:
 	Set the parameters for the extraction tool.
 	@param params - a struct containing some parameters. 
 	*/
-	bool setParams(CPFParams params);
+	bool setParams(TEParams	m_params);
 
 
 
@@ -150,6 +156,7 @@ private:
 	// feature detector and matching
 	CPFMatchingExp*		m_fd;
 	CPFParams			m_fd_params;
+	bool				m_working;
 
 	// ICP
 	ICP*				m_icp;
@@ -166,4 +173,11 @@ private:
 
 	PointCloud*			m_ptr_model_pc;
 	PointCloud*			m_ptr_scene_pc;
+
+	// the global pose of the model 
+	Eigen::Matrix4f		m_model_pose;
+
+	//------------------------------------------------------------------
+	// Parameters
+	TEParams			m_params;
 };

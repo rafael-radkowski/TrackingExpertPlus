@@ -149,9 +149,12 @@ Set the parameters for the extraction tool.
 */
 bool CPFMatchingExp::setParams(CPFParams params)
 {
-	m_params = params;
+	m_params.angle_step = std::max(1.0f, std::min(180.0f, params.angle_step));
+	m_params.search_radius = std::max(0.001f, std::min(10.0f, params.search_radius));
+	m_params.cluster_trans_threshold = std::max(0.0001f, std::min(100.0f, params.cluster_trans_threshold));
+	m_params.cluster_rot_threshold = std::max(0.0f, std::min(180.0f, params.cluster_rot_threshold)) / 180.0f * static_cast<float>(M_PI);  // to rad
 
-	float angle_step_rad = m_params.angle_step / 180.0f * static_cast<float>(M_PI);
+	float angle_step_rad = m_params.angle_step / 180.0f * static_cast<float>(M_PI); // to rad
 	m_angle_bins = (int)(static_cast<float>(2 * M_PI) / angle_step_rad) + 1;
 
 	return true;
@@ -448,7 +451,7 @@ bool CPFMatchingExp::similarPose(Eigen::Affine3f a, Eigen::Affine3f b)
 	Eigen::AngleAxisf aa(a.rotation().inverse() * b.rotation());
 	float delta_r = fabsf(aa.angle());
 
-	return delta_t < translation_threshold;// && delta_r < rotation_threshold;
+	return delta_t < m_params.cluster_trans_threshold;// && delta_r < m_params.cluster_rot_threshold;
 }
 
 

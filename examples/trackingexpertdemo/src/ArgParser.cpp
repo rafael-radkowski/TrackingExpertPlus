@@ -34,8 +34,6 @@ Arguments ArgParser::Parse(int& argc, char** argv)
 	// extract the path
 	Path(argv[0]);
 
-	// get the model
-	opt.model_path_and_file = argv[1];
 
 	int pos = 1;
 	while(pos < argc)
@@ -65,17 +63,6 @@ Arguments ArgParser::Parse(int& argc, char** argv)
 		else if(c_arg.compare("-verbose") == 0 ){ // help
 			opt.verbose = true;
 		}
-
-		
-
-		else if(c_arg.compare("-img_w") == 0){ // image width 
-			if (argc >= pos) opt.image_width = atoi( string(argv[pos+1]).c_str() );
-			else ParamError(c_arg);
-		}
-		else if(c_arg.compare("-img_h") == 0){ // image width 
-			if (argc >= pos) opt.image_height =atoi(  string(argv[pos+1]).c_str() );
-			else ParamError(c_arg);
-		}
 		else if(c_arg.compare("-wnd_w") == 0){ // window width 
 			if (argc >= pos) opt.windows_width = atoi( string(argv[pos+1]).c_str() );
 			else ParamError(c_arg);
@@ -84,77 +71,49 @@ Arguments ArgParser::Parse(int& argc, char** argv)
 			if (argc >= pos) opt.window_height =atoi(  string(argv[pos+1]).c_str() );
 			else ParamError(c_arg);
 		}
-		else if(c_arg.compare("-m") == 0){ // method
-			//if (argc >= pos) opt.cam = CameraModelEnum(string(argv[pos+1]));
-			//else ParamError(c_arg);
-		}
-		else if(c_arg.compare("-sub") == 0){ // number of subdivisions for the polyheder
-			if (argc >= pos) opt.subdivisions = atoi(  string(argv[pos+1]).c_str() );
+		else if(c_arg.compare("-fdang") == 0){ // window width 
+			if (argc >= pos) opt.fd_angle_step = atof( string(argv[pos+1]).c_str() );
 			else ParamError(c_arg);
 		}
-		else if(c_arg.compare("-seg") == 0){ // sphere segments   
-			if (argc >= pos) opt.segments =atoi(  string(argv[pos+1]).c_str() );
+		else if(c_arg.compare("-fdrad") == 0){ // window width 
+			if (argc >= pos) opt.fd_curvature_radius = atof( string(argv[pos+1]).c_str() );
 			else ParamError(c_arg);
 		}
-		else if(c_arg.compare("-rows") == 0){ // sphere rows   
-			if (argc >= pos) opt.rows =atoi(  string(argv[pos+1]).c_str() );
+		else if(c_arg.compare("-cluster_t") == 0){ // window height  
+			if (argc >= pos) opt.fd_cluster_trans_th =atof(  string(argv[pos+1]).c_str() );
 			else ParamError(c_arg);
 		}
-		else if(c_arg.compare("-rad") == 0){ // sphere rows   
-			if (argc >= pos) opt.camera_distance = atof(  string(argv[pos+1]).c_str() );
+		else if(c_arg.compare("-cluster_r") == 0){ // window height  
+			if (argc >= pos) opt.fd_cluster_rot_th =atof(  string(argv[pos+1]).c_str() );
 			else ParamError(c_arg);
 		}
-		else if(c_arg.compare("-intr") == 0){ // intrinsic file
-			if (argc >= pos) opt.intrincic_params_file = string(argv[pos + 1]).c_str();
+		else if(c_arg.compare("-icp_rms") == 0){ // window height  
+			if (argc >= pos) opt.icp_min_rms =atof(  string(argv[pos+1]).c_str() );
 			else ParamError(c_arg);
 		}
-		else if(c_arg.compare("-level") == 0){ // balanced pose tree levels 
-			if (argc >= pos) opt.bpt_levels = atof(string(argv[pos + 1]).c_str());
+		else if(c_arg.compare("-icp_dist") == 0){ // window height  
+			if (argc >= pos) opt.icp_outlier_dist_th =atof(  string(argv[pos+1]).c_str() );
 			else ParamError(c_arg);
 		}
-		else if(c_arg.compare("-num") == 0){ // number of images to generate
-			if (argc >= pos) opt.num_images =atoi(  string(argv[pos+1]).c_str() );
+		else if(c_arg.compare("-icp_ang") == 0){ // window height  
+			if (argc >= pos) opt.icp_outlier_ang_th =atof(  string(argv[pos+1]).c_str() );
 			else ParamError(c_arg);
 		}
-		else if(c_arg.compare("-limx") == 0){ // x-axis position limit
-			if (argc >= pos) {
-				opt.lim_nx = -atof(string(argv[pos + 1]).c_str());
-				opt.lim_px = atof(string(argv[pos + 1]).c_str());
-			}
+		else if(c_arg.compare("-icp_max") == 0){ // window height  
+			if (argc >= pos) opt.icp_max_iterations =atoi(  string(argv[pos+1]).c_str() );
 			else ParamError(c_arg);
 		}
-		else if(c_arg.compare("-limy") == 0){ // y-axis (up axis) position limit
-			if (argc >= pos) {
-				opt.lim_ny = -atof(string(argv[pos + 1]).c_str());
-				opt.lim_py = atof(string(argv[pos + 1]).c_str());
-			}
+		else if(c_arg.compare("-grid") == 0){ // window height  
+			if (argc >= pos) opt.sampling_grid_size =atof(  string(argv[pos+1]).c_str() );
 			else ParamError(c_arg);
 		}
-		else if(c_arg.compare("-lim_near") == 0){ // z-axis  near position limit 
-			if (argc >= pos) opt.lim_pz = -atof(  string(argv[pos+1]).c_str() );
+		else if(c_arg.compare("-int") == 0){ // window height  
+			if (argc >= pos) opt.intrincic_params_file =atof(  string(argv[pos+1]).c_str() );
 			else ParamError(c_arg);
-		}
-		else if(c_arg.compare("-lim_far") == 0){ // z-axis  far position limit 
-			if (argc >= pos) opt.lim_nz = -atof(  string(argv[pos+1]).c_str() );
-			else ParamError(c_arg);
-		}
-		else if(c_arg.compare("-up") == 0 ){ // upright images only
-			opt.upright = true;
 		}
 		else if(c_arg.compare("-help") == 0 || c_arg.compare("-h") == 0){ // help
 			Help();
 		}
-		
-		else if(c_arg.compare("-rand_col") == 0 ){ // help
-			opt.with_random_colors = true;
-			if (argc >= pos) opt.rand_col_file =  string(argv[pos+1]);
-		}
-		else if(c_arg.compare("-brdf_col") == 0 ){ // help
-			opt.with_brdf_colors = true;
-			if (argc >= pos) opt.brdf_col_file =  string(argv[pos+1]);
-		}
-
-	
 	
 
 		pos++;
@@ -209,37 +168,32 @@ Display all arguments
 //static 
 void ArgParser::Display(void)
 {
-	std::cout << "\nParameters:" << endl;
-	std::cout << "Model:\t" << opt.model_path_and_file << endl;
-	std::cout << "Intrinsic param file:\t" << opt.intrincic_params_file << endl;
-	std::cout << "Output path:\t" << opt.output_path << endl;
-	//std::cout << "Path:\t" << opt.current_path << endl;
-	//std::cout << "Camera path: " << CameraModelString(opt.cam) << endl;
-	/*if (opt.cam == SPHERE) {
-		std::cout << "Sphere segments: " << opt.segments << endl;
-		std::cout << "Sphere rows: " << opt.rows << endl;
-		std::cout << "Sphere radius: " << opt.camera_distance << endl;
-	}*/
-	/*if (opt.cam == POLY) {
-		std::cout << "Polyheder subdivisions: " << opt.subdivisions << endl;
-		std::cout << "Polyheder radius: " << opt.camera_distance << endl;
+	std::cout << "\nParameters:\n--------------------------------------------------------------------------" << endl;
+	std::cout << "Camera type: \t\t" << opt.camera_type << std::endl;
+	std::cout << "Model file: \t\t" << opt.model_file << std::endl;
+	std::cout << "Scene file: \t\t" << opt.scene_file << std::endl;
+
+	std::cout << "Descriptor histogram bin angle:\t" << opt.fd_angle_step << std::endl;
+	std::cout << "Descriptor cluster translation:\t" << opt.fd_cluster_trans_th << std::endl;
+	std::cout << "Descriptor cluster rotation: \t" << opt.fd_cluster_rot_th << std::endl;
+	std::cout << "ICP min RMS: \t\t\t" << opt.icp_min_rms << std::endl;
+	std::cout << "ICP outlier reject angle: \t" << opt.icp_outlier_ang_th << std::endl;
+	std::cout << "ICP outlier reject distance: \t" << opt.icp_outlier_dist_th << std::endl;
+	std::cout << "ICP max iterations: \t\t" << opt.icp_max_iterations << std::endl;
+	std::cout << "Sampling voxel edge size:\t" << opt.sampling_grid_size << std::endl;
+	std::cout << "Intrinsic and dist. camera file: \t" << opt.intrincic_params_file << std::endl;
+	std::cout << "Current working path: \t" << opt.current_path << std::endl;
+	
+	std::cout << "Wnd width:\t\t\t" << opt.windows_width << endl;
+	std::cout << "Wnd height:\t\t\t" << opt.window_height << endl;
+
+	if (opt.verbose) {
+		std::cout << "Verbose: True " << std::endl;
+	}else{
+		std::cout << "Verbose: False " << std::endl;
 	}
-	if (opt.cam == TREE) {
-		std::cout << "BPT level: " << opt.bpt_levels << endl;
-		std::cout << "Polyheder radius: " << opt.camera_distance << endl;
-	}
-	if (opt.cam == POSE) {
-		std::cout << "Number of images to generate: " << opt.num_images << endl;
-		std::cout << "Polyheder subdivisions: " << opt.subdivisions << endl;
-		std::cout << "Limit x [" << opt.lim_nx << ", " << opt.lim_px << "]." << endl;
-		std::cout << "Limit y [" << opt.lim_ny << ", " << opt.lim_py << "]." << endl;
-		std::cout << "Limit z [" << opt.lim_nz << ", " << opt.lim_pz << "]; values inverted." << endl;
-		
-	}*/
-	std::cout << "Image width:\t" << opt.image_width << endl;
-	std::cout << "Image height:\t" << opt.image_height << endl;
-	std::cout << "Wnd width:\t" << opt.windows_width << endl;
-	std::cout << "Wnd height:\t" << opt.window_height << endl;
+	std::cout << "\n--------------------------------------------------------------------------\n" << std::endl;
+
 
 
 }

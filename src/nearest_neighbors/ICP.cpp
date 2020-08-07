@@ -10,7 +10,7 @@ ICP::ICP() {
 	_max_iterations = 20;
 
 	_verbose = true;
-	_verbose_level = 2;
+	_verbose_level = 0;
 
 	_Rt_initial = Eigen::Matrix4f::Identity();
 
@@ -276,8 +276,8 @@ Matrix4f ICP::Rt(void){
 	//finalRt = t2 * cent * R2 * centInv;
 	finalRt = Ri.transpose()  *  (  centInv  * R2 * cent * t2 ) * ti.transpose();
 
-	MatrixUtils::PrintMatrix4f(Ri);
-	MatrixUtils::PrintMatrix4f(finalRt);
+	//MatrixUtils::PrintMatrix4f(Ri);
+	//MatrixUtils::PrintMatrix4f(finalRt);
 
 //		glm::mat4 centInv = glm::translate(glm::vec3(-centroid.x(), -centroid.y(), -centroid.z() ));
 //	glm::mat4 cent = glm::translate(glm::vec3(centroid.x(), centroid.y(), centroid.z() ));
@@ -578,6 +578,8 @@ Set the number of maximum iterations.
 */
 void ICP::setMaxIterations(int max_iterations)
 {
+	if(max_iterations > 1000) std::cout << "[ERROR] - ICP iterations > 1000 is not permitted. Value set to 1000." << std::endl;
+	if(max_iterations < 1) std::cout << "[ERROR] - ICP iterations < 1 is not permitted. Value set to 1." << std::endl;
 	_max_iterations = std::min(1000, std::max(1, max_iterations));
 }
 
@@ -590,6 +592,8 @@ as inliers. All other points will be rejected.
 */
 void ICP::setRejectMaxAngle(float max_angle)
 {
+	if(max_angle > 180.0) std::cout << "[ERROR] - ICP Outlier rejection angle > 180.0 deg is not permitted. Value set to 180.0." << std::endl;
+	if(max_angle < 1) std::cout << "[ERROR] - ICP Outlier rejection angle < 1.0 deg is not permitted. Value set to 1.0" << std::endl;
 	float angle = std::min(180.0f, std::max(0.0f, max_angle));
 
 	_outlier_reject.setMaxNormalVectorAngle(angle);
@@ -602,6 +606,8 @@ as inliers.
 */
 void ICP::setRejectMaxDistance(float max_distance)
 {
+	if(max_distance > 100.0) std::cout << "[ERROR] - ICP Outlier rejection distance > 100.0 is not permitted. Value set to 100.0." << std::endl;
+	if(max_distance < 0.01f) std::cout << "[ERROR] - ICP Outlier rejection angle < 0.01 is not permitted. Value set to 0.01" << std::endl;
 	float distance = std::min(100.f, std::max(0.01f, max_distance));
 
 	_outlier_reject.setMaxThreshold(distance);

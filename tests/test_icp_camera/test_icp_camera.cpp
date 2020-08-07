@@ -538,7 +538,7 @@ int main(int argc, char** argv)
 	icp = new texpert::ICP();
 	icp->setMinError(0.00000001);
 	icp->setMaxIterations(1);
-	icp->setVerbose(true, 1);
+	icp->setVerbose(true, 0);
 	icp->setRejectMaxAngle(45.0);
 	icp->setRejectMaxDistance(0.1);
 	icp->setRejectionMethod(ICPReject::DIST_ANG);

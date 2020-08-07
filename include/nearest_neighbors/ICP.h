@@ -67,10 +67,13 @@ March 16, 2020, RR
  - Added a function to return the overall translation and rotation. The transformation can be applied on 
 	a reference object to register it with its counterpart. 
 
-Aug, 06, 2020, RR
+Aug 06, 2020, RR
 - Incorporated the initial pose into the final pose so that the result of this class is 
   a complete pose. 
 - Set default values for all parameters. 
+
+Aug 07, 2020, RR
+- Added code to check the parameters ranges. 
 
 */
 

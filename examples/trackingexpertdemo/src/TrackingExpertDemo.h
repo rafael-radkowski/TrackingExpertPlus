@@ -33,7 +33,7 @@ Aug 06, 2020, RR
 #include "GLLineRenderer.h"
 #include "TrackingExpertRegistration.h"
 #include "ColorCoder.h"
-
+#include "TrackingExpertParams.h"
 
 #ifdef _WITH_AZURE_KINECT // set via cmake
 #include "KinectAzureCaptureDevice.h"  // the camera
@@ -97,6 +97,14 @@ public:
 	@param verbose - true enables more debug outputs. 
 	*/
 	bool setVerbose(bool verbose);
+
+
+
+	/*!
+	Set the application parameters
+	@param params - struct params of type TEParams. 
+	*/
+	bool setParams(TEParams params);
 
 private:
 

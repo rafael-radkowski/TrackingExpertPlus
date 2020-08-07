@@ -17,6 +17,8 @@ TrackingExpertRegistration::~TrackingExpertRegistration()
 void TrackingExpertRegistration::init(void)
 {
 	m_model_id = -1;
+	m_model_pose = Eigen::Matrix4f::Identity();
+	m_working = false;
 
 	// create an ICP and feature descriptor instance. 
 	m_fd = new CPFMatchingExp();
@@ -30,7 +32,7 @@ void TrackingExpertRegistration::init(void)
 
 	m_icp->setMinError(0.00000001);
 	m_icp->setMaxIterations(200);
-	m_icp->setVerbose(true, 2);
+	m_icp->setVerbose(true, 0);
 	m_icp->setRejectMaxAngle(45.0);
 	m_icp->setRejectMaxDistance(0.1);
 	m_icp->setRejectionMethod(ICPReject::DIST_ANG);
@@ -56,7 +58,7 @@ int TrackingExpertRegistration::addReferenceModel(PointCloud& points, std::strin
 	// copies the point cloud (too much copies in this code).
 	m_model_pc = points;
 
-	m_model_id = m_fd->addModel(points, label);
+	m_model_id = m_fd->addModel(m_model_pc, label);
 
 	return m_model_id;
 }
@@ -78,7 +80,7 @@ bool TrackingExpertRegistration::updateScene(PointCloud& points)
 
 	m_ptr_model_pc = &points;
 
-	return m_fd->setScene(points);
+	return m_fd->setScene(m_scene_pc);
 }
 
 
@@ -93,8 +95,10 @@ bool TrackingExpertRegistration::process(void)
 	assert(m_icp != NULL);
 
 	if(m_model_id == -1) return false;
+	if(m_working) return false;
 
 	bool ret = true;
+	m_working = true;
 
 	ret = m_fd->match(m_model_id);
 
@@ -118,10 +122,17 @@ bool TrackingExpertRegistration::process(void)
 
 		Eigen::Matrix4f out_Rt;
 		float rms = 0.0;
+
+		// ICP works internally with a copy of m_model_pc
 		m_icp->compute(m_model_pc, Rt, out_Rt, rms);
 
-		std::cout << rms << std::endl;
+
+		// return the pose
+		m_model_pose = m_icp->Rt();
+	
 	}
+
+	m_working = false;
 
 	return true;
 }
@@ -154,8 +165,21 @@ Eigen::Matrix4f  TrackingExpertRegistration::getICPPose(void)
 {
 	assert(m_icp != NULL);
 
-	return m_icp->Rt();
+	return m_model_pose;
 
+}
+
+/*!
+Reset registration and move the reference model to its original start position.
+*/
+bool TrackingExpertRegistration::reset(void)
+{
+	m_model_pose = Eigen::Matrix4f::Identity();
+
+	// copy the original instance of points to m_scene_pc;
+	m_scene_pc = *m_ptr_model_pc;
+
+	return true;
 }
 
 
@@ -168,7 +192,7 @@ bool TrackingExpertRegistration::setVerbose(bool verbose)
 	assert(m_fd != NULL);
 //	assert(m_icp != NULL);
 
-	return m_fd->setVerbose(verbose);// & m_icp->setVerbose(verbose);
+	return m_fd->setVerbose(verbose) & m_icp->setVerbose(verbose);
 }
 
 
@@ -176,13 +200,32 @@ bool TrackingExpertRegistration::setVerbose(bool verbose)
 Set the parameters for the extraction tool.
 @param params - a struct containing some parameters. 
 */
-bool TrackingExpertRegistration::setParams(CPFParams params)
+bool TrackingExpertRegistration::setParams(	TEParams params)
 {
-	assert(m_fd != NULL);
+	m_params = params;
 
-	m_fd->setParams(params);
+	bool ret = m_params.valid();
 
-	return true;
+	if(m_icp){
+		m_icp->setMinError(params.icp_termination_dist);
+		m_icp->setMaxIterations(params.icp_num_max_iterations);
+		m_icp->setVerbose(params.verbose, 0);
+		m_icp->setRejectMaxAngle(params.icp_outlier_reject_angle);
+		m_icp->setRejectMaxDistance(params.icp_outlier_reject_distance);
+		m_icp->setRejectionMethod(ICPReject::DIST_ANG);
+	}
+
+	if(m_fd){
+		m_fd_params.angle_step = params.angle_step;
+		m_fd_params.search_radius = params.curvature_search_radius;
+		m_fd_params.cluster_rot_threshold = params.cluster_rot_threshold;
+		m_fd_params.cluster_trans_threshold = params.cluster_trans_threshold;
+
+		m_fd->setParams(m_fd_params);
+		m_fd->setVerbose(params.verbose);
+	}
+
+	return ret;
 }
 
 

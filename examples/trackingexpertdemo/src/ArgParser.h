@@ -14,9 +14,24 @@ namespace texpert
 
 typedef struct _Arguments
 {
-	string camera_type;
-	string scene_file;
-	string model_file;
+	string	camera_type;
+	string	scene_file;
+	string	model_file;
+
+	float	fd_angle_step;
+	float	fd_cluster_trans_th;
+	float	fd_cluster_rot_th;
+	float	fd_curvature_radius;
+
+	float	icp_min_rms;
+	float	icp_outlier_ang_th;
+	float	icp_outlier_dist_th;
+	int		icp_max_iterations;
+
+	float	sampling_grid_size;
+
+	string	intrincic_params_file;
+	string	current_path;
 
 
 	// helpers
@@ -25,49 +40,12 @@ typedef struct _Arguments
 
 
 
-
-	string	model_path_and_file;
-	string	output_path;
-	string	output_filename;
-	string	intrincic_params_file;
-	string	current_path;
-
 	int		windows_width;
 	int		window_height;
-	int		image_width;
-	int		image_height;
+
 	
 
-	// sphere arguments 
-	int		segments;
-	int		rows;
-	float	camera_distance;
 
-	// polyheder arguments
-	int		subdivisions;
-
-	// balance pose tree levels
-	int		bpt_levels;
-
-
-	bool		with_random_colors;
-	std::string rand_col_file;
-
-	bool		with_brdf_colors;
-	std::string brdf_col_file;
-
-	// for random image generator
-	int		num_images;
-	float	lim_px;
-	float	lim_nx;
-	float	lim_py;
-	float	lim_ny;
-	float	lim_pz;
-	float	lim_nz;
-
-
-	// only get images from the upper hemisphere
-	bool	upright;
 
 	_Arguments()
 	{
@@ -77,39 +55,22 @@ typedef struct _Arguments
 		model_file = "";
 
 		current_path = "";
-		model_path_and_file = "";
-		output_path = "output";
-		output_filename = "rendering";
+		fd_angle_step = 12.0;
+		fd_cluster_trans_th = 0.03;
+		fd_cluster_rot_th = 45.0;
+		icp_min_rms = 0.00000001;
+		icp_outlier_ang_th = 45.0;
+		icp_outlier_dist_th = 0.1;
+		icp_max_iterations = 200;
+		sampling_grid_size = 0.015;
+		fd_curvature_radius = 0.1;
+
+		intrincic_params_file = "";
 
 		windows_width = 1280;
 		window_height = 1280;
-		image_width = 1280;
-		image_height = 1024;
-
-		segments = 10;
-		rows = 10;
-		camera_distance = 1.3f;
-
-		subdivisions = 0;
-		bpt_levels = 0;
-
-		num_images = 6000;
-		lim_px = 1.0;
-		lim_nx = -1.0;
-		lim_py = 1.0;
-		lim_ny = -1.0;
-		lim_pz = -1.5;
-		lim_nz = -3.0;
-
-		upright = false;
-
 		verbose = false;
-		valid = false;
-		with_random_colors = false;
-		with_brdf_colors = false;
 
-		rand_col_file = "nofile";
-		brdf_col_file = "nofile";
 	}
 
 

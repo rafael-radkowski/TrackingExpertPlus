@@ -382,6 +382,19 @@ void TrackingExpertDemo::render_fcn(glm::mat4 pm, glm::mat4 vm)
 	}
 }
 
+
+/*!
+Set the application parameters
+@param params - struct params of type TEParams. 
+*/
+bool TrackingExpertDemo::setParams(TEParams params)
+{
+	assert(m_reg != NULL);
+	return m_reg->setParams(params);
+
+}
+
+
 //-------------------------------------------------------------------------------------------------------------------------------
 // render helpers
 

@@ -32,6 +32,7 @@ Aug 5, 2020, RR
 #include <vector>
 #include <iostream>
 #include <unordered_map>
+#include <algorithm>
 
 // Eigen
 #include <Eigen/Dense>

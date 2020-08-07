@@ -67,11 +67,16 @@ typedef struct CPFParams
 	float search_radius;
 
 	// descriptor histogram bin range in angle degree,
-	int		angle_step;
+	float	angle_step;
+
+	float	cluster_trans_threshold;
+	float	cluster_rot_threshold;
 
 	CPFParams() {
-		search_radius = 0.06;
+		search_radius = 0.1;
 		angle_step = 12.0;
+		cluster_trans_threshold = 0.03;
+		cluster_rot_threshold = 0.8;
 	}
 
 }CPFParams;
