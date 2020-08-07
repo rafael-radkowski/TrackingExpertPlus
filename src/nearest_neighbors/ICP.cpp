@@ -596,6 +596,9 @@ void ICP::setRejectMaxAngle(float max_angle)
 	if(max_angle < 1) std::cout << "[ERROR] - ICP Outlier rejection angle < 1.0 deg is not permitted. Value set to 1.0" << std::endl;
 	float angle = std::min(180.0f, std::max(0.0f, max_angle));
 
+	if(_verbose)
+		std::cout << "[INFO] - ICP set reject angle to: " << angle << std::endl;
+
 	_outlier_reject.setMaxNormalVectorAngle(angle);
 }
 
@@ -609,6 +612,9 @@ void ICP::setRejectMaxDistance(float max_distance)
 	if(max_distance > 100.0) std::cout << "[ERROR] - ICP Outlier rejection distance > 100.0 is not permitted. Value set to 100.0." << std::endl;
 	if(max_distance < 0.01f) std::cout << "[ERROR] - ICP Outlier rejection angle < 0.01 is not permitted. Value set to 0.01" << std::endl;
 	float distance = std::min(100.f, std::max(0.01f, max_distance));
+
+	if(_verbose)
+		std::cout << "[INFO] - ICP set reject distance to: " << distance << std::endl;
 
 	_outlier_reject.setMaxThreshold(distance);
 }

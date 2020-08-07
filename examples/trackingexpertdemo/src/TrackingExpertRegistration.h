@@ -165,6 +165,7 @@ private:
 	int					m_model_id;
 
 	std::vector<int>	m_pose_votes;
+	float				m_rms;
 
 	//------------------------------------------------------------------
 	// Point clouds

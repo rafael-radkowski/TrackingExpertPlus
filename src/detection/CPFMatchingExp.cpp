@@ -10,6 +10,7 @@ CPFMatchingExp::CPFMatchingExp()
 {
 	m_verbose = false;
 	m_render_helpers = true;
+	m_verbose_level = 0;
 
 	float angle_step_rad = m_params.angle_step / 180.0f * static_cast<float>(M_PI);
 	m_angle_bins = (int)(static_cast<float>(2 * M_PI) / angle_step_rad) + 1;
@@ -76,7 +77,7 @@ bool CPFMatchingExp::setScene(PointCloud& points)
 
 	m_scene = points;
 
-	if (m_verbose) {
+	if (m_verbose && m_verbose_level == 2) {
 		std::cout << "[INFO] - CPFMatchingExp: start extracting scene descriptors for " << points.size() << " points." << std::endl;
 	}
 
@@ -87,7 +88,7 @@ bool CPFMatchingExp::setScene(PointCloud& points)
 	calculateDescriptors(points, m_params.search_radius, m_scene_descriptors, m_scene_curvatures);
 
 
-	if (m_verbose) {
+	if (m_verbose  && m_verbose_level == 2) {
 		std::cout << "[INFO] - CPFMatchingExp: finished extraction of " << m_scene_descriptors.size() << " scene descriptors for." << std::endl;
 	}
 
@@ -129,8 +130,11 @@ bool CPFMatchingExp::match(int model_id)
 	for (int i = 0; i < hits; i++) {
 		// <votes, cluster id> in pose_cluster
 		std::pair< int, int>  votes_cluster_index = m_matching_results[model_id].pose_cluster_votes[i];
-		m_matching_results[model_id].poses.push_back(  m_matching_results[model_id].pose_clusters[votes_cluster_index.second].front() ); // get the first matrix. 
-		m_matching_results[model_id].poses_votes.push_back( votes_cluster_index.first);
+		
+		combinePoseCluster( m_matching_results[model_id].pose_clusters[votes_cluster_index.second], votes_cluster_index.first,  m_matching_results[model_id], false);
+		
+		//m_matching_results[model_id].poses.push_back(  m_matching_results[model_id].pose_clusters[votes_cluster_index.second].front() ); // get the first matrix. 
+		//m_matching_results[model_id].poses_votes.push_back( votes_cluster_index.first);
 	}
 
 	return ret;
@@ -138,8 +142,9 @@ bool CPFMatchingExp::match(int model_id)
 
 /*
 */
-bool CPFMatchingExp::setVerbose(bool verbose)
+bool CPFMatchingExp::setVerbose(bool verbose, int level)
 {
+	m_verbose_level = std::min(2, std::max(0, level));
 	m_verbose = verbose;
 	return m_verbose;
 }
@@ -241,7 +246,7 @@ Match the model and scene descriptors.
 void CPFMatchingExp::matchDescriptors(	std::vector<CPFDiscreet>& src_model, std::vector<CPFDiscreet>& src_scene,  PointCloud& pc_model, PointCloud& pc_scene, CPFMatchingData& dst_data)
 									
 {
-	if (m_verbose) {
+	if (m_verbose && m_verbose_level == 2) {
 		std::cout << "[INFO] - CPFMatchingExp: Start matching descriptors." << std::endl;
 	}
 
@@ -359,7 +364,7 @@ void CPFMatchingExp::matchDescriptors(	std::vector<CPFDiscreet>& src_model, std:
 
 	}
 	
-	if (m_verbose) {
+	if (m_verbose && m_verbose_level == 2) {
 		std::cout << "[INFO] - CPFMatchingExp: Found " << dst_data.pose_candidates.size() << " pose candidates." << std::endl;
 	}
 

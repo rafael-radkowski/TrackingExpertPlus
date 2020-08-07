@@ -45,6 +45,8 @@ void TrackingExpertDemo::init(void)
 	m_current_debug_cluster = 0;
 	m_producer = NULL;
 	m_enable_tracking = true;
+	m_producer_param.uniform_step = 8;
+	m_update_camera = true;
 
 	// sampling parameters
 	sampling_method = SamplingMethod::UNIFORM;
@@ -101,12 +103,14 @@ bool TrackingExpertDemo::setCamera(CaptureDeviceType type)
 		std::cout << "[ERROR] - Could not open a camera " << std::endl;
 	}
 
+	
 	/*
 	Create a point cloud producer. It creates a point cloud 
 	from a depth map. Assign a camera and the location to store the point cloud data. 
 	*/
 #ifdef _WITH_PRODUCER
 	m_producer = new texpert::PointCloudProducer(*m_camera, m_pc_camera);
+	m_producer->setSampingMode(SamplingMethod::UNIFORM, m_producer_param );
 #else
 	m_producer = NULL;
 #endif
@@ -131,7 +135,7 @@ Load a scene model from a file instead of from a camers.
 bool TrackingExpertDemo::loadScene(std::string path_and_filename)
 {
 	if (m_camera_type != None) {
-		std::cout << "[ERROR] - Cannot load a scene file since the camera is not set to None." << std::endl;
+		std::cout << "[INFO] - Cannot load a scene file since the camera is not set to None." << std::endl;
 		return false;
 	}
 
@@ -275,6 +279,7 @@ since the function is blocking and will only return after the window closes.
 */
 bool TrackingExpertDemo::run(void)
 {
+	enableTracking(false);
 
 	// init graphics
 	initGfx();
@@ -338,6 +343,10 @@ Allows one to enable or disable the tracking functionality.
 */
 void TrackingExpertDemo::enableTracking(bool enable)
 {
+	if (m_verbose) {
+		if(enable){std::cout << "[INFO] - TRACKING IS ENABLED" << std::endl; }
+		else{std::cout << "[INFO] - WARNING, TRACKING IS DISABLED" << std::endl; }
+	}
 	m_enable_tracking = enable;
 }
 
@@ -347,17 +356,51 @@ Update camera data
 */
 void TrackingExpertDemo::updateCamera(void)
 {
-	if(m_camera_type == None) return;
+	if(m_camera_type == None || m_update_camera == false) return;
 	if(m_producer == NULL) return;
 
 	// fetches a new camera image and update the data
 	m_producer->process();
+
+	// camera point cloud
+	m_reg->updateScene(m_pc_camera);
 
 	// Update the opengl points and draw the points. 
 	gl_camera_point_cloud->updatePoints();
 
 	// the registratin call only starts working if this is set to true. 
 	m_new_scene = true;
+
+	// update the renderer
+	updateRenderData();
+	updateRenderCluster();
+}
+
+
+/*
+Get a single frame from the camera.
+*/
+void TrackingExpertDemo::grabSingleFrame(void)
+{
+
+	if(m_camera_type == None ) return;
+	if(m_producer == NULL) return;
+
+	// fetches a new camera image and update the data
+	m_producer->process();
+
+	// camera point cloud
+	m_reg->updateScene(m_pc_camera);
+
+	// Update the opengl points and draw the points. 
+	gl_camera_point_cloud->updatePoints();
+
+	// the registratin call only starts working if this is set to true. 
+	m_new_scene = true;
+
+	// update the renderer
+	updateRenderData();
+	updateRenderCluster();
 }
 
 
@@ -390,8 +433,14 @@ Set the application parameters
 bool TrackingExpertDemo::setParams(TEParams params)
 {
 	assert(m_reg != NULL);
-	return m_reg->setParams(params);
+	bool err =  m_reg->setParams(params);
 
+	m_producer_param.uniform_step = params.camera_sampling_offset;
+#ifdef _WITH_PRODUCER
+	if(m_producer)
+		m_producer->setSampingMode(SamplingMethod::UNIFORM, m_producer_param );
+#endif
+	return err;
 }
 
 
@@ -417,10 +466,9 @@ void TrackingExpertDemo::upderRenderPose(void) {
 		m[i/4][i%4] =  mat.data()[i];
 	}
 
-	
 	gl_reference_eval->setModelmatrix(MatrixUtils::ICPRt3Mat4(m_reg->getICPPose()));
-
 	//gl_reference_eval->setModelmatrix(m);
+
 	gl_reference_eval->enablePointRendering(true);
 
 //	std::cout << "RENDER POSE" << std::endl;
@@ -433,11 +481,11 @@ void TrackingExpertDemo::updateRenderData(void)
 
 	m_current_debug_point = (std::max)((int)0, (std::min)( (int)pc_ref.points.size(), (int)m_current_debug_point ) );
 
-	m_reg->getRenderHelper().getMatchingPairs(m_current_debug_point, match_pair_ids);
-	gl_matches->updatePoints(pc_ref.points, m_pc_camera.points, match_pair_ids);
+	if(m_reg->getRenderHelper().getMatchingPairs(m_current_debug_point, match_pair_ids))
+		gl_matches->updatePoints(pc_ref.points, m_pc_camera.points, match_pair_ids);
 
-	m_reg->getRenderHelper().getVotePairs(m_current_debug_point, vote_pair_ids);
-	gl_best_votes->updatePoints(pc_ref.points, m_pc_camera.points, vote_pair_ids);
+	if( m_reg->getRenderHelper().getVotePairs(m_current_debug_point, vote_pair_ids))
+		gl_best_votes->updatePoints(pc_ref.points, m_pc_camera.points, vote_pair_ids);
 
 	
 }
@@ -527,7 +575,7 @@ Keyboard callback for the renderer
 */
 void TrackingExpertDemo::keyboard_cb(int key, int action)
 {
-		//cout << key << " : " << action << endl;
+	//cout << key << " : " << action << endl;
 	switch (action) {
 	case 0:  // key up
 	
@@ -600,6 +648,26 @@ void TrackingExpertDemo::keyboard_cb(int key, int action)
 				renderNormalVectors();
 				break;
 			}
+		case 88: // x
+			{
+				if(m_enable_tracking) m_enable_tracking = false;
+				else m_enable_tracking = true;
+
+				enableTracking(m_enable_tracking);
+				break;
+			}
+		case 67://c
+			{
+				if(m_update_camera) m_update_camera = false;
+				else m_update_camera = true;
+				break;
+			}	
+		case 70:// f
+			{
+				grabSingleFrame();
+				break;
+			}	
+
 		}
 		break;
 		

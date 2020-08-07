@@ -44,6 +44,8 @@ void CPFRenderHelpers::addVotePair(int point_id, int scene_id)
 
 bool CPFRenderHelpers::getMatchingPairs(const int point_id, std::vector< std::pair<int, int> >& matching_pairs )
 {
+	if(point_id >= matching_pair_ids.size()  ) return false;
+
 	matching_pairs = matching_pair_ids[point_id];
 	return true;
 }
@@ -57,10 +59,13 @@ bool CPFRenderHelpers::getVotePairs(const int point_id, std::vector< std::pair<i
 			vote_pairs.push_back(p);
 	});
 
+	if(vote_pairs.size() ==0) return false;
+
 	return true;
 }
 
  std::pair<int, int>& CPFRenderHelpers::getVotePair(const int point_id)
  {
+	if(point_id >= vote_pair_ids.size() ) return std::make_pair(-1,-1);
 	return vote_pair_ids[point_id];
  }

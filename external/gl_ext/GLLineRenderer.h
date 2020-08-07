@@ -36,6 +36,8 @@ Last edits:
 June 11, 2020, RR
 - Update the function updatePoints, to pass the latest points to the gpu. 
 
+Aug 7, 2020, RR
+- Bugfix: the function updatePoints(...) used the wrong point variable. 
 */
 
 // stl include

@@ -19,6 +19,7 @@ void TrackingExpertRegistration::init(void)
 	m_model_id = -1;
 	m_model_pose = Eigen::Matrix4f::Identity();
 	m_working = false;
+	m_rms = 100000.0;
 
 	// create an ICP and feature descriptor instance. 
 	m_fd = new CPFMatchingExp();
@@ -100,6 +101,7 @@ bool TrackingExpertRegistration::process(void)
 	bool ret = true;
 	m_working = true;
 
+	//if(m_rms > m_params.icp_termination_dist)
 	ret = m_fd->match(m_model_id);
 
 	// positive match
@@ -121,14 +123,15 @@ bool TrackingExpertRegistration::process(void)
 		Rt.t = pose[0];
 
 		Eigen::Matrix4f out_Rt;
-		float rms = 0.0;
+		//float rms = 0.0;
 
 		// ICP works internally with a copy of m_model_pc
-		m_icp->compute(m_model_pc, Rt, out_Rt, rms);
+		m_icp->compute(m_model_pc, Rt, out_Rt, m_rms);
 
 
 		// return the pose
 		m_model_pose = m_icp->Rt();
+	
 	
 	}
 

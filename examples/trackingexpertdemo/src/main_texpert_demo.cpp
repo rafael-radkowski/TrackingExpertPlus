@@ -15,7 +15,7 @@ TEParams populateParams(Arguments params)
 	TEParams p;
 
 	p.angle_step = params.fd_angle_step;
-	p.camera_sampling_offset = 4;
+	p.camera_sampling_offset = 8;
 	p.cluster_rot_threshold = params.fd_cluster_rot_th;
 	p.cluster_trans_threshold = params.fd_cluster_trans_th;
 	p.curvature_search_radius = params.fd_curvature_radius;

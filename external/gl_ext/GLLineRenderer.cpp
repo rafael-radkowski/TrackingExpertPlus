@@ -189,6 +189,7 @@ void GLLineRenderer::updatePoints(vector<Eigen::Vector3f>& src_points0, vector<E
 {
 	// update the points
 	int size = knn_matches.size();
+	if(size == 0) return;
 
 	//cout << "[GLLineRenderer] Info - update " << size << " valid matches" << endl;
 
@@ -204,7 +205,7 @@ void GLLineRenderer::updatePoints(vector<Eigen::Vector3f>& src_points0, vector<E
 		int p1 = knn_matches[i].second;
 
 		_gl_points0[i*2] = glm::vec3( src_points0[p0].x(),  src_points0[p0].y(),  src_points0[p0].z());
-		glm::vec4 dst =   glm::vec4( _src_points1[p1].x(),  _src_points1[p1].y(),  _src_points1[p1].z(), 1.0f);
+		glm::vec4 dst =   glm::vec4( src_points1[p1].x(),  src_points1[p1].y(),  src_points1[p1].z(), 1.0f);
 
 		_gl_points0[i*2+1] = glm::vec3(dst.x, dst.y,  dst.z);
 		_gl_normals0[i*2] = _line_color;

@@ -144,8 +144,9 @@ public:
 	/*!
 	Enable extra debug messages. 
 	@param verbose - output extra debug messages if true. 
+	@param level - the verbose level 0, 1, 2. The higher the number, the more detailed the info.
 	*/
-	bool setVerbose(bool verbose);
+	bool setVerbose(bool verbose, int level = 0);
 
 
 	/*!
@@ -270,6 +271,7 @@ private:
 
 	bool									m_verbose;
 	bool									m_render_helpers;
+	int										m_verbose_level;
 };
 
 }

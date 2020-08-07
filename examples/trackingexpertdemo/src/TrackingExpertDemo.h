@@ -156,6 +156,11 @@ private:
 	*/
 	void updateCamera(void);
 
+	/*
+	Get a single frame from the camera.
+	*/
+	void grabSingleFrame(void);
+
 
 	// debug rendering functions
 	void renderMatches(void);
@@ -222,6 +227,7 @@ private:
 #ifdef _WITH_PRODUCER
 	PointCloudProducer*		 m_producer;
 #endif
+	SamplingParam		m_producer_param;
 	//--------------------------------------------------------------------
 	// Detetction and registration
 
@@ -240,6 +246,7 @@ private:
 
 	bool				m_new_scene;
 	bool				m_enable_tracking;
+	bool				m_update_camera;
 
 	//--------------------------------------------------------------------
 	// Helper params
