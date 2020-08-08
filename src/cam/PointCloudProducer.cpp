@@ -4,6 +4,7 @@
 // cuda bindings
 #include "cuda/cuPCU3f.h"  // point cloud samping
 
+
 using namespace texpert;
 using namespace std;
 
@@ -49,7 +50,6 @@ PointCloudProducer::PointCloudProducer(ICaptureDevice& capture_device, PointClou
 	// allocate memory for all sampling units. 
 	cuSample3f::CreateUniformSamplePattern(_depth_cols, _depth_rows, _sampling_param.uniform_step);
 	cuSample3f::CreateRandomSamplePattern(_depth_cols, _depth_rows, _sampling_param.random_max_points, _sampling_param.ramdom_percentage);
-	
 
 	_producer_ready = true;
 }
@@ -57,7 +57,7 @@ PointCloudProducer::PointCloudProducer(ICaptureDevice& capture_device, PointClou
 	
 PointCloudProducer::~PointCloudProducer()
 {
-
+	
 }
 
 
@@ -79,6 +79,17 @@ void PointCloudProducer::setSampingMode(SamplingMethod method, SamplingParam par
 	// set sampling parameters and create the required cuda structures. 
 	cuSample3f::CreateUniformSamplePattern(w, h, param.uniform_step);
 	cuSample3f::CreateRandomSamplePattern(w, h, param.random_max_points, param.ramdom_percentage);
+}
+
+/*!
+Set a point cloud filter methods. 
+@param method - can be NONE or BILATERAL
+@param param - the parameters for the filter
+*/
+void PointCloudProducer::setFilterMethod(FilterMethod method, FilterParams param)
+{
+	// pass-through function
+	cuFilter3f::SetFilterMethod( method,  param);
 }
 
 /*

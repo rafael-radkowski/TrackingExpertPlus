@@ -25,6 +25,11 @@ TEParams populateParams(Arguments params)
 	p.icp_termination_dist = params.icp_min_rms;
 	p.sampling_grid_size = params.sampling_grid_size;
 	p.verbose = params.verbose;
+	p.filter_enabled = params.filter_enabled;
+	p.filter_sigmaI = params.filter_sigmaI;
+	p.filter_sigmaS = params.filter_sigmaS;
+	p.filter_kernel = params.filter_kernel;
+
 
 	return p;
 }

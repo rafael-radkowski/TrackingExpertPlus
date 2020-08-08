@@ -31,7 +31,7 @@ void ColorCoder::CPF2Color( std::vector<uint32_t>& desc, std::vector<glm::vec3>&
 		if(desc[i] < min) min = desc[i];
 	}
 
-	cout << "max: " << max << ", min: " << min << endl;
+	//cout << "max: " << max << ", min: " << min << endl;
 
 	std::uint32_t range = max - min;
 

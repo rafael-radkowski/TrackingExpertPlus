@@ -28,6 +28,11 @@ typedef struct _Arguments
 	float	icp_outlier_dist_th;
 	int		icp_max_iterations;
 
+	float	filter_sigmaI;
+	float	filter_sigmaS;
+	int		filter_kernel;
+	bool	filter_enabled;
+
 	float	sampling_grid_size;
 
 	string	intrincic_params_file;
@@ -70,6 +75,11 @@ typedef struct _Arguments
 		windows_width = 1280;
 		window_height = 1280;
 		verbose = false;
+
+		filter_sigmaI = 16.0;
+		filter_sigmaS = 12.0;
+		filter_kernel = 9;
+		filter_enabled = false;
 
 	}
 

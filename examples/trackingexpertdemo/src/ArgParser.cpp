@@ -114,7 +114,21 @@ Arguments ArgParser::Parse(int& argc, char** argv)
 		else if(c_arg.compare("-help") == 0 || c_arg.compare("-h") == 0){ // help
 			Help();
 		}
-	
+		else if(c_arg.compare("-bf_si") == 0){ // bilateral filter sigma I
+			if (argc >= pos) opt.filter_sigmaI =atof(  string(argv[pos+1]).c_str() );
+			else ParamError(c_arg);
+		}
+		else if(c_arg.compare("-bf_ss") == 0){ // bilateral filter sigma S
+			if (argc >= pos) opt.filter_sigmaS =atof(  string(argv[pos+1]).c_str() );
+			else ParamError(c_arg);
+		}
+		else if(c_arg.compare("-bf_ks") == 0){ // bilateral filter kernel size
+			if (argc >= pos) opt.filter_kernel =atoi(  string(argv[pos+1]).c_str() );
+			else ParamError(c_arg);
+		}
+		else if(c_arg.compare("-with_filter") == 0){ // bilateral filter kernel size
+			opt.filter_enabled = true;
+		}
 
 		pos++;
 	}
@@ -182,7 +196,17 @@ void ArgParser::Display(void)
 	std::cout << "ICP max iterations: \t\t" << opt.icp_max_iterations << std::endl;
 	std::cout << "Sampling voxel edge size:\t" << opt.sampling_grid_size << std::endl;
 	std::cout << "Intrinsic and dist. camera file: \t" << opt.intrincic_params_file << std::endl;
-	std::cout << "Current working path: \t" << opt.current_path << std::endl;
+	std::cout << "Filter sigma S: \t\t" << opt.filter_sigmaS << std::endl;
+	std::cout << "Filter sigma I: \t\t" << opt.filter_sigmaI << std::endl;
+	std::cout << "Filter kernel size:\t\t" << opt.filter_kernel << std::endl;
+
+	if (opt.filter_enabled) {
+		std::cout << "Filter:\t\t\tEnabled " << std::endl;
+	}else{
+		std::cout << "Filter:\t\t\tDisabled " << std::endl;
+	}
+	std::cout << "\nCurrent working path: \t" << opt.current_path << std::endl;
+	
 	
 	std::cout << "Wnd width:\t\t\t" << opt.windows_width << endl;
 	std::cout << "Wnd height:\t\t\t" << opt.window_height << endl;

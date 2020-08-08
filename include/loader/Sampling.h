@@ -26,6 +26,9 @@ March 20, 2019, RR
 - Made a local copy of the point cloud in function Unifrom
 	PointCloud temp_src = src;
   to prevent crashes if &src == &dst
+
+Aug 8, 2020, RR
+- Added a verbose level to surpress unnesssary information.
 */
 
 
@@ -66,6 +69,17 @@ public:
     @param dst - location of the the destination  point cloud.
     */
     static void Run(PointCloud& src, PointCloud& dst, bool verbose = false);
+
+
+	/*!
+	Enable more output information.
+	@param verbose - true enables output information. 
+	@param level - set the verbose level. It changes the amount of information.
+		level 0: essential information and parameter changes, 
+		level 1: essential frame-by-frame information.
+		level 2: detailed frame-by-frame information. 
+	*/
+	static void SetVerbose(bool verbose, int level);
 
 private:
     /*

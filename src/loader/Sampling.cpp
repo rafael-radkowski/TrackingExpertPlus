@@ -9,6 +9,7 @@ namespace Sampling_ns{
 
 
     bool    g_verbose = false;
+	bool	g_verbose_level = 0;
 }
 
 
@@ -47,10 +48,10 @@ void Sampling::Uniform( PointCloud& src, PointCloud& dst, SamplingParam param)
        if(p.z() < minZ) minZ = p.z();
     }
 
-    if(g_verbose){
-        cout << "[SamplingPointCloud] - Min x: " << minX << ", max x: " << maxX << endl;
-        cout << "[SamplingPointCloud] - Min y: " << minY << ", max y: " << maxY << endl;
-        cout << "[SamplingPointCloud] - Min z: " << minZ << ", max z: " << maxZ << endl;
+    if(g_verbose && g_verbose_level == 2){
+        cout << "[INFO] Sampling - Min x: " << minX << ", max x: " << maxX << endl;
+        cout << "[INFO] Sampling - Min y: " << minY << ", max y: " << maxY << endl;
+        cout << "[INFO] Sampling - Min z: " << minZ << ", max z: " << maxZ << endl;
     }
 
     //--------------
@@ -72,10 +73,10 @@ void Sampling::Uniform( PointCloud& src, PointCloud& dst, SamplingParam param)
     int vy = std::ceil ( dimY / voxY );
     int vz = std::ceil ( dimZ / voxZ );
 
-    if(g_verbose){
-        cout << "[SamplingPointCloud] - Num cells Vx: " << vx << endl;
-        cout << "[SamplingPointCloud] - Num cells Vy: " << vy << endl;
-        cout << "[SamplingPointCloud] - Num cells Vz: " << vz << endl;
+    if(g_verbose  && g_verbose_level == 2){
+        cout << "[INFO] Sampling - Num cells Vx: " << vx << endl;
+        cout << "[INFO] Sampling - Num cells Vy: " << vy << endl;
+        cout << "[INFO] Sampling - Num cells Vz: " << vz << endl;
     }
 
 
@@ -104,8 +105,8 @@ void Sampling::Uniform( PointCloud& src, PointCloud& dst, SamplingParam param)
         }
     }
 
-    if(g_verbose){
-        cout << "[SamplingPointCloud] - Downsampled form " << src.N << " to " << count << " points. " << endl;
+    if(g_verbose && g_verbose_level == 2){
+        cout << "[INFO] - Downsampled form " << src.N << " to " << count << " points. " << endl;
     }
     dst.points.resize(count);
     dst.normals.resize(count);
@@ -133,8 +134,8 @@ void Sampling::Uniform( PointCloud& src, PointCloud& dst, SamplingParam param)
 	// to reset the variable N
 	dst.size();
 
-    if(g_verbose){ 
-        cout << "[SamplingPointCloud] - Output contains " << i << " points and normals. "  << endl;
+    if(g_verbose && g_verbose_level == 1){ 
+        cout << "[INFO] Sampling - Sampling successfull; output contains " << i << " points and normals. "  << endl;
     }
 }
 
@@ -149,6 +150,21 @@ the set SamplingMethod.
 //static 
 void Sampling::SetMethod(SamplingMethod method, SamplingParam param)
 {
+	if(g_verbose && g_verbose_level == 0){ 
+       switch(method){
+		 case RAW:
+			std::cout << "[INFO] Sampling - Set method to Raw"   << std::endl;
+            break;
+        case UNIFORM:
+            std::cout << "[INFO] Sampling - Set method to UNIFORM"   << std::endl;
+            break;
+        case RANDOM:
+			std::cout << "[ERROR] Sampling - Set method to RANDOM - METHOD CURRENTLY NOT SUPPORTED."   << std::endl;
+            break;
+        default:
+            break;
+		}
+	}
     curr_method = method;
     curr_param = param;
 }
@@ -176,4 +192,21 @@ void Sampling::Run(PointCloud& src, PointCloud& dst, bool verbose)
 
 	dst.size(); // calculates its size
 
+}
+
+
+
+/*!
+Enable more output information.
+@param verbose - true enables output information. 
+@param level - set the verbose level. It changes the amount of information.
+	level 0: essential information and parameter changes, 
+	level 1: additional warnings
+	level 2: frame-by-frame information. 
+*/
+//static 
+void Sampling::SetVerbose(bool verbose, int level)
+{
+	g_verbose = verbose;
+	g_verbose_level = level;
 }

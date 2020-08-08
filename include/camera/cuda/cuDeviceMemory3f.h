@@ -21,6 +21,13 @@ rafael@iastate.edu
 September 27, 2017
 MIT License
 ---------------------------------------------------------------
+
+Last edits:
+
+Aug 8, 2020, RR,
+- Allocate new memory for temporary image data. 
+- Addeda memory counter to keep track of allocated cuda memory;
+
 */
 
 // stl
@@ -50,6 +57,7 @@ class cuDevMem3f
 
 	friend class cuPCU3f;
 	friend class cuSample3f;
+	friend class cuFilter;
 
 public:
 
@@ -68,6 +76,13 @@ public:
 	static void FreeAll(void);
 
 
+	/*
+	Return the amount of allocated cuda memory in bytes. 
+	@return allocated cuda memory in bytes as unsigned int. 
+	*/
+	static unsigned int GetMemoryCount(void);
+
+
 protected:
 
 	/*
@@ -76,6 +91,11 @@ protected:
 	*/
 	//static unsigned short* DevInImagePtr(void);
 	static float* DevInImagePtr(void);
+
+	/*
+	Return the pointer to temporary image memory. 
+	*/
+	static float* DevTempImagePtr(void);
 
 	/*
 	Return the pointer to the output memory for points stored as float3 array;

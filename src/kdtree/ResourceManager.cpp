@@ -1,6 +1,8 @@
 #include "ResourceManager.h"
 
 
+#include "cuDeviceMemory3f.h"
+
 namespace ns_ResourceManager{
 
 	Cuda_KdTree*		g_kdtree_ref = NULL;
@@ -14,18 +16,6 @@ namespace ns_ResourceManager{
 using namespace ns_ResourceManager;
 
 
-//static 
-bool ResourceManager::SetKDTree(Cuda_KdTree* kdtree)
-{
-	if (g_kdtree_ref_cout == 0) {
-		g_kdtree_ref = kdtree;
-		g_kdtree_ref_cout++;
-
-		return true;
-	}
-
-	return false;
-}
 
 
 //static 
@@ -33,10 +23,15 @@ Cuda_KdTree* ResourceManager::GetKDTree(void)
 {
 	if (g_kdtree_ref_cout > 0 ) {
 		g_kdtree_ref_cout++;
-		return g_kdtree_ref;
+		//return g_kdtree_ref;
+	}else
+	{
+		g_kdtree_ref = new Cuda_KdTree();
+		g_kdtree_ref_cout++;
 	}
 
-	return NULL;
+	return g_kdtree_ref;
+	//return NULL;
 }
 
 //static 

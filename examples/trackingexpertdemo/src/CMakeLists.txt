@@ -107,6 +107,7 @@ set(Demo_SRC
 	TrackingExpertRegistration.cpp
 	ColorCoder.h
 	ColorCoder.cpp
+	TrackingExpertParams.h
 )
 
 

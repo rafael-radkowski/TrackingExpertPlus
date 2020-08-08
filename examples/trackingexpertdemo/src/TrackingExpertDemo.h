@@ -34,6 +34,7 @@ Aug 06, 2020, RR
 #include "TrackingExpertRegistration.h"
 #include "ColorCoder.h"
 #include "TrackingExpertParams.h"
+#include "FilterTypes.h"
 
 #ifdef _WITH_AZURE_KINECT // set via cmake
 #include "KinectAzureCaptureDevice.h"  // the camera
@@ -216,6 +217,8 @@ private:
 	// Helper variables to set the point cloud sampling. 
 	SamplingParam		sampling_param;
 	SamplingMethod		sampling_method;
+	FilterParams		m_filter_param;
+	FilterMethod		m_filter_method;
 
 	// switch between AR and point cloud scene. 
 	SceneType			m_scene_type;

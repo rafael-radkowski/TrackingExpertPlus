@@ -196,6 +196,9 @@ set( PointCloud_cuda_INC
 	${PROJECT_SOURCE_DIR}/include/camera/cuda/cuDeviceMemory3f.h
 	${PROJECT_SOURCE_DIR}/include/camera/cuda/cuPCU3f.h
 	${PROJECT_SOURCE_DIR}/include/camera/cuda/cuPCUImpl3f.h
+	${PROJECT_SOURCE_DIR}/include/camera/cuda/cuFilter.h
+	
+	cam/cuda/cuFilter.cu
 )
 
 
@@ -326,8 +329,8 @@ source_group(ICP FILES ${NN_SRC})
 source_group(PointCloud FILES ${PointCloud_SRC})
 source_group(Shader FILES ${Shader_SRC})
 source_group(Utils FILES ${Utils_SRC})
-source_group("PointCloud/Cuda" FILES ${PointCloud_cuda_SRC} )
-source_group(Cuda FILES ${PointCloud_cuda_INC})
+source_group("Cuda/PointCloud" FILES ${PointCloud_cuda_SRC} ${PointCloud_cuda_INC})
+#source_group(Cuda FILES ${PointCloud_cuda_INC})
 #----------------------------------------------------------------------
 # Compiler standards
 

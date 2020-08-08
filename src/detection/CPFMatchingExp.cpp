@@ -72,7 +72,7 @@ bool CPFMatchingExp::setScene(PointCloud& points)
 	if(points.size() == 0) return false;
 
 	if (points.points.size() != points.normals.size()) {
-		std::cout << "[ERROR] - CPFMatchingExp: scene point size " << points.points.size() << " != "  << points.normals.size() << " for the scene."  << std::endl;
+		std::cout << "[ERROR] - CPFMatchingExp: scene point size != normals size: " << points.points.size() << " != "  << points.normals.size() << "."  << std::endl;
 	}
 
 	m_scene = points;

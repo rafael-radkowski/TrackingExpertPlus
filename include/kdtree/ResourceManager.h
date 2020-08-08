@@ -11,8 +11,6 @@ class ResourceManager
 {
 public:
 
-	static bool SetKDTree(Cuda_KdTree* kdtree);
-
 
 	static Cuda_KdTree* GetKDTree(void);
 

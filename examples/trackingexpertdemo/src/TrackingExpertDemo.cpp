@@ -48,13 +48,14 @@ void TrackingExpertDemo::init(void)
 	m_producer_param.uniform_step = 8;
 	m_update_camera = true;
 
+	m_filter_method = BILATERAL;
+
 	// sampling parameters
 	sampling_method = SamplingMethod::UNIFORM;
 	sampling_param.grid_x = 0.015;
 	sampling_param.grid_y = 0.015;
 	sampling_param.grid_z = 0.015;
 	Sampling::SetMethod(sampling_method, sampling_param);
-
 	
 	// init the opengl window
 	glm::mat4 vm = glm::lookAt(glm::vec3(0.0f, 0.0, -0.5f), glm::vec3(0.0f, 0.0f, 0.5), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -111,6 +112,7 @@ bool TrackingExpertDemo::setCamera(CaptureDeviceType type)
 #ifdef _WITH_PRODUCER
 	m_producer = new texpert::PointCloudProducer(*m_camera, m_pc_camera);
 	m_producer->setSampingMode(SamplingMethod::UNIFORM, m_producer_param );
+	m_producer->setFilterMethod (m_filter_method, m_filter_param);
 #else
 	m_producer = NULL;
 #endif
@@ -362,6 +364,8 @@ void TrackingExpertDemo::updateCamera(void)
 	// fetches a new camera image and update the data
 	m_producer->process();
 
+	//Sampling::Run(m_pc_camera, m_pc_camera, m_verbose);
+
 	// camera point cloud
 	m_reg->updateScene(m_pc_camera);
 
@@ -391,6 +395,8 @@ void TrackingExpertDemo::grabSingleFrame(void)
 
 	// camera point cloud
 	m_reg->updateScene(m_pc_camera);
+
+	Sampling::Run(m_pc_camera, m_pc_camera, m_verbose);
 
 	// Update the opengl points and draw the points. 
 	gl_camera_point_cloud->updatePoints();
@@ -436,9 +442,21 @@ bool TrackingExpertDemo::setParams(TEParams params)
 	bool err =  m_reg->setParams(params);
 
 	m_producer_param.uniform_step = params.camera_sampling_offset;
+	m_filter_param.kernel_size = params.filter_kernel;
+	m_filter_param.sigmaI = params.filter_sigmaI;
+	m_filter_param.sigmaS = params.filter_sigmaS;
+
+	if(params.filter_enabled) m_filter_method = BILATERAL;
+	else m_filter_method = NONE;
+
+	// Note that the next lines have no effect if the camera has not been initialized.
+	// Go to setCamera to change default params. 
+	// This method is only useful for changed during runtime. 
 #ifdef _WITH_PRODUCER
-	if(m_producer)
+	if(m_producer){
 		m_producer->setSampingMode(SamplingMethod::UNIFORM, m_producer_param );
+		m_producer->setFilterMethod (m_filter_method, m_filter_param);
+	}
 #endif
 	return err;
 }

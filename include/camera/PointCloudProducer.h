@@ -25,6 +25,9 @@ Feb 20, 2020, RR
 - Added a function that copies the point from the internal to the external storage. 
 	and removes all 0,0,0 points. 
 
+Aug 8, 2020, RR
+- Added a function to set the point cloud filter method. 
+
 */
 #include <iostream>
 #include <vector>
@@ -40,7 +43,7 @@ Feb 20, 2020, RR
 #include "ICaptureDeviceTypes.h"
 #include "Types.h"  // PointCloud data type
 #include "SamplingTypes.h"
-
+#include "FilterTypes.h"
 
 namespace texpert {
 
@@ -60,6 +63,14 @@ public:
 		sampling method. 
 	*/
 	void setSampingMode(SamplingMethod method, SamplingParam param);
+
+
+	/*!
+	Set a point cloud filter methods. 
+	@param method - can be NONE or BILATERAL
+	@param param - the parameters for the filter
+	*/
+	void setFilterMethod(FilterMethod method, FilterParams param);
 
 	/*
 	For normal vector calculation - set the related parameters

@@ -12,10 +12,7 @@ KNN::KNN() {
 	exists in the entire app. 
 	*/
 	_kdtree = ResourceManager::GetKDTree();
-	if(_kdtree == NULL){
-		_kdtree = new Cuda_KdTree();
-		ResourceManager::SetKDTree(_kdtree);
-	}
+	
 
 	_ready = false;
 

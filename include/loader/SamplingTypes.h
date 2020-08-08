@@ -49,8 +49,8 @@ typedef struct _SamplingParam
         grid_z = 0.01;
 
 		uniform_step = 0.0;
-		random_max_points = -1;
-		ramdom_percentage = 25;
+		random_max_points = 5000;
+		ramdom_percentage = 25; // currently not in use. Use the max random points number. 
     }
 
 }SamplingParam;

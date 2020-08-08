@@ -89,7 +89,22 @@ namespace nsGLPointCloudRenderer
 		"}                                                                 \n";
 
 
-
+			// Fragment shader source code. This determines the colors in the fragment generated in the shader pipeline. In this case, it colors the inside of our triangle specified by our vertex shader.
+	static const string fs_string_410_normals =
+		"#version 410 core                                                 \n"
+		"                                                                  \n"
+		"uniform vec3 pointcolor;                                          \n"
+		"in vec2 pass_Texture;												\n"
+		"in vec3 pass_Color;                                               \n"
+		"out vec4 color;                                                    \n"
+		"void main(void)                                                   \n"
+		"{                                                                 \n"
+#ifdef _USE_PER_VERTEX_COLOR
+		"    color = vec4(pointcolor, 1.0);                               \n"
+#else
+		"    color = vec4(pointcolor, 1.0);                               \n"
+#endif
+		"}																	 \n";
 };
 
 
@@ -173,7 +188,7 @@ GLPointCloudRenderer::GLPointCloudRenderer(vector<Eigen::Vector3f>& src_points, 
 
 	//----------------------------------------------------------------
 	// normal vectors
-	program_normals = cs557::CreateShaderProgram(vs_string_410, gs_string_410, fs_string_410);
+	program_normals = cs557::CreateShaderProgram(vs_string_410, gs_string_410, fs_string_410_normals);
 
 	glUseProgram(program_normals);
 	glBindVertexArray(vaoID[0]);

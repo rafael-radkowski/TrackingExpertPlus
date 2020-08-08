@@ -31,6 +31,13 @@ typedef struct TEParams {
 	float		icp_num_max_iterations; // ICP max. number of allowed iterations [1, 1000]
 
 
+	// bilateral filter
+	float		filter_sigmaI;
+	float		filter_sigmaS;
+	int			filter_kernel;
+	bool		filter_enabled;
+
+
 	TEParams() {
 		verbose = false;
 		angle_step = 12.0;
@@ -43,6 +50,11 @@ typedef struct TEParams {
 		icp_outlier_reject_distance = 0.1;
 		icp_termination_dist = 0.00000001;
 		icp_num_max_iterations = 200;
+
+		filter_sigmaI = 12.0;
+		filter_sigmaS = 16.0;
+		filter_kernel = 9;
+		filter_enabled = false;
 	}
 
 	bool valid(void) {

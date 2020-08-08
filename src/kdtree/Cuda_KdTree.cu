@@ -1192,6 +1192,7 @@ void Cuda_KdTree::knn(std::vector<MyPoint>& search_points, std::vector<MyMatches
 	assert(n <= MAX_SEARCH_POINTS);
 	assert(n  <= MAX_OUTPUT_POINTS);
 	assert(k <= KNN_MATCHES_LENGTH);
+	output.clear();
 	output.resize(n);
 
 	Cuda_Helpers::HostToDevice<MyPoint>(&search_points.front(), d_query_points, n); 
