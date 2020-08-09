@@ -28,6 +28,9 @@ Feb 20, 2020, RR
 Aug 8, 2020, RR
 - Added a function to set the point cloud filter method. 
 
+Aug 9, 2020, RR
+- BUGFIX: fixed a severe bug in setSampingMode(). The sampling pattern used the color image resolution
+  to create sampling patterns and not the depth resolution. That resulted in double-points in the point cloud. 
 */
 #include <iostream>
 #include <vector>

@@ -11,10 +11,11 @@ CPFMatchingExp::CPFMatchingExp()
 	m_verbose = false;
 	m_render_helpers = true;
 	m_verbose_level = 0;
+	m_multiplier = 10.0;
 
 	float angle_step_rad = m_params.angle_step / 180.0f * static_cast<float>(M_PI);
 	m_angle_bins = (int)(static_cast<float>(2 * M_PI) / angle_step_rad) + 1;
-
+	
 
 	m_knn = new KNN();
 }
@@ -158,6 +159,7 @@ bool CPFMatchingExp::setParams(CPFParams params)
 	m_params.search_radius = std::max(0.001f, std::min(10.0f, params.search_radius));
 	m_params.cluster_trans_threshold = std::max(0.0001f, std::min(100.0f, params.cluster_trans_threshold));
 	m_params.cluster_rot_threshold = std::max(0.0f, std::min(180.0f, params.cluster_rot_threshold)) / 180.0f * static_cast<float>(M_PI);  // to rad
+	m_multiplier = std::max(1.0f, std::min(100.0f, params.multiplier));
 
 	float angle_step_rad = m_params.angle_step / 180.0f * static_cast<float>(M_PI); // to rad
 	m_angle_bins = (int)(static_cast<float>(2 * M_PI) / angle_step_rad) + 1;
@@ -195,7 +197,7 @@ void CPFMatchingExp::calculateDescriptors(PointCloud& pc, float radius, std::vec
 
 	for (int i = 0; i < s; i++) {
 	
-		uint32_t curv = CPFTools::DiscretizeCurvature(pc.points[i], pc.normals[i], pc, matches[i]);
+		uint32_t curv = CPFTools::DiscretizeCurvature(pc.points[i], pc.normals[i], pc, matches[i], m_multiplier);
 		curvatures.push_back(curv);
 	}	
 

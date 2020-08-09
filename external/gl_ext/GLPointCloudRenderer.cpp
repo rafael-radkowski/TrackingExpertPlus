@@ -224,6 +224,8 @@ GLPointCloudRenderer::GLPointCloudRenderer(vector<Eigen::Vector3f>& src_points, 
 	// default color
 	glUniform3fv( program_normals_locations[5], 1, &_normal_color[0]);
 	glUniform1f(  glGetUniformLocation(program_normals, "normal_length"), _normal_length );
+
+	
 	
 }
 
@@ -235,10 +237,8 @@ Update the points using the existing references.
 */
 void GLPointCloudRenderer::updatePoints(void)
 {
-	if(!_auto_update)return;
-
+	
 	_N = _points.size();
-
 	if(_N <= 0) return;
 
 	_block.lock();
@@ -267,7 +267,8 @@ Draw the obj model
 void GLPointCloudRenderer::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
 {
 	// update the points
-	updatePoints();
+	if(_auto_update)
+		updatePoints();
 
 	_projectionMatrix = projectionMatrix;
 	_viewMatrix = viewMatrix;
@@ -312,6 +313,7 @@ void GLPointCloudRenderer::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix
 		return;
 	}
 
+	glEnable(GL_LINE_SMOOTH);
 	glUseProgram(program_normals);
 	// this changes the camera location
 	glUniformMatrix4fv(program_normals_locations[1] , 1, GL_FALSE, &viewMatrix[0][0]); // send the view matrix to our shader
@@ -324,7 +326,7 @@ void GLPointCloudRenderer::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix
 	//glBindVertexArray(vaoID[0]);
 
 	//glUseProgram(program_normals);
-	
+	glLineWidth(2.0f);;
 	// Draw the triangles
  	glDrawArrays(GL_POINTS, 0, _N);
 	
@@ -364,7 +366,7 @@ void GLPointCloudRenderer::setPointColor(glm::vec3 color)
 
 	//Normal vectors
 	glBindBuffer(GL_ARRAY_BUFFER, vboID[2]); // Bind our second Vertex Buffer Object
-	glBufferSubData(GL_ARRAY_BUFFER, 0, (GLsizeiptr)(_N * 3* sizeof(GLfloat)), (void*) &colors[0]); // Set the size and data of our VBO and set it to STATIC_DRAW
+	glBufferSubData(GL_ARRAY_BUFFER, 0, (GLsizeiptr)(size * 3* sizeof(GLfloat)), (void*) &colors[0]); // Set the size and data of our VBO and set it to STATIC_DRAW
 
 	glBindVertexArray(0); // Disable our Vertex Buffer Object
 #endif
@@ -385,6 +387,10 @@ void GLPointCloudRenderer::setPointColors(vector<glm::vec3> per_vertex_color)
 	for(int i=0; i<size; i++)
 	{
 		colors[i] = per_vertex_color[i];
+	}
+
+	if (size != _N) {
+		std::cout << "[ERROR] GLPointCloudRenderer::setPointColors - Number of points does not match number of color elements: " << _N << " p != " << size << " n." << std::endl;
 	}
 
 	//Normal vectors

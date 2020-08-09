@@ -107,7 +107,7 @@ Arguments ArgParser::Parse(int& argc, char** argv)
 			if (argc >= pos) opt.sampling_grid_size =atof(  string(argv[pos+1]).c_str() );
 			else ParamError(c_arg);
 		}
-		else if(c_arg.compare("-int") == 0){ // window height  
+		else if(c_arg.compare("-int") == 0){ // intrinsic camera params
 			if (argc >= pos) opt.intrincic_params_file =atof(  string(argv[pos+1]).c_str() );
 			else ParamError(c_arg);
 		}
@@ -129,7 +129,10 @@ Arguments ArgParser::Parse(int& argc, char** argv)
 		else if(c_arg.compare("-with_filter") == 0){ // bilateral filter kernel size
 			opt.filter_enabled = true;
 		}
-
+		else if(c_arg.compare("-cam_offset") == 0){ // cuda camera procuder grid offset
+			if (argc >= pos) opt.camera_sampling_offset = atoi(  string(argv[pos+1]).c_str() );
+			else ParamError(c_arg);
+		}
 		pos++;
 	}
 

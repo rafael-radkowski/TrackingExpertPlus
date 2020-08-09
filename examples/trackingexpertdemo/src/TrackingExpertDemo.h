@@ -170,6 +170,7 @@ private:
 	void updateRenderData(void);
 	void updateRenderCluster(void);
 	void renderCurvatures(void);
+	void updateCurvatures(void);
 	void renderNormalVectors(void);
 	void upderRenderPose(void);
 
@@ -194,6 +195,7 @@ private:
 	bool					m_enable_best_pose_renderer;
 	bool					m_render_curvatures;
 	bool					m_render_normals;
+	bool					m_enable_filter;
 	int						m_current_debug_point;
 	int						m_current_debug_cluster;
 

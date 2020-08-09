@@ -223,6 +223,7 @@ bool TrackingExpertRegistration::setParams(	TEParams params)
 		m_fd_params.search_radius = params.curvature_search_radius;
 		m_fd_params.cluster_rot_threshold = params.cluster_rot_threshold;
 		m_fd_params.cluster_trans_threshold = params.cluster_trans_threshold;
+		m_fd_params.multiplier = params.curvature_multiplier;
 
 		m_fd->setParams(m_fd_params);
 		m_fd->setVerbose(params.verbose);

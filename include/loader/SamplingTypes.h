@@ -6,10 +6,17 @@ Iowa State University
 rafael@iastate.edu
 MIT License
 ---------------------------------------------------------------
+
+Last edits:
+Aug 9, 2020, RR:
+- Added a method to validate the correctness of the value and to correct them if required. 
 */
+
 
 #ifndef __SAMPLING_TIMES__
 #define __SAMPLING_TIMES__
+
+#include <algorithm>
 
 /*
 The different datasets sampling types for the camera data and the loaded model. 
@@ -48,10 +55,20 @@ typedef struct _SamplingParam
         grid_y = 0.01;
         grid_z = 0.01;
 
-		uniform_step = 0.0;
+		uniform_step = 1.0;
 		random_max_points = 5000;
 		ramdom_percentage = 25; // currently not in use. Use the max random points number. 
     }
+
+	void validate(void) {
+		uniform_step = std::max(1, uniform_step);
+		random_max_points = std::max(1, random_max_points);
+		ramdom_percentage = std::max(1.0f, std::min(100.0f, ramdom_percentage));
+
+		grid_x =  std::max(0.0001f, grid_x);
+		grid_y =  std::max(0.0001f, grid_y);
+		grid_z =  std::max(0.0001f, grid_z);
+	}
 
 }SamplingParam;
 

@@ -9,7 +9,7 @@ namespace Sampling_ns{
 
 
     bool    g_verbose = false;
-	bool	g_verbose_level = 0;
+	int		g_verbose_level = 0;
 }
 
 
@@ -106,8 +106,10 @@ void Sampling::Uniform( PointCloud& src, PointCloud& dst, SamplingParam param)
     }
 
     if(g_verbose && g_verbose_level == 2){
-        cout << "[INFO] - Downsampled form " << src.N << " to " << count << " points. " << endl;
+        cout << "[INFO] - Downsampled fr0m " << src.N << " to " << count << " points. " << endl;
     }
+	dst.points.clear();
+	dst.normals.clear();
     dst.points.resize(count);
     dst.normals.resize(count);
 

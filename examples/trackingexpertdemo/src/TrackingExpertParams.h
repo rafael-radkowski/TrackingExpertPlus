@@ -13,6 +13,7 @@ typedef struct TEParams {
 
 	// registration parameters
 	float		angle_step;  // descriptor histogram threshold [1, 180] degree
+	float		curvature_multiplier;
 	float		cluster_trans_threshold; // clustering threshold [0, inf ]
 	float		cluster_rot_threshold; //
 
@@ -50,6 +51,7 @@ typedef struct TEParams {
 		icp_outlier_reject_distance = 0.1;
 		icp_termination_dist = 0.00000001;
 		icp_num_max_iterations = 200;
+		curvature_multiplier = 10;
 
 		filter_sigmaI = 12.0;
 		filter_sigmaS = 16.0;

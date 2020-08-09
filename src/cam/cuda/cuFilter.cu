@@ -11,7 +11,7 @@ struct  {
 	float* devImageMem = NULL;
 	float* devImageIn = NULL;
 	bool   use_global_memory = true;
-	bool   filter_enabled = true;
+	bool   filter_enabled = false;
 	bool	verbose = true;
 
 	// bilateral filter

@@ -70,11 +70,16 @@ Set the sampling method
 */
 void PointCloudProducer::setSampingMode(SamplingMethod method, SamplingParam param)
 {
-	int w = _capture_device.getCols(COLOR);
-	int h = _capture_device.getRows(COLOR);
+	int w = _depth_cols;//_capture_device.getCols(COLOR);
+	int h = _depth_rows;//_capture_device.getRows(COLOR);
+
+	if (w <= 0 || h <= 0) {
+		std::cout << "[ERROR] - setSampingMode: invalid camera resolution." << std::endl; 
+	}
 
 	_sampling_method = method;
 	_sampling_param = param;
+	_sampling_param.validate(); // check the values and correct if necessary. 
 
 	// set sampling parameters and create the required cuda structures. 
 	cuSample3f::CreateUniformSamplePattern(w, h, param.uniform_step);
@@ -192,8 +197,6 @@ bool PointCloudProducer::run_sampling_random(float* imgBuf)
 // and remove all points with values (0,0,0)
 bool  PointCloudProducer::copy_and_clear_points(void)
 {
-	
-
 	_the_cloud.resize(_pc_storage.points.size());
 	auto itp = std::copy_if(_pc_storage.points.begin(),  _pc_storage.points.end(),  _the_cloud.points.begin(), [](Eigen::Vector3f p){return !(p.z()==0.0);});
 	auto itn = std::copy_if(_pc_storage.normals.begin(), _pc_storage.normals.end(), _the_cloud.normals.begin(), [](Eigen::Vector3f n){return !(n.z()==0.0);});
@@ -201,6 +204,7 @@ bool  PointCloudProducer::copy_and_clear_points(void)
 	_the_cloud.points.resize(std::distance(_the_cloud.points.begin(), itp ));
 	_the_cloud.normals.resize(std::distance(_the_cloud.normals.begin(), itn ));
 
+	
 //#define _TEST_COPY
 #ifdef _TEST_COPY
 // brute force test to check if the result is equal
@@ -209,7 +213,7 @@ bool  PointCloudProducer::copy_and_clear_points(void)
 Test passed on:
 
 - Feb 20, 2020, RR, Structure Core camera: no problems
-
+- Aug 8, 2020, RR, Azure kinect, no problem. 
 ****************************************************************************/
 
 	PointCloud	test_cloud;

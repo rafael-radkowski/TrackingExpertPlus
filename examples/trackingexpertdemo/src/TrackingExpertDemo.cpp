@@ -47,6 +47,7 @@ void TrackingExpertDemo::init(void)
 	m_enable_tracking = true;
 	m_producer_param.uniform_step = 8;
 	m_update_camera = true;
+	m_enable_filter = false;
 
 	m_filter_method = BILATERAL;
 
@@ -240,6 +241,7 @@ void TrackingExpertDemo::initGfx(void)
 	gl_camera_point_cloud->setPointColor(glm::vec3(1.0,0.0,0.0));
 	gl_camera_point_cloud->setNormalColor(glm::vec3(0.8,0.5,0.0));
 	gl_camera_point_cloud->setNormalGfxLength(0.05f);
+	gl_camera_point_cloud->enableAutoUpdate(false);
 
 	// reference point cloud
 	gl_reference_point_cloud = new	isu_ar::GLPointCloudRenderer(pc_ref.points, pc_ref.normals);
@@ -337,6 +339,11 @@ void TrackingExpertDemo::trackObject(void)
 
 	// update the final pose
 	upderRenderPose();
+
+	// update the renderer
+	updateRenderData();
+	updateRenderCluster();
+	
 }
 
 /*
@@ -372,12 +379,12 @@ void TrackingExpertDemo::updateCamera(void)
 	// Update the opengl points and draw the points. 
 	gl_camera_point_cloud->updatePoints();
 
+	// update the curvature values
+	updateCurvatures();
+
 	// the registratin call only starts working if this is set to true. 
 	m_new_scene = true;
 
-	// update the renderer
-	updateRenderData();
-	updateRenderCluster();
 }
 
 
@@ -396,17 +403,14 @@ void TrackingExpertDemo::grabSingleFrame(void)
 	// camera point cloud
 	m_reg->updateScene(m_pc_camera);
 
-	Sampling::Run(m_pc_camera, m_pc_camera, m_verbose);
+	//Sampling::Run(m_pc_camera, m_pc_camera, m_verbose);
 
 	// Update the opengl points and draw the points. 
 	gl_camera_point_cloud->updatePoints();
 
 	// the registratin call only starts working if this is set to true. 
 	m_new_scene = true;
-
-	// update the renderer
-	updateRenderData();
-	updateRenderCluster();
+	
 }
 
 
@@ -445,9 +449,13 @@ bool TrackingExpertDemo::setParams(TEParams params)
 	m_filter_param.kernel_size = params.filter_kernel;
 	m_filter_param.sigmaI = params.filter_sigmaI;
 	m_filter_param.sigmaS = params.filter_sigmaS;
+	m_enable_filter = true;
 
 	if(params.filter_enabled) m_filter_method = BILATERAL;
-	else m_filter_method = NONE;
+	else{ 
+		m_filter_method = NONE;
+		m_enable_filter = false;
+	}
 
 	// Note that the next lines have no effect if the camera has not been initialized.
 	// Go to setCamera to change default params. 
@@ -458,6 +466,11 @@ bool TrackingExpertDemo::setParams(TEParams params)
 		m_producer->setFilterMethod (m_filter_method, m_filter_param);
 	}
 #endif
+
+	sampling_param.grid_x = params.sampling_grid_size;
+	sampling_param.grid_y = params.sampling_grid_size;
+	sampling_param.grid_z = params.sampling_grid_size;
+	Sampling::SetMethod(sampling_method, sampling_param);
 	return err;
 }
 
@@ -552,28 +565,33 @@ void TrackingExpertDemo::renderCurvatures(void)
 {
 	assert(m_reg != NULL);
 
-	if(m_render_curvatures) m_render_curvatures = false;
-	else m_render_curvatures = true;
-
-	if (m_render_curvatures) {
-		std::vector<uint32_t> cu0, cu1;
-		std::vector<glm::vec3> colors;
-		std::vector<glm::vec3> colors2;
-
-		m_reg->getModelCurvature(cu0);
-		m_reg->getSceneCurvature(cu1);
-
-		ColorCoder::CPF2Color(cu0, colors);
-		gl_reference_point_cloud->setPointColors(colors);
-
-		ColorCoder::CPF2Color(cu1, colors2);
-		gl_camera_point_cloud->setPointColors(colors2);
-
-	}else
-	{
+	if(m_render_curvatures){
+		m_render_curvatures = false;
 		gl_reference_point_cloud->setPointColor(glm::vec3(0.0, 1.0, 0.0));
 		gl_camera_point_cloud->setPointColor(glm::vec3(1.0, 0.0, 0.0));
 	}
+	else{
+		m_render_curvatures = true;
+		updateCurvatures();
+	}
+}
+
+void TrackingExpertDemo::updateCurvatures(void)
+{
+	if(!m_render_curvatures) return;
+
+	std::vector<uint32_t> cu0, cu1;
+	std::vector<glm::vec3> colors;
+	std::vector<glm::vec3> colors2;
+
+	m_reg->getModelCurvature(cu0);
+	m_reg->getSceneCurvature(cu1);
+
+	ColorCoder::CPF2Color(cu0, colors);
+	gl_reference_point_cloud->setPointColors(colors);
+
+	ColorCoder::CPF2Color(cu1, colors2);
+	gl_camera_point_cloud->setPointColors(colors2);
 }
 
 
@@ -674,6 +692,24 @@ void TrackingExpertDemo::keyboard_cb(int key, int action)
 				enableTracking(m_enable_tracking);
 				break;
 			}
+		case 66://b
+			{
+				if(m_enable_filter){ 
+					m_enable_filter = false;
+					m_filter_method = NONE;
+				}
+				else {
+					m_enable_filter = true;
+					m_filter_method = BILATERAL;
+				}
+
+#ifdef _WITH_PRODUCER
+				if(m_producer){
+					m_producer->setFilterMethod (m_filter_method, m_filter_param);
+				}
+#endif
+				break;
+			}	
 		case 67://c
 			{
 				if(m_update_camera) m_update_camera = false;

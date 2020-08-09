@@ -689,7 +689,7 @@ void cuSample3f::CreateUniformSamplePattern(int width, int height, int sampling_
 	cudaMemcpy((unsigned short*)output_pattern.data, g_cu_sampling_dev, output_size, cudaMemcpyDeviceToHost);
 
 	cv::Mat test_out;
-	output_pattern.convertTo(test_out, CV_8UC3);
+	output_pattern.convertTo(test_out, CV_8UC3, 255);
 
 
 	cv::imshow("Pattern image out", test_out);
@@ -781,7 +781,7 @@ void cuSample3f::CreateRandomSamplePattern(int width, int height, int max_points
 		cudaMemcpy((unsigned short*)output_pattern.data, g_cu_random_sampling_dev[i], output_size, cudaMemcpyDeviceToHost);
 
 		cv::Mat test_out;
-		output_pattern.convertTo(test_out, CV_8UC3);
+		output_pattern.convertTo(test_out, CV_8UC3, 255);
 
 
 		cv::imshow("Pattern image out", test_out);

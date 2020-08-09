@@ -15,7 +15,7 @@ TEParams populateParams(Arguments params)
 	TEParams p;
 
 	p.angle_step = params.fd_angle_step;
-	p.camera_sampling_offset = 8;
+	p.camera_sampling_offset = params.camera_sampling_offset;
 	p.cluster_rot_threshold = params.fd_cluster_rot_th;
 	p.cluster_trans_threshold = params.fd_cluster_trans_th;
 	p.curvature_search_radius = params.fd_curvature_radius;
@@ -29,7 +29,7 @@ TEParams populateParams(Arguments params)
 	p.filter_sigmaI = params.filter_sigmaI;
 	p.filter_sigmaS = params.filter_sigmaS;
 	p.filter_kernel = params.filter_kernel;
-
+	p.curvature_multiplier = 4.0;
 
 	return p;
 }

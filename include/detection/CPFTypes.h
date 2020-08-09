@@ -69,10 +69,13 @@ typedef struct CPFParams
 	// descriptor histogram bin range in angle degree,
 	float	angle_step;
 
+	float	multiplier;
+
 	float	cluster_trans_threshold;
 	float	cluster_rot_threshold;
 
 	CPFParams() {
+		multiplier = 10.0;
 		search_radius = 0.1;
 		angle_step = 12.0;
 		cluster_trans_threshold = 0.03;

@@ -268,6 +268,7 @@ private:
 
 	// params
 	int										m_angle_bins;
+	float									m_multiplier;
 
 	bool									m_verbose;
 	bool									m_render_helpers;

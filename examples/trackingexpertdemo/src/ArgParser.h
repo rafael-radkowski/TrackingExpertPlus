@@ -38,6 +38,7 @@ typedef struct _Arguments
 	string	intrincic_params_file;
 	string	current_path;
 
+	int		camera_sampling_offset;
 
 	// helpers
 	bool		verbose;
@@ -68,6 +69,7 @@ typedef struct _Arguments
 		icp_outlier_dist_th = 0.1;
 		icp_max_iterations = 200;
 		sampling_grid_size = 0.015;
+		camera_sampling_offset = 12;
 		fd_curvature_radius = 0.1;
 
 		intrincic_params_file = "";
