@@ -56,6 +56,7 @@ endmacro( mark_as_internal _var )
 
 # default search dirs
 set( _azurekinect_DEFAULT_SEARCH_DIRS 
+  "C:/Program Files/Azure Kinect SDK v1.4.1"
   "C:/Program Files/Azure Kinect SDK v1.4.0"
   "D:/Program Files/Azure Kinect SDK v1.4.0"
   "C:/Program Files/Azure Kinect SDK v1.5.0"

@@ -31,10 +31,14 @@ Aug 8, 2020, RR
 Aug 9, 2020, RR
 - BUGFIX: fixed a severe bug in setSampingMode(). The sampling pattern used the color image resolution
   to create sampling patterns and not the depth resolution. That resulted in double-points in the point cloud. 
+
+Aug 27, 2020, RR
+- Removed a copy_if operator and added a loop to copy points. Copy_if return incorrect sized vectors. 
+
 */
 #include <iostream>
 #include <vector>
-
+#include <algorithm>
 // opencv
 #include <opencv2/opencv.hpp>
 

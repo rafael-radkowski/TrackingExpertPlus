@@ -111,9 +111,8 @@ if(${ENABLE_STRUCTURE_CORE} STREQUAL  ON )
 endif()
 
 if(${ENABLE_AZURE_KINECT} STREQUAL  ON )
-	#FIND_PACKAGE(AzureKinect REQUIRED)
-	#include_directories(${AZUREKINECT_INCLUDE_DIR})
-	include_directories("C:/Program Files/Azure Kinect SDK v1.4.0/sdk/include")
+	FIND_PACKAGE(AzureKinect REQUIRED)
+	include_directories(${AZUREKINECT_INCLUDE_DIR})
 endif()
 
 
@@ -364,7 +363,7 @@ if(${ENABLE_STRUCTURE_CORE} STREQUAL  ON )
 endif()
 
 if(${ENABLE_AZURE_KINECT} STREQUAL  ON )
-	target_link_libraries(trackingx  "C:/Program Files/Azure Kinect SDK v1.4.0/sdk/windows-desktop/amd64/release/lib/k4a.lib")
+	target_link_libraries(trackingx  ${AZUREKINECT_LIBRARY})
 endif()
 
 
