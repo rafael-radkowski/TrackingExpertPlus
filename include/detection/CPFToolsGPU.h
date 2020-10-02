@@ -1,4 +1,23 @@
 #pragma once
+/*
+@class CPFToolsGPU
+
+@brief This is the GPU implementation of the already-implemented CPFTools static class.
+
+William Blanchard
+Iowa State University
+wsb@iastate.edu
+(847) 707-1421
+2 Oct 2020
+
+MIT License
+-------------------------------------------------------------------------------------------------------
+Last edits:
+2 October 2020
+- Added overall class documentation
+- Added GetRefFrameGPU kernel for use in GetRefFrame
+
+*/
 
 #include <cuda_runtime.h>
 #include <vector_types.h>
@@ -32,7 +51,7 @@ public:
 
 	/*!
 	*/
-	static float AngleBetween(const Eigen::Vector3f& a, const Eigen::Vector3f& b);
+	__host__ __device__ static float AngleBetween(const Eigen::Vector3f& a, const Eigen::Vector3f& b);
 
 	/*!
 	*/
