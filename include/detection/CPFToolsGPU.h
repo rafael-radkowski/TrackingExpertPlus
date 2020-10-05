@@ -51,15 +51,15 @@ public:
 
 	/*!
 	*/
-	__host__ __device__ static float AngleBetween(const Eigen::Vector3f& a, const Eigen::Vector3f& b);
+	static float AngleBetween(const Eigen::Vector3f& a, const Eigen::Vector3f& b);
 
 	/*!
 	*/
-	static Eigen::Affine3f GetRefFrame(vector<Eigen::Vector3f>& p, vector<Eigen::Vector3f>& n);
+	static void GetRefFrames(vector<Eigen::Affine3f>& dst, vector<Eigen::Vector3f>& p, vector<Eigen::Vector3f>& n);
 
 	/*!
 	*/
-	static uint32_t DiscretizeCurvature(const Eigen::Vector3f& p1, const Eigen::Vector3f& n1, const PointCloud& pc, const MyMatches& matches, const float range = 10.0);
+	static void DiscretizeCurvature(vector<uint32_t>& dst, const vector<Eigen::Vector3f>& n1, PointCloud& pc, const Matches* matches, const float range = 10.0);
 
 	/*!
 	*/
