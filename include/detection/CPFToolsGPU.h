@@ -51,6 +51,14 @@ public:
 
 	/*!
 	*/
+	static void AllocateMemory(uint32_t size);
+
+	/*!
+	*/
+	static void DeallocateMemory();
+
+	/*!
+	*/
 	static float AngleBetween(const Eigen::Vector3f& a, const Eigen::Vector3f& b);
 
 	/*!
@@ -63,7 +71,7 @@ public:
 
 	/*!
 	*/
-	static CPFDiscreet DiscretizeCPF(const std::uint32_t& c0, const std::uint32_t& c1, const Eigen::Vector3f& p0, const Eigen::Vector3f& p1);
+	static void DiscretizeCPF(vector<CPFDiscreet>& dst, vector<uint32_t>& curvatures, Matches* matches, int num_matches, vector<Eigen::Vector3f> pts, vector<Eigen::Affine3f> ref_frames);
 
 	/*!
 	*/
