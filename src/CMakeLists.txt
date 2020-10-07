@@ -212,6 +212,8 @@ set(Detection_SRC
 	${PROJECT_SOURCE_DIR}/include/detection/CPFMatchingExp.h
 	detection/CPFTools.cpp
 	${PROJECT_SOURCE_DIR}/include/detection/CPFTools.h
+	${PROJECT_SOURCE_DIR}/include/detection/CPFToolsGPU.h
+	detection/CPFToolsGPU.cu
 	${PROJECT_SOURCE_DIR}/include/detection/CPFTypes.h
 
 	${PROJECT_SOURCE_DIR}/include/detection/CPFRenderHelpers.h
