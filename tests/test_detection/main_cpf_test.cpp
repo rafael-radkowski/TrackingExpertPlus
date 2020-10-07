@@ -11,4 +11,5 @@ void main()
 
 	cout << CPFTools::AngleBetween(vec0, vec1) << endl;
 	cout << CPFToolsGPU::AngleBetween(vec0, vec1) << endl;
+	CPFToolsGPU::DeallocateMemory();
 }

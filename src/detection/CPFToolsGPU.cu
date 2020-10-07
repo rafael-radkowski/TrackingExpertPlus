@@ -136,8 +136,8 @@ float AngleBetweenGPU(const float3 a, const float3 b)
 {
 	float3 a_norm = normalize(a);
 	float3 b_norm = normalize(b);
-	float3 c = cross(a, b);
-	return atan2f(sqrtf(powf(c.x, 2) + powf(c.y, 2) + powf(c.z, 2)), dot(a_norm, b_norm));
+	float3 c = cross(a_norm, b_norm);
+	return atan2f(sqrt(powf(c.x, 2) + powf(c.y, 2) + powf(c.z, 2)), dot(a_norm, b_norm));
 }
 
 float CPFToolsGPU::AngleBetween(const Eigen::Vector3f& a, const Eigen::Vector3f& b)

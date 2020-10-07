@@ -179,7 +179,7 @@ Check whether the file exits.
 //static 
 bool LogReaderWriter::Exists(string path_and_file)
 {
-	if (!std::filesystem::exists(path_and_file)) {
+	if (!std::experimental::filesystem::exists(path_and_file)) {
 		cout << "[ERROR] - Cannot find file " << path_and_file << "." << endl;
 		return false;
 	}
@@ -192,7 +192,7 @@ Check whether the file exits and create if if not
 //static 
 bool LogReaderWriter::ExistsAndCreate(string path_and_file)
 {
-	if (std::filesystem::exists(path_and_file)) {
+	if (std::experimental::filesystem::exists(path_and_file)) {
 		return true;
 	}
 
@@ -200,7 +200,7 @@ bool LogReaderWriter::ExistsAndCreate(string path_and_file)
 
 	if (idx > 0) {
 		string path = path_and_file.substr(0, idx);
-		std::filesystem::create_directories(path);
+		std::experimental::filesystem::create_directories(path);
 	}
 
 	cout << "[Info] - Created file " << path_and_file << "." << endl;
@@ -236,7 +236,7 @@ bool LogReaderWriter::FlashWriteHeader(string path_and_file, string header)
 {
 	ExistsAndCreate(path_and_file);
 
-	if (std::filesystem::exists(path_and_file))
+	if (std::experimental::filesystem::exists(path_and_file))
 		return false;
 
 	return FlashWrite( path_and_file,  header);
