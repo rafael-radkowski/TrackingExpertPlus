@@ -14,9 +14,9 @@ wsb@iastate.edu
 MIT License
 -------------------------------------------------------------------------------------------------------
 Last edits:
-2 October 2020
-- Added overall class documentation
-- Added GetRefFrameGPU kernel for use in GetRefFrame
+8 October 2020
+- BUGFIX: Corrected AngleBetween
+- BUGFIX: Fixed conversion of Eigen vectors/matrices to vec3/vec4 pointers and vice versa.
 
 */
 

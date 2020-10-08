@@ -82,35 +82,35 @@ void vecToPointer3F(float3* dst, const vector<Eigen::Vector3f>& src)
 	Eigen::Vector3f curVec;
 	for (int i = 0; i < src.size(); i++) {
 		curVec = src.at(i);
-		dst[i] = make_float3(curVec(0), curVec(1), curVec(2));
+		dst[i] = make_float3(curVec[0], curVec[1], curVec[2]);
 	}
 }
 
-void pointerToVecM4F(vector<Eigen::Affine3f>& dst, float4* src)
+void pointerToVecM4F(vector<Eigen::Affine3f>& dst, float4* src, int num_src)
 {
 	Eigen::Matrix4f curMatrix;
-	for (int i = 0; i < dst.size(); i++)
+	for (int i = 0; i < num_src; i++)
 	{
-		curMatrix <<
+		curMatrix = (Eigen::Matrix4f() <<
 			(src[i * 4].x, src[i * 4].y, src[i * 4].z, src[i * 4].w,
 				src[(i * 4) + 1].x, src[(i * 4) + 1].y, src[(i * 4) + 1].z, src[(i * 4) + 1].w,
 				src[(i * 4) + 2].x, src[(i * 4) + 2].y, src[(i * 4) + 2].z, src[(i * 4) + 2].w,
-				src[(i * 4) + 3].x, src[(i * 4) + 3].y, src[(i * 4) + 3].z, src[(i * 4) + 3].w);
+				src[(i * 4) + 3].x, src[(i * 4) + 3].y, src[(i * 4) + 3].z, src[(i * 4) + 3].w)).finished();
 
-		dst.at(i) = curMatrix;
+		dst.push_back(Eigen::Affine3f(curMatrix));
 	}
 }
 
 void vecToPointerM4F(float4* dst, vector<Eigen::Affine3f>& src)
 {
-	float* curMatrix;
+	Eigen::Matrix4f curMatrix;
 	for (int i = 0; i < src.size(); i++)
 	{
-		curMatrix = src.at(i).data();
-		dst[i * 4] = make_float4(curMatrix[0], curMatrix[1], curMatrix[2], curMatrix[3]);
-		dst[(i * 4) + 1] = make_float4(curMatrix[4], curMatrix[5], curMatrix[6], curMatrix[7]);
-		dst[(i * 4) + 2] = make_float4(curMatrix[8], curMatrix[9], curMatrix[10], curMatrix[11]);
-		dst[(i * 4) + 3] = make_float4(curMatrix[12], curMatrix[13], curMatrix[14], curMatrix[15]);
+		curMatrix = src.at(i).matrix();
+		dst[i * 4] = make_float4(curMatrix(0), curMatrix(1), curMatrix(2), curMatrix(3));
+		dst[(i * 4) + 1] = make_float4(curMatrix(4), curMatrix(5), curMatrix(6), curMatrix(7));
+		dst[(i * 4) + 2] = make_float4(curMatrix(8), curMatrix(9), curMatrix(10), curMatrix(11));
+		dst[(i * 4) + 3] = make_float4(curMatrix(12), curMatrix(13), curMatrix(14), curMatrix(15));
 	}
 }
 
@@ -134,8 +134,10 @@ void pointerToVecI(std::vector<uint32_t>& dst, int* src)
 __host__ __device__
 float AngleBetweenGPU(const float3 a, const float3 b)
 {
-	float3 a_norm = normalize(a);
-	float3 b_norm = normalize(b);
+	float an = sqrt(powf(a.x, 2) + powf(a.y, 2) + powf(a.z, 2));
+	float bn = sqrt(powf(b.x, 2) + powf(b.y, 2) + powf(b.z, 2));
+	float3 a_norm = make_float3(a.x / an, a.y / an, a.z / an);
+	float3 b_norm = make_float3(b.x / bn, b.y / bn, b.z / bn);
 	float3 c = cross(a_norm, b_norm);
 	return atan2f(sqrt(powf(c.x, 2) + powf(c.y, 2) + powf(c.z, 2)), dot(a_norm, b_norm));
 }
@@ -163,7 +165,8 @@ void GetRefFrameGPU(float3* p, float3* n, int numPts, float4* res)
 		axis = make_float3(1, 0, 0);
 	}
 	else {
-		axis = normalize(axis);
+		float an = sqrt(powf(axis.x, 2) + powf(axis.y, 2) + powf(axis.z, 2));
+		axis = make_float3(axis.x / an, axis.y / an, axis.z / an);
 	}
 
 	// create an angle axis transformation that rotates A degrees around the axis.
@@ -177,16 +180,16 @@ void GetRefFrameGPU(float3* p, float3* n, int numPts, float4* res)
 	float yz =		axis.y * axis.z; // uy * uz
 	float xz =		axis.x * axis.z; // ux * uz
 
-
+	//TODO: RESEARCH HOW EIGEN DOES ITS AFFINE CALCULATION
 	float3* rot = (float3*)malloc(3 * sizeof(float3));
 	rot[0] = make_float3(cost + (powf(axis.x, 2) * omcost), (xy * omcost) - (axis.z * sint), (xz * omcost) + (axis.y * sint));
 	rot[1] = make_float3((xy * omcost) + (axis.z * sint), cost + (powf(axis.y, 2) * omcost), (yz * omcost) - (axis.x * sint));
 	rot[2] = make_float3((xz * omcost) - (axis.y * sint), (yz * omcost) + (axis.x * sint), cost + (powf(axis.z, 2) * omcost));
 
 	// create the reference frame
-	res[i * 4] =		make_float4(rot[0], point.x);
-	res[(i * 4) + 1] =  make_float4(rot[1], point.y);
-	res[(i * 4) + 2] =  make_float4(rot[2], point.z);
+	res[i * 4] =		make_float4(rot[0].x, rot[0].y, rot[0].z, point.x);
+	res[(i * 4) + 1] =  make_float4(rot[1].x, rot[1].y, rot[1].z, point.y);
+	res[(i * 4) + 2] =  make_float4(rot[2].x, rot[2].y, rot[2].z, point.z);
 	res[(i * 4) + 3] =  make_float4(0, 0, 0, 1);
 }
 
@@ -197,19 +200,20 @@ void CPFToolsGPU::GetRefFrames(vector<Eigen::Affine3f>& dst, vector<Eigen::Vecto
 	vecToPointer3F(vectorsA, p);
 	vecToPointer3F(vectorsB, n);
 
+	for (int i = 0; i < p.size(); i++)
+		cout << vectorsA[i].x << ", " << vectorsA[i].y << ", " << vectorsA[i].z << endl;
+
 	int threads = 32;
 	int blocks = p.size() / threads;
 	GetRefFrameGPU<<<blocks, threads>>>(vectorsA, vectorsB, p.size(), RefFrames);
 
 	cudaDeviceSynchronize();
 
-	std::vector<Eigen::Affine3f> frames = std::vector<Eigen::Affine3f>(p.size());
-	pointerToVecM4F(dst, RefFrames);
+	pointerToVecM4F(dst, RefFrames, p.size());
 }
 
 
 
-//TODO
 __global__
 void DiscretizeCurvatureGPU(float2* dst, float3* n1, float3* n, Matches* matches, int num_matches, int* range, int iteration) 
 {
