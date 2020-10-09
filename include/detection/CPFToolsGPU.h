@@ -14,9 +14,9 @@ wsb@iastate.edu
 MIT License
 -------------------------------------------------------------------------------------------------------
 Last edits:
-8 October 2020
-- BUGFIX: Corrected AngleBetween
-- BUGFIX: Fixed conversion of Eigen vectors/matrices to vec3/vec4 pointers and vice versa.
+9 October 2020
+- BUGFIX: Corrected GetRefFrame alg
+- BUGFIX: Corrected ponterToVecM4F function
 
 */
 
@@ -68,7 +68,7 @@ public:
 
 	/*!
 	*/
-	static void DiscretizeCurvature(vector<uint32_t>& dst, const vector<Eigen::Vector3f>& n1, PointCloud& pc, const Matches* matches, const float range = 10.0);
+	static void DiscretizeCurvature(vector<uint32_t>& dst, const vector<Eigen::Vector3f>& n1, PointCloud& pc, vector<Matches> matches, const float range = 10.0);
 
 	/*!
 	*/

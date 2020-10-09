@@ -88,16 +88,16 @@ void vecToPointer3F(float3* dst, const vector<Eigen::Vector3f>& src)
 
 void pointerToVecM4F(vector<Eigen::Affine3f>& dst, float4* src, int num_src)
 {
-	Eigen::Matrix4f curMatrix;
+
+	Eigen::Affine3f affine;
 	for (int i = 0; i < num_src; i++)
 	{
-		curMatrix = (Eigen::Matrix4f() <<
-			(src[i * 4].x, src[i * 4].y, src[i * 4].z, src[i * 4].w,
+		affine.matrix() << src[i * 4].x, src[i * 4].y, src[i * 4].z, src[i * 4].w,
 				src[(i * 4) + 1].x, src[(i * 4) + 1].y, src[(i * 4) + 1].z, src[(i * 4) + 1].w,
 				src[(i * 4) + 2].x, src[(i * 4) + 2].y, src[(i * 4) + 2].z, src[(i * 4) + 2].w,
-				src[(i * 4) + 3].x, src[(i * 4) + 3].y, src[(i * 4) + 3].z, src[(i * 4) + 3].w)).finished();
+				src[(i * 4) + 3].x, src[(i * 4) + 3].y, src[(i * 4) + 3].z, src[(i * 4) + 3].w;
 
-		dst.push_back(Eigen::Affine3f(curMatrix));
+		dst.push_back(Eigen::Affine3f(affine));
 	}
 }
 
@@ -180,16 +180,19 @@ void GetRefFrameGPU(float3* p, float3* n, int numPts, float4* res)
 	float yz =		axis.y * axis.z; // uy * uz
 	float xz =		axis.x * axis.z; // ux * uz
 
-	//TODO: RESEARCH HOW EIGEN DOES ITS AFFINE CALCULATION
 	float3* rot = (float3*)malloc(3 * sizeof(float3));
 	rot[0] = make_float3(cost + (powf(axis.x, 2) * omcost), (xy * omcost) - (axis.z * sint), (xz * omcost) + (axis.y * sint));
 	rot[1] = make_float3((xy * omcost) + (axis.z * sint), cost + (powf(axis.y, 2) * omcost), (yz * omcost) - (axis.x * sint));
 	rot[2] = make_float3((xz * omcost) - (axis.y * sint), (yz * omcost) + (axis.x * sint), cost + (powf(axis.z, 2) * omcost));
 
+
+	float3 tinf = make_float3(rot[0].x * point.x + rot[0].y * point.y + rot[0].z * point.z,
+		rot[1].x * point.x + rot[1].y * point.y + rot[1].z * point.z,
+		rot[2].x * point.x + rot[2].y * point.y + rot[2].z * point.z);
 	// create the reference frame
-	res[i * 4] =		make_float4(rot[0].x, rot[0].y, rot[0].z, point.x);
-	res[(i * 4) + 1] =  make_float4(rot[1].x, rot[1].y, rot[1].z, point.y);
-	res[(i * 4) + 2] =  make_float4(rot[2].x, rot[2].y, rot[2].z, point.z);
+	res[i * 4] =		make_float4(rot[0].x, rot[0].y, rot[0].z, tinf.x);
+	res[(i * 4) + 1] =  make_float4(rot[1].x, rot[1].y, rot[1].z, tinf.y);
+	res[(i * 4) + 2] =  make_float4(rot[2].x, rot[2].y, rot[2].z, tinf.z);
 	res[(i * 4) + 3] =  make_float4(0, 0, 0, 1);
 }
 
@@ -200,14 +203,20 @@ void CPFToolsGPU::GetRefFrames(vector<Eigen::Affine3f>& dst, vector<Eigen::Vecto
 	vecToPointer3F(vectorsA, p);
 	vecToPointer3F(vectorsB, n);
 
-	for (int i = 0; i < p.size(); i++)
-		cout << vectorsA[i].x << ", " << vectorsA[i].y << ", " << vectorsA[i].z << endl;
-
 	int threads = 32;
-	int blocks = p.size() / threads;
+	int blocks = ceil((float) p.size() / threads);
 	GetRefFrameGPU<<<blocks, threads>>>(vectorsA, vectorsB, p.size(), RefFrames);
 
 	cudaDeviceSynchronize();
+
+	//cout << "Before the ref frame" << endl;
+	//for (int i = 0; i < p.size(); i++)
+	//{
+	//	cout << RefFrames[(i * 4)].x << ", " << RefFrames[(i * 4)].y << ", " << RefFrames[(i * 4)].z << ", " << RefFrames[(i * 4)].w << endl;
+	//	cout << RefFrames[(i * 4) + 1].x << ", " << RefFrames[(i * 4) + 1].y << ", " << RefFrames[(i * 4) + 1].z << ", " << RefFrames[(i * 4) + 1].w << endl;
+	//	cout << RefFrames[(i * 4) + 2].x << ", " << RefFrames[(i * 4) + 2].y << ", " << RefFrames[(i * 4) + 2].z << ", " << RefFrames[(i * 4) + 2].w << endl;
+	//	cout << RefFrames[(i * 4) + 3].x << ", " << RefFrames[(i * 4) + 3].y << ", " << RefFrames[(i * 4) + 3].z << ", " << RefFrames[(i * 4) + 3].w << endl;
+	//}
 
 	pointerToVecM4F(dst, RefFrames, p.size());
 }
@@ -236,12 +245,15 @@ void CalculateDiscCurve(int* dst, float2* src, int num_curve)
 }
 
 //static
-void CPFToolsGPU::DiscretizeCurvature(vector<uint32_t>& dst, const vector<Eigen::Vector3f>& n1, PointCloud& pc, const Matches* matches, const float range)
+void CPFToolsGPU::DiscretizeCurvature(vector<uint32_t>& dst, const vector<Eigen::Vector3f>& n1, PointCloud& pc, vector<Matches> matches, const float range)
 {
 	vecToPointer3F(vectorsA, n1);
 	vecToPointer3F(pcN, pc.normals);
 	curvature_pairs = (float2*)malloc(n1.size() * sizeof(float2));
-	cudaMemcpy(pt_matches, matches, n1.size() * sizeof(Matches), cudaMemcpyHostToDevice);
+	for (int i = 0; i < matches.size(); i++)
+	{
+		pt_matches[i] = matches.at(i);
+	}
 	*int_p = range;
 	for (int i = 0; i < n1.size(); i++)
 		curvature_pairs[i] = make_float2(0, 0);
