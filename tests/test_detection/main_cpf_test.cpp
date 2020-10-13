@@ -108,7 +108,7 @@ void main()
 	cout << "DiscretizeCPF Test--------------------------------------------------------------" << endl;
 	error = false;
 
-	vector<CPFDiscreet> GPU_cpf;
+	vector<CPFDiscreet> GPU_cpf = vector<CPFDiscreet>();
 	vector<CPFDiscreet> CPU_cpf;
 
 	CPFToolsGPU::DiscretizeCPF(GPU_cpf, GPU_curvatures, matches, pc.points, refFramesGPU);
@@ -140,13 +140,28 @@ void main()
 		}
 	}
 
+	CPFDiscreet curCPU;
+	CPFDiscreet curGPU;
+
 	for (int i = 0; i < CPU_cpf.size() && i < GPU_cpf.size(); i++)
 	{
+		curCPU = CPU_cpf.at(i);
+		curGPU = GPU_cpf.at(i);
 		cout << i << ": " << endl;
-		cout << "CPU: " << CPU_cpf.at(i).data << endl;
-		cout << "GPU: " << GPU_cpf.at(i).data << endl << endl;
-		if (!(CPU_cpf.at(i) == GPU_cpf.at(i)))
-			error = true;
+		cout << "CPU: " << curCPU.data[0] << ", " << curCPU.data[1] << ", " << curCPU.data[2] << ", " << curCPU.data[3] << endl;
+		cout << "GPU: " << curGPU.data[0] << ", " << curGPU.data[1] << ", " << curGPU.data[2] << ", " << curGPU.data[3] << endl << endl;
+		for (int j = 0; j < CPU_cpf.size(); j++)
+		{
+			if (!(CPU_cpf.at(j) == curGPU)) 
+			{
+				error = true;
+			}
+			else
+			{
+				error = false;
+				break;
+			}
+		}
 	}
 	if (!error)
 		cout << "DiscretizeCPF successful!" << endl;

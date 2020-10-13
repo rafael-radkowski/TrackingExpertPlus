@@ -14,8 +14,8 @@ wsb@iastate.edu
 MIT License
 -------------------------------------------------------------------------------------------------------
 Last edits:
-12 October 2020
-- BUGFIX: Fixed block calculation in DiscretizeCurvature and DiscretizeCPF
+13 October 2020
+- BUGFIX: Fixed cuda sync error in DiscretizeCPF
 
 */
 
