@@ -122,10 +122,10 @@ void vecToPointerI(int* dst, std::vector<uint32_t>& src)
 	}
 }
 
-void pointerToVecI(std::vector<uint32_t>& dst, int* src)
+void pointerToVecI(std::vector<uint32_t>& dst, int* src, int num_e)
 {
-	for (int i = 0; i < dst.size(); i++)
-		dst.at(i) = src[i];
+	for (int i = 0; i < num_e; i++)
+		dst.push_back(src[i]);
 }
 
 
@@ -231,7 +231,7 @@ void DiscretizeCurvatureGPU(float2* dst, float3* n1, float3* n, Matches* matches
 	if (matches[i].matches[iteration].distance > 0.0)
 	{
 		int id = matches[i].matches[iteration].second;
-		dst[i].x += AngleBetweenGPU(n1[i], n[id]);
+		dst[i].x += AngleBetweenGPU(n1[i], n[id]) * *range;
 		dst[i].y++;
 	}
 }
@@ -249,7 +249,6 @@ void CPFToolsGPU::DiscretizeCurvature(vector<uint32_t>& dst, const vector<Eigen:
 {
 	vecToPointer3F(vectorsA, n1);
 	vecToPointer3F(pcN, pc.normals);
-	curvature_pairs = (float2*)malloc(n1.size() * sizeof(float2));
 	for (int i = 0; i < matches.size(); i++)
 	{
 		pt_matches[i] = matches.at(i);
@@ -259,17 +258,17 @@ void CPFToolsGPU::DiscretizeCurvature(vector<uint32_t>& dst, const vector<Eigen:
 		curvature_pairs[i] = make_float2(0, 0);
 
 	int threads = 64;
-	int blocks = pc.size() / threads;
+	int blocks = ceil((float) matches.size() / threads);
 	for (int i = 0; i < 21; i++)
 	{
-		DiscretizeCurvatureGPU<<<blocks, threads>>>(curvature_pairs, vectorsA, pcN, pt_matches, n1.size(), int_p, i);
+		DiscretizeCurvatureGPU<<<blocks, threads>>>(curvature_pairs, vectorsA, pcN, pt_matches, matches.size(), int_p, i);
 	}
 
 	CalculateDiscCurve<<<blocks, threads>>>(discretized_curvatures, curvature_pairs, n1.size());
 
 	cudaDeviceSynchronize();
 
-	pointerToVecI(dst, discretized_curvatures);
+	pointerToVecI(dst, discretized_curvatures, n1.size());
 }
 
 __global__
@@ -321,26 +320,27 @@ void DiscretizeCPFGPU(CPFDiscreet* dst, uint32_t* curvatures, float4* ref_frames
 }
 
 //static
-void CPFToolsGPU::DiscretizeCPF(vector<CPFDiscreet>& dst, vector<uint32_t>& curvatures, Matches* matches, int num_matches, vector<Eigen::Vector3f> pts, vector<Eigen::Affine3f> ref_frames)
+void CPFToolsGPU::DiscretizeCPF(vector<CPFDiscreet>& dst, vector<uint32_t>& curvatures, vector<Matches> matches, vector<Eigen::Vector3f> pts, vector<Eigen::Affine3f> ref_frames)
 {
 	vecToPointerI(discretized_curvatures, curvatures);
 	vecToPointer3F(vectorsA, pts);
 	vecToPointerM4F(RefFrames, ref_frames);
-	cudaMemcpy(pt_matches, matches, num_matches * sizeof(Matches), cudaMemcpyHostToDevice);
-
-	int threads = 64;
-	int blocks = pts.size() / threads;
-	for (int i = 0; i < num_matches; i++)
+	for (int i = 0; i < matches.size(); i++)
 	{
-		DiscretizeCPFGPU<<<blocks, threads>>>(discretized_cpfs, (uint32_t*)discretized_curvatures, RefFrames, vectorsA, num_matches, pt_matches, i, max_ang_value, min_ang_value, angle_bins);
+		pt_matches[i] = matches.at(i);
+		discretized_cpfs[i] = _CPFDiscreet();
 	}
 
-	CPFDiscreet null_cpf = CPFDiscreet();
+	int threads = 64;
+	int blocks = ceil((float) pts.size() / threads);
+	for (int i = 0; i < matches.size(); i++)
+	{
+		DiscretizeCPFGPU<<<blocks, threads>>>(discretized_cpfs, (uint32_t*)discretized_curvatures, RefFrames, vectorsA, matches.size(), pt_matches, i, max_ang_value, min_ang_value, angle_bins);
+	}
+
+	CPFDiscreet null_cpf = _CPFDiscreet();
 	for (int i = 0; i < pts.size(); i++)
 	{
-		if (!(discretized_cpfs[i] == null_cpf))
-		{
-			dst.push_back(discretized_cpfs[i]);
-		}
+		dst.push_back(discretized_cpfs[i]);
 	}
 }

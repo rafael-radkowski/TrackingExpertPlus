@@ -14,9 +14,8 @@ wsb@iastate.edu
 MIT License
 -------------------------------------------------------------------------------------------------------
 Last edits:
-9 October 2020
-- BUGFIX: Corrected GetRefFrame alg
-- BUGFIX: Corrected ponterToVecM4F function
+12 October 2020
+- BUGFIX: Fixed block calculation in DiscretizeCurvature and DiscretizeCPF
 
 */
 
@@ -72,7 +71,7 @@ public:
 
 	/*!
 	*/
-	static void DiscretizeCPF(vector<CPFDiscreet>& dst, vector<uint32_t>& curvatures, Matches* matches, int num_matches, vector<Eigen::Vector3f> pts, vector<Eigen::Affine3f> ref_frames);
+	static void DiscretizeCPF(vector<CPFDiscreet>& dst, vector<uint32_t>& curvatures, vector<Matches> matches, vector<Eigen::Vector3f> pts, vector<Eigen::Affine3f> ref_frames);
 
 	/*!
 	*/
