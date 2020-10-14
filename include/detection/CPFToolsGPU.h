@@ -5,6 +5,9 @@
 
 @brief This is the GPU implementation of the already-implemented CPFTools static class.
 
+WARNING: When building, add "-fmad=false" to the CUDA command line in the trackingx project properties.
+fmad is short for "fused multiply add"
+
 William Blanchard
 Iowa State University
 wsb@iastate.edu
@@ -66,6 +69,7 @@ public:
 	static void GetRefFrames(vector<Eigen::Affine3f>& dst, vector<Eigen::Vector3f>& p, vector<Eigen::Vector3f>& n);
 
 	/*!
+	WARNING: Set 
 	*/
 	static void DiscretizeCurvature(vector<uint32_t>& dst, const vector<Eigen::Vector3f>& n1, PointCloud& pc, vector<Matches> matches, const float range = 10.0);
 
