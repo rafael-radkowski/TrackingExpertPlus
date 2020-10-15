@@ -31,15 +31,14 @@ Oct, 2019
 MIT License
 //-----------------------------------------------------------------------
 Last edits:
-
 Feb 21, 2020, RR
 - Added a geoemetry shader to render normal vectors. 
-
 Feb 22, 2020, RR
 - Added a parameter to change between static and dynamic vertex buffer usage.
-
 July 7, 2020, RR
 - Added a per-vertex-color function to color-code each point individually. 
+Oct 15, 2020, RR
+- Fixed a bug that prevented a static point cloud to be rendered correctly.
 */
 
 // stl include

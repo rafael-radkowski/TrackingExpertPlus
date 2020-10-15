@@ -271,6 +271,7 @@ Test passed on:
 			if((n0 - n1).norm()  > 0.01 )
 				error_count++;
 		}
+
 		if(error_count > 0) 
 			cout << "[TEST] - Found " <<  error_count << " errors." << endl;
 
@@ -294,8 +295,6 @@ Test passed on:
 		if (error_count > 0)
 			cout << "[TEST] - Found " << error_count << " errors." << endl;
 	}
-
-	
 
 #endif
 
