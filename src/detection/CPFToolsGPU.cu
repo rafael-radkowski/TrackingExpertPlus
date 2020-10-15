@@ -3,8 +3,6 @@
 #include <cuda/cutil_math.h>
 #include "CPFToolsGPU.h"
 
-#define M_PI 3.14159265359
-
 namespace nsCPFToolsGPU {
 	int pc_size;
 
@@ -180,15 +178,17 @@ void GetRefFrameGPU(float3* p, float3* n, int numPts, float4* res)
 	float yz =		axis.y * axis.z; // uy * uz
 	float xz =		axis.x * axis.z; // ux * uz
 
+	//Find the rotation matrix of this reference frame
 	float3* rot = (float3*)malloc(3 * sizeof(float3));
 	rot[0] = make_float3(cost + (powf(axis.x, 2) * omcost), (xy * omcost) - (axis.z * sint), (xz * omcost) + (axis.y * sint));
 	rot[1] = make_float3((xy * omcost) + (axis.z * sint), cost + (powf(axis.y, 2) * omcost), (yz * omcost) - (axis.x * sint));
 	rot[2] = make_float3((xz * omcost) - (axis.y * sint), (yz * omcost) + (axis.x * sint), cost + (powf(axis.z, 2) * omcost));
 
-
+	//Translate the point to fit in the new rotation frame
 	float3 tinf = make_float3(rot[0].x * point.x + rot[0].y * point.y + rot[0].z * point.z,
 		rot[1].x * point.x + rot[1].y * point.y + rot[1].z * point.z,
 		rot[2].x * point.x + rot[2].y * point.y + rot[2].z * point.z);
+
 	// create the reference frame
 	res[i * 4] =		make_float4(rot[0].x, rot[0].y, rot[0].z, tinf.x);
 	res[(i * 4) + 1] =  make_float4(rot[1].x, rot[1].y, rot[1].z, tinf.y);
@@ -206,8 +206,11 @@ void CPFToolsGPU::GetRefFrames(vector<Eigen::Affine3f>& dst, vector<Eigen::Vecto
 	int threads = 32;
 	int blocks = ceil((float) p.size() / threads);
 	GetRefFrameGPU<<<blocks, threads>>>(vectorsA, vectorsB, p.size(), RefFrames);
-
 	cudaDeviceSynchronize();
+
+	cudaError error = cudaGetLastError();
+	if (error)
+		cout << "ERROR: CPFToolsGPU: GetRefFrames: " << error << endl;
 
 	//cout << "Before the ref frame" << endl;
 	//for (int i = 0; i < p.size(); i++)
@@ -222,7 +225,6 @@ void CPFToolsGPU::GetRefFrames(vector<Eigen::Affine3f>& dst, vector<Eigen::Vecto
 }
 
 
-//fma error is going on here.  This sucks.  Talk to Rafael.
 __global__
 void DiscretizeCurvatureGPU(float2* dst, float3* n1, float3* n, Matches* matches, int num_pts, int* range, int iteration) 
 {
@@ -236,7 +238,7 @@ void DiscretizeCurvatureGPU(float2* dst, float3* n1, float3* n, Matches* matches
 		int id = matches[i].matches[iteration].second;
 		double curAng = AngleBetweenGPU(n1[i], n[id]) * *range;
 
-		dst[i].x = (AngleBetweenGPU(n1[i], n[id]) * *range) + prevAng;
+		dst[i].x = (AngleBetweenGPU(n1[i], n[id]) * *range) + prevAng; //fma error is going on here.  This sucks.  Talk to Rafael.
 		dst[i].y = prevNum + 1;
 	}
 }
@@ -264,19 +266,25 @@ void CPFToolsGPU::DiscretizeCurvature(vector<uint32_t>& dst, const vector<Eigen:
 
 	int threads = 64;
 	int blocks = ceil((float) pc.normals.size() / threads);
+
+	//Iterate through all 21 matches in each match
 	for (int i = 0; i < 21; i++)
 	{
+		//Store number of valid matches and the sum of the angle between their normals
 		DiscretizeCurvatureGPU<<<blocks, threads>>>(curvature_pairs, vectorsA, pcN, pt_matches, pc.normals.size(), int_p, i);
-
-		cudaError error = cudaGetLastError();
-		if (error)
-			cout << "Uh... Error?" << error << endl;
-
 		cudaDeviceSynchronize();
 	}
 
+	cudaError error = cudaGetLastError();
+	if (error)
+		cout << "ERROR: CPFToolsGPU: DiscretizeCurvature: DiscretizeCurvatureGPU: " << error << endl;
+
+	//curvature_pairs.x / curvature_pairs.y
 	CalculateDiscCurve<<<blocks, threads>>>(discretized_curvatures, curvature_pairs, pc.normals.size());
 	cudaDeviceSynchronize();
+	error = cudaGetLastError();
+	if (error)
+		cout << "ERROR: CPFToolsGPU: DiscretizeCurvature: CalculateDiscCurve: " << error << endl;
 
 	pointerToVecI(dst, discretized_curvatures, n1.size());
 }
@@ -322,10 +330,11 @@ void DiscretizeCPFGPU(CPFDiscreet* dst, uint32_t* curvatures, float4* ref_frames
 
 		float ang = (p_norm.x * ptr_norm.x) + (p_norm.y * ptr_norm.y) + (p_norm.z * ptr_norm.z);
 
+		if (isnan(ang)) ang = 0;
+
 		dst[idx].data[0] = cur1;
 		dst[idx].data[1] = cur2;
-		dst[idx].data[2] = ((ang + 1) * (*ang_bins / 2.0));  //This calculation flips out when the result should be 6.
-		//Give that one a good look.
+		dst[idx].data[2] = ((ang + 1) * (*ang_bins / 2.0));
 		dst[idx].data[3] = 0; //cur1 - cur2
 
 		if (ang > *max_angle_val)
@@ -354,6 +363,8 @@ void CPFToolsGPU::DiscretizeCPF(vector<CPFDiscreet>& dst, vector<uint32_t>& curv
 	{
 		DiscretizeCPFGPU<<<blocks, threads>>>(discretized_cpfs, (uint32_t*)discretized_curvatures, RefFrames, vectorsA, pts.size(), pt_matches, i, max_ang_value, min_ang_value, angle_bins);
 		cudaError error = cudaGetLastError();
+		if (error)
+			cout << "ERROR: CPFToolsGPU: DiscretizeCPF: " << error << endl;
 		cudaDeviceSynchronize();
 	}
 
