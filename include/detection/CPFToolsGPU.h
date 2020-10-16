@@ -3,12 +3,7 @@
 /*
 @class CPFToolsGPU
 
-@brief This is the GPU implementation of the already-CPU-implemented CPFTools static class.
-
-WARNING: When building, add "-fmad=false" to the CUDA command line in the trackingx project properties.
-fma is short for "fused multiply add."  CUDA does this operation in a non-IEEE standard way, and so
-there are some calculations, such as in DiscretizeCurvature, that are correct in debug mode (where fmad
-is disabled by default) but incorrect in release mode (where fmad is enabled by default).  
+@brief This is the GPU implementation of the already-CPU-implemented CPFTools static class. 
 
 William Blanchard
 Iowa State University
@@ -20,9 +15,7 @@ MIT License
 -------------------------------------------------------------------------------------------------------
 Last edits:
 15 October 2020
-- BUGFIX: Fixed case where ang variable in DiscretizeCPF would be calculated as nan by replacing with 0
-- FEATURE: Added CUDA error statements
-- Added some function documentation
+- BUGFIX: Fixed faulty fma calculation in AngleBetween
 
 */
 

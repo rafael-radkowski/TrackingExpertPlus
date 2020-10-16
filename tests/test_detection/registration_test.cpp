@@ -28,7 +28,7 @@ using namespace isu_ar;
 
 // -r  ../data/stanford_bunny_pc.obj -t ../data/stanford_bunny_pc.obj -mode manual -log ./logs/test_manual.csv -c_ang 12.0 -c_dist 0.05 -n 1000 -dist 0.002 -ang 6.0 -grid 0.01 -wnd_w 1920  -wnd_h 1536 -verbose
 
-int mainn(int argc, char** argv)
+int main(int argc, char** argv)
 {
 
 	Arguments app_params = ArgParser::Parse(argc, argv);

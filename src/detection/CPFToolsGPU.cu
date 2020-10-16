@@ -20,7 +20,7 @@ namespace nsCPFToolsGPU {
 	float4* RefFrames;
 
 	//DiscretizeCurvature
-	float2* curvature_pairs;
+	double2* curvature_pairs;
 	int* discretized_curvatures;
 
 	//DiscretizeCPF
@@ -49,7 +49,7 @@ void CPFToolsGPU::AllocateMemory(uint32_t size)
 
 	cudaMallocManaged(&RefFrames, size * 4 * sizeof(float4));
 
-	cudaMallocManaged(&curvature_pairs, size * sizeof(float2));
+	cudaMallocManaged(&curvature_pairs, size * sizeof(double2));
 	cudaMallocManaged(&discretized_curvatures, size * sizeof(int));
 	
 	cudaMallocManaged(&discretized_cpfs, size * KNN_MATCHES_LENGTH * sizeof(CPFDiscreet));
@@ -130,14 +130,20 @@ void pointerToVecI(std::vector<uint32_t>& dst, int* src, int num_e)
 
 //static
 __host__ __device__
-float AngleBetweenGPU(const float3 a, const float3 b)
+float AngleBetweenGPU(float3 a, float3 b)
 {
-	float an = sqrt(powf(a.x, 2) + powf(a.y, 2) + powf(a.z, 2));
-	float bn = sqrt(powf(b.x, 2) + powf(b.y, 2) + powf(b.z, 2));
+	float an = sqrtf(powf(a.x, 2) + powf(a.y, 2) + powf(a.z, 2));
+	float bn = sqrtf(powf(b.x, 2) + powf(b.y, 2) + powf(b.z, 2));
 	float3 a_norm = make_float3(a.x / an, a.y / an, a.z / an);
 	float3 b_norm = make_float3(b.x / bn, b.y / bn, b.z / bn);
 	float3 c = cross(a_norm, b_norm);
-	return atan2f(sqrt(powf(c.x, 2) + powf(c.y, 2) + powf(c.z, 2)), dot(a_norm, b_norm));
+
+
+	double c_norm = sqrt(powf(c.x, 2) + powf(c.y, 2) + powf(c.z, 2));
+	double ab_dot = (a_norm.x * b_norm.x) + (a_norm.y * b_norm.y) + (a_norm.z * b_norm.z);
+
+	//printf("%f \n", atan2(c_norm, ab_dot));
+	return atan2(c_norm, ab_dot);
 }
 
 float CPFToolsGPU::AngleBetween(const Eigen::Vector3f& a, const Eigen::Vector3f& b)
@@ -226,7 +232,7 @@ void CPFToolsGPU::GetRefFrames(vector<Eigen::Affine3f>& dst, vector<Eigen::Vecto
 
 
 __global__
-void DiscretizeCurvatureGPU(float2* dst, float3* n1, float3* n, Matches* matches, int num_pts, int* range, int iteration) 
+void DiscretizeCurvatureGPU(double2* dst, float3* n1, float3* n, Matches* matches, int num_pts, double range, int iteration) 
 {
 	int i = (blockIdx.x * blockDim.x) + threadIdx.x;
 	if (i > num_pts) return;
@@ -235,16 +241,19 @@ void DiscretizeCurvatureGPU(float2* dst, float3* n1, float3* n, Matches* matches
 		double prevAng = dst[i].x;
 		float prevNum = dst[i].y;
 
-		int id = matches[i].matches[iteration].second;
-		double curAng = AngleBetweenGPU(n1[i], n[id]) * *range;
 
-		dst[i].x = (AngleBetweenGPU(n1[i], n[id]) * *range) + prevAng; //fma error is going on here.  This sucks.  Talk to Rafael.
+
+		int id = matches[i].matches[iteration].second;
+		//printf("%f \n", AngleBetweenGPU(n1[i], n[id]));
+		double curAng = AngleBetweenGPU(n1[i], n[id]) * range;
+
+		dst[i].x = prevAng + curAng; 
 		dst[i].y = prevNum + 1;
 	}
 }
 
 __global__
-void CalculateDiscCurve(int* dst, float2* src, int num_curve)
+void CalculateDiscCurve(int* dst, double2* src, int num_curve)
 {
 	int i = (blockIdx.x * blockDim.x) + threadIdx.x;
 	if (i > num_curve) return;
@@ -260,9 +269,8 @@ void CPFToolsGPU::DiscretizeCurvature(vector<uint32_t>& dst, const vector<Eigen:
 	{
 		pt_matches[i] = matches.at(i);
 	}
-	*int_p = range;
 	for (int i = 0; i < n1.size(); i++)
-		curvature_pairs[i] = make_float2(0, 0);
+		curvature_pairs[i] = make_double2(0, 0);
 
 	int threads = 64;
 	int blocks = ceil((float) pc.normals.size() / threads);
@@ -271,7 +279,7 @@ void CPFToolsGPU::DiscretizeCurvature(vector<uint32_t>& dst, const vector<Eigen:
 	for (int i = 0; i < 21; i++)
 	{
 		//Store number of valid matches and the sum of the angle between their normals
-		DiscretizeCurvatureGPU<<<blocks, threads>>>(curvature_pairs, vectorsA, pcN, pt_matches, pc.normals.size(), int_p, i);
+		DiscretizeCurvatureGPU<<<blocks, threads>>>(curvature_pairs, vectorsA, pcN, pt_matches, pc.normals.size(), range, i);
 		cudaDeviceSynchronize();
 	}
 
@@ -334,7 +342,7 @@ void DiscretizeCPFGPU(CPFDiscreet* dst, uint32_t* curvatures, float4* ref_frames
 
 		dst[idx].data[0] = cur1;
 		dst[idx].data[1] = cur2;
-		dst[idx].data[2] = ((ang + 1) * (*ang_bins / 2.0));
+		dst[idx].data[2] = ((double)(ang + 1.0) * (double)(*ang_bins / 2.0));
 		dst[idx].data[3] = 0; //cur1 - cur2
 
 		if (ang > *max_angle_val)
