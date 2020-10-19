@@ -179,11 +179,9 @@ void run_non_stress()
 -----------------------------Stress Tests----------------------------------------------
 */
 
-KNN* knn;
+KNN knn;
 
-PointCloud	points0;
-PointCloud	points1;
-
+PointCloud	points;
 
 std::vector<MyMatches> matches;
 
@@ -249,7 +247,7 @@ int CompareMatches(std::vector<MyMatches>& matches0, std::vector<MyMatches>& mat
 	return error_count;
 }
 
-int CompareValues(std::vector<uint32_t> values0, std::vector<uint32_t> values1)
+void CompareValues(std::vector<uint32_t> values0, std::vector<uint32_t> values1)
 {
 	int s0 = values0.size();
 	int s1 = values1.size();
@@ -272,12 +270,14 @@ int CompareValues(std::vector<uint32_t> values0, std::vector<uint32_t> values1)
 		std::cout << "[ERROR] - " << error_percentage << "% of values don't match" << endl;
 }
 
-void run_stress(PointCloud pc)
+void run_stress(PointCloud pc, int iteration)
 {
+	cout << "Test " << iteration << ": " << endl;
+	matches.clear();
+	knn = KNN();
 
-	CPFToolsGPU::AllocateMemory(pc.size());
-
-	cout << "GetRefFrame Test--------------------------------------------------------------" << endl;
+	knn.populate(pc);
+	knn.radius(pc, 2.0, matches);
 
 	int ref_errors = 0;
 	vector<Eigen::Affine3f> refFramesGPU;
@@ -288,16 +288,13 @@ void run_stress(PointCloud pc)
 	for (int i = 0; i < pc.size(); i++) {
 		curRefCPU = CPFTools::GetRefFrame(pc.points.at(i), pc.normals.at(i));
 
-		cout << i << ":" << endl;
-		cout << curRefCPU.matrix() << endl;
-		cout << refFramesGPU.at(i).matrix() << endl << endl;
-
 		refFramesCPU.push_back(curRefCPU);
 		if (!(curRefCPU.matrix().isApprox(refFramesGPU.at(i).matrix())))
 			ref_errors++;
 	}
 
-	cout << "DiscretizeCurvature Test--------------------------------------------------------------" << endl;
+	float err_ratio = ((float)ref_errors / (float)pc.size()) * 100;
+	cout << "GetRefFrame: Found " << ref_errors << " ( about " << err_ratio << "% ) errors." << endl;
 
 	int curve_error = 0;
 	vector<uint32_t> CPU_curvatures;
@@ -313,15 +310,12 @@ void run_stress(PointCloud pc)
 
 	for (int i = 0; i < CPU_curvatures.size() && i < GPU_curvatures.size(); i++)
 	{
-		cout << i << ": " << endl;
-		cout << "CPU: " << CPU_curvatures.at(i) << endl;
-		cout << "GPU: " << GPU_curvatures.at(i) << endl << endl;
-
 		if (CPU_curvatures.at(i) != GPU_curvatures.at(i))
-			curve_error = true;
+			curve_error++;
 	}
 
-	cout << "DiscretizeCPF Test--------------------------------------------------------------" << endl;
+	err_ratio = ((float)curve_error / (float)CPU_curvatures.size()) * 100;
+	cout << "DiscretizeCurvature: Found " << curve_error << " ( about " << err_ratio << "% ) errors." << endl;
 
 	int cpf_error = 0;
 
@@ -359,29 +353,37 @@ void run_stress(PointCloud pc)
 
 	CPFDiscreet curCPU;
 	CPFDiscreet curGPU;
+	bool has_error;
 
 	for (int i = 0; i < CPU_cpf.size() && i < GPU_cpf.size(); i++)
 	{
+		has_error = true;
 		curCPU = CPU_cpf.at(i);
 		curGPU = GPU_cpf.at(i);
-		cout << i << ": " << endl;
-		cout << "CPU: " << curCPU.data[0] << ", " << curCPU.data[1] << ", " << curCPU.data[2] << ", " << curCPU.data[3] << endl;
-		cout << "GPU: " << curGPU.data[0] << ", " << curGPU.data[1] << ", " << curGPU.data[2] << ", " << curGPU.data[3] << endl << endl;
 		for (int j = 0; j < CPU_cpf.size(); j++)
 		{
-			if (!(CPU_cpf.at(j) == curGPU))
+			if ((CPU_cpf.at(j) == curGPU))
 			{
-				cpf_error++;
+				has_error = false;
+				break;
 			}
 		}
+
+		if (has_error)
+			cpf_error++;
 	}
 
-	CPFToolsGPU::DeallocateMemory();
+	err_ratio = ((float)cpf_error / (float)CPU_cpf.size()) * 100;
+	cout << "DiscretizeCPF: Found " << cpf_error << " ( about " << err_ratio << "% ) errors." << endl;
+
+	knn.reset();
 }
 
 void main()
 {
 	//run_non_stress();
+
+	float tolerance = 0.0000001f;
 
 	//1. Test AngleBetween
 	for (int i = 0; i < 20; i++)
@@ -392,9 +394,36 @@ void main()
 		Eigen::Vector3f v0 = Eigen::Vector3f(vec0[0], vec0[1], vec0[2]);
 		Eigen::Vector3f v1 = Eigen::Vector3f(vec1[0], vec1[1], vec1[2]);
 
-		if (CPFTools::AngleBetween(v0, v1) != CPFToolsGPU::AngleBetween(v0, v1))
-			std::cout << "[ERROR] - AngleBetween fails for CPFToolsGPU for vectors " << v0 << " and " << v1 << endl;
+		float acpu = CPFTools::AngleBetween(v0, v1);
+		float agpu = CPFToolsGPU::AngleBetween(v0, v1);
+
+		if (!(agpu <= acpu + tolerance || agpu >= acpu - tolerance))
+			std::cout << "[ERROR] - AngleBetween fails for CPFToolsGPU for vectors " << v0 << " and " << v1 << endl
+				<< "CPU: " << acpu << ", GPU: " << agpu << endl << endl;
 	}
 
-	//2. Test 
+	//2. Test normal range, small point size
+	CPFToolsGPU::AllocateMemory(100);
+	for (int i = 0; i < 20; i++)
+	{
+		GenerateRandomPointCloud(points, 100);
+		run_stress(points, i);
+	}
+	CPFToolsGPU::DeallocateMemory();
+
+	CPFToolsGPU::AllocateMemory(10000);
+	//3. Test normal range, large point size
+	for (int i = 0; i < 5; i++)
+	{
+		GenerateRandomPointCloud(points, 10000);
+		run_stress(points, i);
+	}
+
+	//4. Test large range, large point size
+	for (int i = 0; i < 5; i++)
+	{
+		GenerateRandomPointCloud(points, 10000, -3.0, 3.0);
+		run_stress(points, i);
+	}
+	CPFToolsGPU::DeallocateMemory();
 }

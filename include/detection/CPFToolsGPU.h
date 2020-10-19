@@ -14,8 +14,8 @@ wsb@iastate.edu
 MIT License
 -------------------------------------------------------------------------------------------------------
 Last edits:
-15 October 2020
-- BUGFIX: Fixed faulty fma calculation in AngleBetween
+19 October 2020
+- BUGFIX: AngleBetween returns 0 if the vectors are the same.
 
 */
 

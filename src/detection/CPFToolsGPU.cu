@@ -132,6 +132,9 @@ void pointerToVecI(std::vector<uint32_t>& dst, int* src, int num_e)
 __host__ __device__
 float AngleBetweenGPU(float3 a, float3 b)
 {
+	if (a.x == b.x && a.y == b.y && a.z == b.z)
+		return 0.0f;
+
 	float an = sqrtf(powf(a.x, 2) + powf(a.y, 2) + powf(a.z, 2));
 	float bn = sqrtf(powf(b.x, 2) + powf(b.y, 2) + powf(b.z, 2));
 	float3 a_norm = make_float3(a.x / an, a.y / an, a.z / an);
@@ -216,7 +219,7 @@ void CPFToolsGPU::GetRefFrames(vector<Eigen::Affine3f>& dst, vector<Eigen::Vecto
 
 	cudaError error = cudaGetLastError();
 	if (error)
-		cout << "ERROR: CPFToolsGPU: GetRefFrames: " << error << endl;
+		cout << "ERROR: CPFToolsGPU: GetRefFrames: " << cudaGetErrorString(error) << endl;
 
 	//cout << "Before the ref frame" << endl;
 	//for (int i = 0; i < p.size(); i++)
@@ -309,7 +312,7 @@ void DiscretizeCPFGPU(CPFDiscreet* dst, uint32_t* curvatures, float4* ref_frames
 		int id = matches[i].matches[iteration].second;
 		int cur1 = curvatures[i];
 		int cur2 = curvatures[id];
-		int idx = (i * num_pts) + iteration;
+		int idx = (i * KNN_MATCHES_LENGTH) + iteration;
 
 		float3 p01;
 
@@ -372,7 +375,7 @@ void CPFToolsGPU::DiscretizeCPF(vector<CPFDiscreet>& dst, vector<uint32_t>& curv
 		DiscretizeCPFGPU<<<blocks, threads>>>(discretized_cpfs, (uint32_t*)discretized_curvatures, RefFrames, vectorsA, pts.size(), pt_matches, i, max_ang_value, min_ang_value, angle_bins);
 		cudaError error = cudaGetLastError();
 		if (error)
-			cout << "ERROR: CPFToolsGPU: DiscretizeCPF: " << error << endl;
+			cout << "ERROR: CPFToolsGPU: DiscretizeCPF: " << cudaGetErrorString(error) << " on iteration " << i << endl;
 		cudaDeviceSynchronize();
 	}
 
