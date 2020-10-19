@@ -47,4 +47,4 @@ add_subdirectory(test_knn)
 add_subdirectory(test_icp)
 add_subdirectory(test_icp_camera)
 endif()
-
+#add_subdirectory(dev_detection)

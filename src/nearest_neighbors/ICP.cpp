@@ -7,10 +7,12 @@ using namespace  texpert;
 ICP::ICP() {
 
 	_max_error = 0.0001;
-	_max_iterations = 10;
+	_max_iterations = 20;
 
 	_verbose = true;
-	_verbose_level = 2;
+	_verbose_level = 0;
+
+	_Rt_initial = Eigen::Matrix4f::Identity();
 
 	_knn = new KNN();
 
@@ -64,10 +66,12 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 // note that the two point clouds must be equal for this test. 
 	return test_rejection(pc, initial_pose,  result_pose,  rms);
 #endif
-
+	_Rt_initial = initial_pose.t.matrix();
+	_Rt_affine = initial_pose.t;
 	
-
+	// TODO: copies all points into a new object. Line 90, 91 does the same. Why?
 	// remember the test points
+	// this makes a copy of the test points. 
 	_testPoints = pc;
 
 	if (!ready()) {
@@ -83,6 +87,7 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 	_R_all = Eigen::Matrix3f::Identity();
 	_t_all = Eigen::Vector3f(0.0, 0.0, 0.0);
 
+	// TODO: Remove teh manual copy since the code in line 70 already copies the points. 
 	// copy test points into a new struct
 	vector<Vector3f> in0, nn0;
 	std::copy(_testPoints.points.begin(), _testPoints.points.end(), back_inserter(in0));
@@ -235,6 +240,9 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 
 Matrix4f ICP::Rt(void){
 
+
+	// TODO: Check the pose calculation. 
+
 	Eigen::Matrix4f finalRt = Eigen::Matrix4f::Identity();
 
 	Eigen::Vector3f tall = t();
@@ -256,8 +264,20 @@ Matrix4f ICP::Rt(void){
 	Eigen::Matrix4f R2 = Eigen::Matrix4f::Identity();
 	R2.block<3,3>(0,0) = Rall;
 
+	Affine3f m;     
+	m  = Translation3f(_Rt_affine.translation());
+	Matrix4f ti;
+	ti = m.matrix();
+
+	Matrix4f Ri;
+	Ri = Matrix4f::Identity();
+	Ri.block(0,0,3,3) = _Rt_affine.rotation().matrix();
+
 	//finalRt = t2 * cent * R2 * centInv;
-	finalRt = centInv * R2 * cent * t2;
+	finalRt = Ri.transpose()  *  (  centInv  * R2 * cent * t2 ) * ti.transpose();
+
+	//MatrixUtils::PrintMatrix4f(Ri);
+	//MatrixUtils::PrintMatrix4f(finalRt);
 
 //		glm::mat4 centInv = glm::translate(glm::vec3(-centroid.x(), -centroid.y(), -centroid.z() ));
 //	glm::mat4 cent = glm::translate(glm::vec3(centroid.x(), centroid.y(), centroid.z() ));
@@ -558,6 +578,8 @@ Set the number of maximum iterations.
 */
 void ICP::setMaxIterations(int max_iterations)
 {
+	if(max_iterations > 1000) std::cout << "[ERROR] - ICP iterations > 1000 is not permitted. Value set to 1000." << std::endl;
+	if(max_iterations < 1) std::cout << "[ERROR] - ICP iterations < 1 is not permitted. Value set to 1." << std::endl;
 	_max_iterations = std::min(1000, std::max(1, max_iterations));
 }
 
@@ -570,7 +592,12 @@ as inliers. All other points will be rejected.
 */
 void ICP::setRejectMaxAngle(float max_angle)
 {
+	if(max_angle > 180.0) std::cout << "[ERROR] - ICP Outlier rejection angle > 180.0 deg is not permitted. Value set to 180.0." << std::endl;
+	if(max_angle < 1) std::cout << "[ERROR] - ICP Outlier rejection angle < 1.0 deg is not permitted. Value set to 1.0" << std::endl;
 	float angle = std::min(180.0f, std::max(0.0f, max_angle));
+
+	if(_verbose)
+		std::cout << "[INFO] - ICP set reject angle to: " << angle << std::endl;
 
 	_outlier_reject.setMaxNormalVectorAngle(angle);
 }
@@ -582,7 +609,12 @@ as inliers.
 */
 void ICP::setRejectMaxDistance(float max_distance)
 {
+	if(max_distance > 100.0) std::cout << "[ERROR] - ICP Outlier rejection distance > 100.0 is not permitted. Value set to 100.0." << std::endl;
+	if(max_distance < 0.01f) std::cout << "[ERROR] - ICP Outlier rejection angle < 0.01 is not permitted. Value set to 0.01" << std::endl;
 	float distance = std::min(100.f, std::max(0.01f, max_distance));
+
+	if(_verbose)
+		std::cout << "[INFO] - ICP set reject distance to: " << distance << std::endl;
 
 	_outlier_reject.setMaxThreshold(distance);
 }

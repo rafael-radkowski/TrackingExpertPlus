@@ -139,7 +139,7 @@ __device__ void reorganize_func(int* data_in_x, int* data_in_y, int* data_in_z, 
 
 
 
-__global__ void create_nodes(int N, int n_chunks, uint32_t* data_x, uint32_t* data_y, uint32_t* data_z, float* mins, float* maxes, int dim, int* index, Cuda_KdNode* tree, int n_built, double chunk_width, bool final_level) {
+__global__ void create_nodes(int N, int n_chunks, uint32_t* data_x, uint32_t* data_y, uint32_t* data_z, float* mins, float* maxes, int dim, int* index, Cuda_KdNode* tree, int n_built, float chunk_width, bool final_level) {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 	int tree_idx = idx + n_built;
 	if (idx >= n_chunks || tree_idx >= MAX_NUM_POINTS) {return;}
@@ -1128,7 +1128,7 @@ void Cuda_KdTree::allocateMemory(void)
 		return;
 	}
 
-	cudaStatus = cudaMalloc((void**)&d_query_results, MAX_OUTPUT_POINTS * sizeof(MyMatch));
+	cudaStatus = cudaMalloc((void**)&d_query_results, MAX_OUTPUT_POINTS * sizeof(MyMatches));
 	CudaCheckError();
 	if (cudaStatus != cudaSuccess) {
 		fprintf(stderr, "cudaMalloc failed!");
@@ -1192,6 +1192,7 @@ void Cuda_KdTree::knn(std::vector<MyPoint>& search_points, std::vector<MyMatches
 	assert(n <= MAX_SEARCH_POINTS);
 	assert(n  <= MAX_OUTPUT_POINTS);
 	assert(k <= KNN_MATCHES_LENGTH);
+	output.clear();
 	output.resize(n);
 
 	Cuda_Helpers::HostToDevice<MyPoint>(&search_points.front(), d_query_points, n); 

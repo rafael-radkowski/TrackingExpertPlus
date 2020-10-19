@@ -25,10 +25,20 @@ Feb 20, 2020, RR
 - Added a function that copies the point from the internal to the external storage. 
 	and removes all 0,0,0 points. 
 
+Aug 8, 2020, RR
+- Added a function to set the point cloud filter method. 
+
+Aug 9, 2020, RR
+- BUGFIX: fixed a severe bug in setSampingMode(). The sampling pattern used the color image resolution
+  to create sampling patterns and not the depth resolution. That resulted in double-points in the point cloud. 
+
+Aug 27, 2020, RR
+- Removed a copy_if operator and added a loop to copy points. Copy_if return incorrect sized vectors. 
+
 */
 #include <iostream>
 #include <vector>
-
+#include <algorithm>
 // opencv
 #include <opencv2/opencv.hpp>
 
@@ -40,7 +50,7 @@ Feb 20, 2020, RR
 #include "ICaptureDeviceTypes.h"
 #include "Types.h"  // PointCloud data type
 #include "SamplingTypes.h"
-
+#include "FilterTypes.h"
 
 namespace texpert {
 
@@ -60,6 +70,14 @@ public:
 		sampling method. 
 	*/
 	void setSampingMode(SamplingMethod method, SamplingParam param);
+
+
+	/*!
+	Set a point cloud filter methods. 
+	@param method - can be NONE or BILATERAL
+	@param param - the parameters for the filter
+	*/
+	void setFilterMethod(FilterMethod method, FilterParams param);
 
 	/*
 	For normal vector calculation - set the related parameters

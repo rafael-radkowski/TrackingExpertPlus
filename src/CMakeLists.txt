@@ -111,9 +111,8 @@ if(${ENABLE_STRUCTURE_CORE} STREQUAL  ON )
 endif()
 
 if(${ENABLE_AZURE_KINECT} STREQUAL  ON )
-	#FIND_PACKAGE(AzureKinect REQUIRED)
-	#include_directories(${AZUREKINECT_INCLUDE_DIR})
-	include_directories("C:/Program Files/Azure Kinect SDK v1.4.0/sdk/include")
+	FIND_PACKAGE(AzureKinect REQUIRED)
+	include_directories(${AZUREKINECT_INCLUDE_DIR})
 endif()
 
 
@@ -172,6 +171,10 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/camera/ICaptureDeviceTypes.h
 	${PROJECT_SOURCE_DIR}/include/camera/PointCloudProducer.h
 	${PROJECT_SOURCE_DIR}/include/camera/CameraParameters.h
+
+	
+
+	
 	
 	
 	
@@ -192,6 +195,9 @@ set( PointCloud_cuda_INC
 	${PROJECT_SOURCE_DIR}/include/camera/cuda/cuDeviceMemory3f.h
 	${PROJECT_SOURCE_DIR}/include/camera/cuda/cuPCU3f.h
 	${PROJECT_SOURCE_DIR}/include/camera/cuda/cuPCUImpl3f.h
+	${PROJECT_SOURCE_DIR}/include/camera/cuda/cuFilter.h
+	
+	cam/cuda/cuFilter.cu
 )
 
 
@@ -201,6 +207,16 @@ set(Detection_SRC
 	detection/FDMatching.cpp
 	detection/FDClustering.cpp
 	detection/PCRegistration.cpp
+
+	detection/CPFMatchingExp.cpp
+	${PROJECT_SOURCE_DIR}/include/detection/CPFMatchingExp.h
+	detection/CPFTools.cpp
+	${PROJECT_SOURCE_DIR}/include/detection/CPFTools.h
+	${PROJECT_SOURCE_DIR}/include/detection/CPFTypes.h
+
+	${PROJECT_SOURCE_DIR}/include/detection/CPFRenderHelpers.h
+	detection/CPFRenderHelpers.cpp
+
 )
 
 set(Cuda_kdtree_SRC
@@ -209,12 +225,14 @@ set(Cuda_kdtree_SRC
 	kdtree/CudaErrorCheck.cu
 	kdtree/Cuda_KdTree.cu
 	kdtree/Cuda_Helpers.cpp
+	
 	${PROJECT_SOURCE_DIR}/include/kdtree/sort.h
 	${PROJECT_SOURCE_DIR}/include/kdtree/dequeue.h
 	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_KdTree.h
 	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Helpers.h
 	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Common.h
 	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Types.h
+	
 )
 
 set(Loader_SRC
@@ -239,6 +257,8 @@ set(NN_SRC
 	nearest_neighbors/ICPTransform.cpp
 	nearest_neighbors/ICP.cpp
 	nearest_neighbors/ICPReject.cpp
+	${PROJECT_SOURCE_DIR}/include/kdtree/ResourceManager.h
+	kdtree/ResourceManager.cpp
 )
 
 set( PointCloud_SRC
@@ -308,8 +328,8 @@ source_group(ICP FILES ${NN_SRC})
 source_group(PointCloud FILES ${PointCloud_SRC})
 source_group(Shader FILES ${Shader_SRC})
 source_group(Utils FILES ${Utils_SRC})
-source_group("PointCloud/Cuda" FILES ${PointCloud_cuda_SRC} )
-source_group(Cuda FILES ${PointCloud_cuda_INC})
+source_group("Cuda/PointCloud" FILES ${PointCloud_cuda_SRC} ${PointCloud_cuda_INC})
+#source_group(Cuda FILES ${PointCloud_cuda_INC})
 #----------------------------------------------------------------------
 # Compiler standards
 
@@ -343,7 +363,7 @@ if(${ENABLE_STRUCTURE_CORE} STREQUAL  ON )
 endif()
 
 if(${ENABLE_AZURE_KINECT} STREQUAL  ON )
-	target_link_libraries(trackingx  "C:/Program Files/Azure Kinect SDK v1.4.0/sdk/windows-desktop/amd64/release/lib/k4a.lib")
+	target_link_libraries(trackingx  ${AZUREKINECT_LIBRARY})
 endif()
 
 

@@ -46,7 +46,8 @@ Feb 20, 2020, RR
 #include <opencv2\highgui.hpp>
 #include <opencv2\core.hpp>
 
-
+// local
+#include "FilterTypes.h"
 
 using namespace std;
 
@@ -61,9 +62,9 @@ public:
 
 
 	/*
-	Create a point cloud from a depth image with all points
+	Create a point cloud from a depth image with all points from host images as source/
 	@param src_image_ptr - a pointer to the image of size [wdith x height x channels ] stored as an array of type float which stores the depth values as
-			A(i) = {d0, d1, d2, ..., dN} in mm.
+			A(i) = {d0, d1, d2, ..., dN} in mm. The image pointer points to host image data. 
 	@param width - the width of the image in pixels
 	@param height - the height of the image in pixels
 	@param channels - the number of channels. A depth image should have only 1 channel.
@@ -78,6 +79,23 @@ public:
 	*/
 	static int CreatePointCloud(float* src_image_ptr, int width, int height, int chanels, float focal_length_x, float focal_length_y, float cx, float cy, int step_size, float normal_flip, vector<float3>& points, vector<float3>& normals, bool to_host = true);
 
+	/*
+	Create a point cloud from a depth image with all points from device images as source. There is no copy operation involed. 
+	@param src_device_image_ptr - a pointer to the image of size [wdith x height x channels ] stored as an array of type float which stores the depth values as
+			A(i) = {d0, d1, d2, ..., dN} in mm. The image pointer points to DEVICE MEMORY.
+	@param width - the width of the image in pixels
+	@param height - the height of the image in pixels
+	@param channels - the number of channels. A depth image should have only 1 channel.
+	@param focal_legnth - the focal length of the camera in pixel
+	@param step_size - for normal vector calculations. The interger specifies how many steps a neighbor sould be away no obtain a vector for normal vector calculation.
+					Minimum step_size is 1.
+	@param normal_flip - flip the normal vector with normal_flip = -1.0. The value is multiplies with the normal vector. 
+	@param points - a vector A(i) = {p0, p1, p2, ..., pN} with all points p_i = {px, py, pz} as float3.
+	@param normals - a vector A(i) = {n0, n1, n2, ..., nN} with all normal vectors n_i = {nx, ny, nz} as float3
+	@param to_host - if true, the device normals and points are copied back to the host. If false, this is skipped and the  data in points and normals remains empty.
+					NOTE, COPYING DATA REQUIRES A SIGNIFICANT AMOUNT OF TIME AND SHOULD ONLY BE EXECUTED AT THE VERY LAST STEP
+	*/
+	static int CreatePointCloudDev(float* src_device_image_ptr, int width, int height, int chanels, float focal_length_x, float focal_length_y, float cx, float cy, int step_size, float normal_flip, vector<float3>& points, vector<float3>& normals, bool to_host = true);
 
 
 	/*
@@ -205,6 +223,20 @@ public:
 
 
 
+};
+
+
+
+class cuFilter3f
+{
+public:
+
+	/*!
+	Set a point cloud filter methods. 
+	@param method - can be NONE or BILATERAL
+	@param param - the parameters for the filter
+	*/
+	static void SetFilterMethod(FilterMethod method, FilterParams param);
 };
 
 

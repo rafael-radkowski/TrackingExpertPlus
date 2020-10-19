@@ -9,6 +9,7 @@
 #include "cutil_math.h"
 #include "cuDeviceMemory3f.h"
 #include "cuPCUImpl3f.h"
+#include "cuFilter.h" // bilateral filter
 
 // stl
 #include <conio.h>
@@ -24,6 +25,7 @@ namespace texpert_cuPCU3f
 
 	// The input image on the device
 	float*	image_dev;
+	float*  image_temp_dev;
 
 	// debug images to visualize the output
 	float* image_output_dev = NULL;
@@ -429,6 +431,128 @@ int cuPCU3f::CreatePointCloud(float* src_image_ptr, int width, int height, int c
 
 
 
+/*
+Create a point cloud from a depth image with all points from device images as source. There is no copy operation involed. 
+@param src_device_image_ptr - a pointer to the image of size [wdith x height x channels ] stored as an array of type float which stores the depth values as
+		A(i) = {d0, d1, d2, ..., dN} in mm. . The image pointer points to DEVICE MEMORY.
+@param width - the width of the image in pixels
+@param height - the height of the image in pixels
+@param channels - the number of channels. A depth image should have only 1 channel.
+@param focal_legnth - the focal length of the camera in pixel
+@param step_size - for normal vector calculations. The interger specifies how many steps a neighbor sould be away no obtain a vector for normal vector calculation.
+				Minimum step_size is 1.
+@param normal_flip - flip the normal vector with normal_flip = -1.0. The value is multiplies with the normal vector. 
+@param points - a vector A(i) = {p0, p1, p2, ..., pN} with all points p_i = {px, py, pz} as float3.
+@param normals - a vector A(i) = {n0, n1, n2, ..., nN} with all normal vectors n_i = {nx, ny, nz} as float3
+@param to_host - if true, the device normals and points are copied back to the host. If false, this is skipped and the  data in points and normals remains empty.
+				NOTE, COPYING DATA REQUIRES A SIGNIFICANT AMOUNT OF TIME AND SHOULD ONLY BE EXECUTED AT THE VERY LAST STEP
+*/
+//static 
+int cuPCU3f::CreatePointCloudDev(float* src_device_image_ptr, int width, int height, int channels, float focal_length_x, float focal_length_y, float cx, float cy, int step_size, float normal_flip, vector<float3>& points, vector<float3>& normals, bool to_host )
+{
+	/*
+	std::ofstream off("test_cu.csv", std::ofstream::out);
+
+	cv::Mat img(480,640,CV_32FC1, src_image_ptr);
+	for (int i = 0; i < 480; i++) {
+		for (int j = 0; j < 640; j++) {
+			off << img.at<float>(i,j) << ",";
+		}
+		off << "\n";
+	}
+	off.close();
+*/
+
+
+	step_size = (step_size <= 0) ? 1 : step_size;
+
+	int input_size = width* height* channels * sizeof( float);
+	int output_size = width* height* 3 * sizeof(float);  // three channels
+
+	dim3 threads_per_block(THREADS_PER_BLOCK, THREADS_PER_BLOCK, 1);
+	dim3 blocks(width / threads_per_block.x,
+		height / threads_per_block.y,
+		1);
+
+	points.resize(width*height);
+	normals.resize(width*height);
+
+
+	//---------------------------------------------------------------------------------
+	// Allocating memory
+	// Moved to cuPCU::AllocateDeviceMemory()
+	//
+	// Allocate memory with AllocateDeviceMemory(.....)
+
+	//---------------------------------------------------------------------------------
+	// Copy memory
+
+	/*cudaError err = cudaMemcpy(image_dev, (float*)src_image_ptr, input_size, cudaMemcpyHostToDevice);
+	if (err != 0) { 
+		std::cout << "\n[KNN] - cudaMemcpy error.\n"; 
+	}
+	err = cudaGetLastError();
+	if (err != 0) {
+		std::cout << "\n[KNN] - cudaMemcpy error (2).\n"; 
+	}*/
+
+	//---------------------------------------------------------------------------------
+	// Process the image
+
+	// compute the points 
+	pcu_project_image_points << <blocks, threads_per_block >> > (src_device_image_ptr, width, height, channels, focal_length_x, focal_length_y, cx, cy, point_output_dev, image_output_dev);
+	cudaError  err = cudaGetLastError();
+	if (err != 0) { std::cout << "\n[KNN] - points processing error.\n"; }
+
+	cudaDeviceSynchronize();
+
+	// compute normal vectors
+	pcu_calculate_normal_vector << <blocks, threads_per_block >> > (point_output_dev, width, height, step_size, normal_flip, normals_output_dev, image_normals_out_dev);
+	err = cudaGetLastError();
+	if (err != 0) { std::cout << "\n[KNN] - normals points processing error.\n"; }
+
+	cudaDeviceSynchronize();
+
+
+	if (!to_host) return 1;
+		
+	//---------------------------------------------------------------------------------
+	// Return the data
+
+	cudaMemcpy(&points[0], point_output_dev, output_size, cudaMemcpyDeviceToHost);
+	cudaMemcpy(&normals[0], normals_output_dev, output_size, cudaMemcpyDeviceToHost);
+
+	//int removed = 0;
+	//cudaMemcpy(&removed, count_dev, sizeof(int), cudaMemcpyDeviceToHost);
+
+	//cout << "Removed " << removed << " points" << endl;
+
+
+#ifdef DEBUG_CUPCU
+
+	// renders an image of the outcomeing dataset on screen.
+	// Note. INCREASE THE SCALE IN pcu_project_image_points(...) TO SEE SOME COLOR.
+	// The values are scaled to meters.
+	cv::Mat output_points = cv::Mat::zeros(height, width, CV_32FC3);
+	cv::Mat output_normals = cv::Mat::zeros(height, width, CV_32FC3);
+	cudaMemcpy((float*)output_points.data, image_output_dev, output_size, cudaMemcpyDeviceToHost);
+	cudaMemcpy((float*)output_normals.data, image_normals_out_dev, output_size, cudaMemcpyDeviceToHost);
+
+	cv::Mat test_out, test_out_2, test_outf, test_out_2f;
+	output_points.convertTo(test_out, CV_8UC3);
+	output_normals.convertTo(test_out_2, CV_8UC3);
+	cv::flip(test_out, test_outf,1);
+	cv::flip(test_out_2, test_out_2f,1);
+	cv::imshow("Range image out", test_outf);
+	cv::imshow("Normal image out", test_out_2f);
+	cv::waitKey();
+#endif
+
+	cudaDeviceSynchronize();
+
+	return 1;
+}
+
 
 
 /*
@@ -452,6 +576,12 @@ void cuPCU3f::AllocateDeviceMemory(int width, int height, int channels)
 	image_normals_out_dev = cuDevMem3f::DevNormalsImagePtr();
 	point_output_dev = cuDevMem3f::DevPointPtr();
 	normals_output_dev = cuDevMem3f::DevNormalsPtr();
+
+
+		// allocate memory for the bilateral filter
+	cuFilter::AllocateDeviceMemory(width, height, channels);
+
+	image_temp_dev = cuDevMem3f::DevTempImagePtr();
 }
 
 
@@ -470,7 +600,7 @@ void cuPCU3f::FreeDeviceMemory(void)
 	cudaFree(normals_output_clean_dev);
 	cudaFree(point_output_clean_dev);
 
-
+	cuFilter::FreeDeviceMemory();
 }
 
 
@@ -559,7 +689,7 @@ void cuSample3f::CreateUniformSamplePattern(int width, int height, int sampling_
 	cudaMemcpy((unsigned short*)output_pattern.data, g_cu_sampling_dev, output_size, cudaMemcpyDeviceToHost);
 
 	cv::Mat test_out;
-	output_pattern.convertTo(test_out, CV_8UC3);
+	output_pattern.convertTo(test_out, CV_8UC3, 255);
 
 
 	cv::imshow("Pattern image out", test_out);
@@ -651,7 +781,7 @@ void cuSample3f::CreateRandomSamplePattern(int width, int height, int max_points
 		cudaMemcpy((unsigned short*)output_pattern.data, g_cu_random_sampling_dev[i], output_size, cudaMemcpyDeviceToHost);
 
 		cv::Mat test_out;
-		output_pattern.convertTo(test_out, CV_8UC3);
+		output_pattern.convertTo(test_out, CV_8UC3, 255);
 
 
 		cv::imshow("Pattern image out", test_out);
@@ -696,11 +826,16 @@ void cuSample3f::UniformSampling(float* src_image_ptr, int width, int height, fl
 		height / threads_per_block.y,
 		1);
 
+	//-----------------------------------------------------------
+	// Filter the point cloud
+	// image_temp_dev is device memory. 
+	cuFilter::ApplyBilateralFilter((float*)src_image_ptr, width, height, 1, (float*)image_temp_dev, false);
+
 
 	//-----------------------------------------------------------
 	// Create the point cloud
 
-	cuPCU3f::CreatePointCloud((float*)src_image_ptr, width, height, 1, focal_length_x, focal_length_y, cx, cy, normal_radius, normal_flip, points, normals, false);
+	cuPCU3f::CreatePointCloudDev((float*)image_temp_dev, width, height, 1, focal_length_x, focal_length_y, cx, cy, normal_radius, normal_flip, points, normals, false);
 
 
 
@@ -809,3 +944,26 @@ void cuSample3f::SetCuttingPlaneParams(float a, float b, float c, float d, float
 }
 
 
+
+	
+
+/*!
+Set a point cloud filter methods. 
+@param method - can be NONE or BILATERAL
+@param param - the parameters for the filter
+*/
+//static 
+void cuFilter3f::SetFilterMethod(FilterMethod method, FilterParams param)
+{
+	cuFilter::Params p;
+	p.kernel_size = param.kernel_size;
+	p.sigmaI = param.sigmaI;
+	p.sigmaS = param.sigmaS;
+
+	cuFilter::SetBilateralFilterParams(p);
+
+	if(method == FilterMethod::NONE)
+		cuFilter::Enable(false);
+	else
+		cuFilter::Enable(true);
+}

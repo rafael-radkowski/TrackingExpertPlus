@@ -4,6 +4,7 @@
 // cuda bindings
 #include "cuda/cuPCU3f.h"  // point cloud samping
 
+
 using namespace texpert;
 using namespace std;
 
@@ -49,7 +50,6 @@ PointCloudProducer::PointCloudProducer(ICaptureDevice& capture_device, PointClou
 	// allocate memory for all sampling units. 
 	cuSample3f::CreateUniformSamplePattern(_depth_cols, _depth_rows, _sampling_param.uniform_step);
 	cuSample3f::CreateRandomSamplePattern(_depth_cols, _depth_rows, _sampling_param.random_max_points, _sampling_param.ramdom_percentage);
-	
 
 	_producer_ready = true;
 }
@@ -57,7 +57,7 @@ PointCloudProducer::PointCloudProducer(ICaptureDevice& capture_device, PointClou
 	
 PointCloudProducer::~PointCloudProducer()
 {
-
+	
 }
 
 
@@ -70,15 +70,31 @@ Set the sampling method
 */
 void PointCloudProducer::setSampingMode(SamplingMethod method, SamplingParam param)
 {
-	int w = _capture_device.getCols(COLOR);
-	int h = _capture_device.getRows(COLOR);
+	int w = _depth_cols;//_capture_device.getCols(COLOR);
+	int h = _depth_rows;//_capture_device.getRows(COLOR);
+
+	if (w <= 0 || h <= 0) {
+		std::cout << "[ERROR] - setSampingMode: invalid camera resolution." << std::endl; 
+	}
 
 	_sampling_method = method;
 	_sampling_param = param;
+	_sampling_param.validate(); // check the values and correct if necessary. 
 
 	// set sampling parameters and create the required cuda structures. 
 	cuSample3f::CreateUniformSamplePattern(w, h, param.uniform_step);
 	cuSample3f::CreateRandomSamplePattern(w, h, param.random_max_points, param.ramdom_percentage);
+}
+
+/*!
+Set a point cloud filter methods. 
+@param method - can be NONE or BILATERAL
+@param param - the parameters for the filter
+*/
+void PointCloudProducer::setFilterMethod(FilterMethod method, FilterParams param)
+{
+	// pass-through function
+	cuFilter3f::SetFilterMethod( method,  param);
 }
 
 /*
@@ -181,15 +197,36 @@ bool PointCloudProducer::run_sampling_random(float* imgBuf)
 // and remove all points with values (0,0,0)
 bool  PointCloudProducer::copy_and_clear_points(void)
 {
-	
+/*
+	// the copy_if operator does not work correctly. It returns an incorrect sized point cloud, and the storage containers get out of sync.
+	// Added an ugly for loop to make it working. 
 
 	_the_cloud.resize(_pc_storage.points.size());
-	auto itp = std::copy_if(_pc_storage.points.begin(),  _pc_storage.points.end(),  _the_cloud.points.begin(), [](Eigen::Vector3f p){return !(p.z()==0.0);});
-	auto itn = std::copy_if(_pc_storage.normals.begin(), _pc_storage.normals.end(), _the_cloud.normals.begin(), [](Eigen::Vector3f n){return !(n.z()==0.0);});
+
+	auto itp = std::copy_if(_pc_storage.points.begin(),  _pc_storage.points.end(), _the_cloud.points.begin(), [](Eigen::Vector3f p){return !(p.z()==0);});
+	auto itn = std::copy_if(_pc_storage.normals.begin(), _pc_storage.normals.end(), _the_cloud.normals.begin(), [](Eigen::Vector3f n){return !(n.z()==0);});
 
 	_the_cloud.points.resize(std::distance(_the_cloud.points.begin(), itp ));
 	_the_cloud.normals.resize(std::distance(_the_cloud.normals.begin(), itn ));
 
+	//std::copy_if(_pc_storage.points.begin(), _pc_storage.points.end(), std::back_inserter(_the_cloud.points), [](Eigen::Vector3f p) { return !(p[2] == 0.0f); });
+	//std::copy_if(_pc_storage.normals.begin(), _pc_storage.normals.end(), std::back_inserter(_the_cloud.normals), [](Eigen::Vector3f n) {return !(n[2] == 0.0f); });
+*/
+	
+	_the_cloud.points.clear();
+	_the_cloud.normals.clear();
+	// copy the epoint
+	for (int i = 0; i < _pc_storage.points.size(); i++) {
+		Eigen::Vector3f p0 = _pc_storage.points[i];
+		Eigen::Vector3f n0 = _pc_storage.normals[i];
+
+		if (!p0.z() == 0 && !n0.z() == 0) {
+			_the_cloud.points.push_back(p0);
+			_the_cloud.normals.push_back(n0);
+		}
+	}
+	
+	
 //#define _TEST_COPY
 #ifdef _TEST_COPY
 // brute force test to check if the result is equal
@@ -198,8 +235,12 @@ bool  PointCloudProducer::copy_and_clear_points(void)
 Test passed on:
 
 - Feb 20, 2020, RR, Structure Core camera: no problems
-
+- Aug 8, 2020, RR, Azure kinect, no problem. 
 ****************************************************************************/
+
+	if (_the_cloud.points.size() != _the_cloud.normals.size()) {
+		cout << "[TEST] - ERROR _the_cloud.points.size() != _the_cloud.normals.size()) -> " << _the_cloud.points.size() << " != " <<_the_cloud.normals.size() << endl;
+	}
 
 	PointCloud	test_cloud;
 	
@@ -216,7 +257,7 @@ Test passed on:
 
 	// compare the vectors
 	if (test_cloud.points.size() == test_cloud.normals.size() && _the_cloud.points.size() == _the_cloud.normals.size() && test_cloud.points.size() == _the_cloud.points.size()) {
-		cout << "[TEST] - Sizes ok" << endl;
+		//cout << "[TEST] - Sizes ok" << endl;
 
 		int error_count = 0;
 		for (int i = 0; i < test_cloud.size(); i++) {
@@ -230,14 +271,30 @@ Test passed on:
 			if((n0 - n1).norm()  > 0.01 )
 				error_count++;
 		}
-		cout << "[TEST] - Found " <<  error_count << " errors." << endl;
+
+		if(error_count > 0) 
+			cout << "[TEST] - Found " <<  error_count << " errors." << endl;
 
 	}else
 	{	
 		cout << "[TEST] - ERROR - sizes do not match" << endl;
-	}
+		cout << "[TEST] - " << test_cloud.points.size() << " != " << test_cloud.normals.size() << " && " << test_cloud.normals.size() << " != " << _the_cloud.normals.size() << " && " << test_cloud.points.size() << " != " << _the_cloud.points.size() << endl;
 
-	
+		int error_count = 0;
+		for (int i = 0; i < test_cloud.size(); i++) {
+			Eigen::Vector3f p0 = test_cloud.points[i];
+			Eigen::Vector3f n0 = test_cloud.normals[i];
+			Eigen::Vector3f p1 = _the_cloud.points[i];
+			Eigen::Vector3f n1 = _the_cloud.normals[i];
+
+			if ((p0 - p1).norm() > 0.01)
+				error_count++;
+			if ((n0 - n1).norm() > 0.01)
+				error_count++;
+		}
+		if (error_count > 0)
+			cout << "[TEST] - Found " << error_count << " errors." << endl;
+	}
 
 #endif
 
