@@ -319,29 +319,39 @@ void DiscretizeCPFGPU(CPFDiscreet* dst, uint32_t* curvatures, float4* ref_frames
 		float3 pt = pts[id];
 		float4* ref_frame = ref_frames + (i * 4);
 
+		double3 ptd = make_double3(pt.x, pt.y, pt.z);
+
 		dst[idx].point_idx = i;
-		//get the angle.
-		//The point pt is in the frame origin.  n is aligned with the x axis.
-		dst[idx].alpha = atan2f(-pt.z, pt.y);
+
 
 		float3 pt_trans = make_float3(
 			(ref_frame[0].x * pt.x) + (ref_frame[0].y * pt.y) + (ref_frame[0].z * pt.z) + ref_frame[0].w,
 			(ref_frame[1].x * pt.x) + (ref_frame[1].y * pt.y) + (ref_frame[1].z * pt.z) + ref_frame[1].w, 
 			(ref_frame[2].x * pt.x) + (ref_frame[2].y * pt.y) + (ref_frame[2].z * pt.z) + ref_frame[2].w);
 
+		//get the angle.
+		//The point pt is in the frame origin.  n is aligned with the x axis.
+		dst[idx].alpha = atan2(-pt_trans.z, pt_trans.y);
+
 
 
 		pt = pts[i];
 
-		float pn = sqrt(powf(pt.x, 2) + powf(pt.y, 2) + powf(pt.z, 2));
-		float3 p_norm = make_float3(pt.x / pn, pt.y / pn, pt.z / pn);
+		double pn = sqrt(powf(pt.x, 2) + powf(pt.y, 2) + powf(pt.z, 2));
+		float3 p_norm;
+		if (pn == 0)
+			p_norm = make_float3(0, 0, 0);
+		else
+			p_norm = make_float3(pt.x / pn, pt.y / pn, pt.z / pn);
 
-		float ptrn = sqrt(powf(pt_trans.x, 2) + powf(pt_trans.y, 2) + powf(pt_trans.z, 2));
-		float3 ptr_norm = make_float3(pt_trans.x / ptrn, pt_trans.y / ptrn, pt_trans.z / ptrn);
+		double ptrn = sqrt(powf(pt_trans.x, 2) + powf(pt_trans.y, 2) + powf(pt_trans.z, 2));
+		float3 ptr_norm;
+		if (ptrn == 0)
+			ptr_norm = make_float3(0, 0, 0);
+		else
+			ptr_norm = make_float3(pt_trans.x / ptrn, pt_trans.y / ptrn, pt_trans.z / ptrn);
 
 		float ang = (p_norm.x * ptr_norm.x) + (p_norm.y * ptr_norm.y) + (p_norm.z * ptr_norm.z);
-
-		if (isnan(ang)) ang = 0;
 
 		dst[idx].data[0] = cur1;
 		dst[idx].data[1] = cur2;

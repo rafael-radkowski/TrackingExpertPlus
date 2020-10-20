@@ -14,8 +14,8 @@ wsb@iastate.edu
 MIT License
 -------------------------------------------------------------------------------------------------------
 Last edits:
-19 October 2020
-- BUGFIX: AngleBetween returns 0 if the vectors are the same.
+20 October 2020
+- BUGFIX: Corrected DiscretizeCPF alpha calculation
 
 */
 

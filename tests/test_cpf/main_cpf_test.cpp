@@ -179,11 +179,13 @@ void run_non_stress()
 -----------------------------Stress Tests----------------------------------------------
 */
 
-KNN knn;
+KNN* knn;
 
-PointCloud	points;
+PointCloud*	points;
 
 std::vector<MyMatches> matches;
+
+float tolerance = 0.0000001;
 
 /*
 Function to generate random point clouds and normal vectors. Note that the normal vectors are just
@@ -274,10 +276,10 @@ void run_stress(PointCloud pc, int iteration)
 {
 	cout << "Test " << iteration << ": " << endl;
 	matches.clear();
-	knn = KNN();
+	knn = new KNN();
 
-	knn.populate(pc);
-	knn.radius(pc, 2.0, matches);
+	knn->populate(pc);
+	knn->radius(pc, 2.0, matches);
 
 	int ref_errors = 0;
 	vector<Eigen::Affine3f> refFramesGPU;
@@ -353,6 +355,8 @@ void run_stress(PointCloud pc, int iteration)
 
 	CPFDiscreet curCPU;
 	CPFDiscreet curGPU;
+	vector<CPFDiscreet> discErr;
+	vector<CPFDiscreet> discErrCPU;
 	bool has_error;
 
 	for (int i = 0; i < CPU_cpf.size() && i < GPU_cpf.size(); i++)
@@ -369,14 +373,22 @@ void run_stress(PointCloud pc, int iteration)
 			}
 		}
 
-		if (has_error)
+		if (has_error) {
 			cpf_error++;
+			discErr.push_back(curGPU);
+			discErrCPU.push_back(curCPU);
+		}
 	}
 
 	err_ratio = ((float)cpf_error / (float)CPU_cpf.size()) * 100;
 	cout << "DiscretizeCPF: Found " << cpf_error << " ( about " << err_ratio << "% ) errors." << endl;
+	for (int i = 0; i < discErr.size(); i++)
+	{
+		cout << discErr.at(i).data[0] << ", " << discErr.at(i).data[1] << ", " << discErr.at(i).data[2] << ", " << discErr.at(i).data[3] << " &&&& " <<
+			discErrCPU.at(i).data[0] << ", " << discErrCPU.at(i).data[1] << ", " << discErrCPU.at(i).data[2] << ", " << discErrCPU.at(i).data[3] << endl;
+	}
 
-	knn.reset();
+	knn->reset();
 }
 
 void main()
@@ -402,12 +414,14 @@ void main()
 				<< "CPU: " << acpu << ", GPU: " << agpu << endl << endl;
 	}
 
+	points = new PointCloud();
+
 	//2. Test normal range, small point size
 	CPFToolsGPU::AllocateMemory(100);
 	for (int i = 0; i < 20; i++)
 	{
-		GenerateRandomPointCloud(points, 100);
-		run_stress(points, i);
+		GenerateRandomPointCloud(*points, 100);
+		run_stress(*points, i);
 	}
 	CPFToolsGPU::DeallocateMemory();
 
@@ -415,15 +429,15 @@ void main()
 	//3. Test normal range, large point size
 	for (int i = 0; i < 5; i++)
 	{
-		GenerateRandomPointCloud(points, 10000);
-		run_stress(points, i);
+		GenerateRandomPointCloud(*points, 10000);
+		run_stress(*points, i);
 	}
 
 	//4. Test large range, large point size
 	for (int i = 0; i < 5; i++)
 	{
-		GenerateRandomPointCloud(points, 10000, -3.0, 3.0);
-		run_stress(points, i);
+		GenerateRandomPointCloud(*points, 10000, -3.0, 3.0);
+		run_stress(*points, i);
 	}
 	CPFToolsGPU::DeallocateMemory();
 }
