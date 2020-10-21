@@ -287,6 +287,12 @@ void run_stress(PointCloud pc, int iteration)
 	Eigen::Affine3f curRefCPU;
 
 	CPFToolsGPU::GetRefFrames(refFramesGPU, pc.points, pc.normals);
+	if (refFramesGPU.empty())
+	{
+		cout << "GetRefFrames Failed!" << endl;
+		return;
+	}
+
 	for (int i = 0; i < pc.size(); i++) {
 		curRefCPU = CPFTools::GetRefFrame(pc.points.at(i), pc.normals.at(i));
 
@@ -364,29 +370,37 @@ void run_stress(PointCloud pc, int iteration)
 		has_error = true;
 		curCPU = CPU_cpf.at(i);
 		curGPU = GPU_cpf.at(i);
-		for (int j = 0; j < CPU_cpf.size(); j++)
-		{
-			if ((CPU_cpf.at(j) == curGPU))
-			{
-				has_error = false;
-				break;
-			}
-		}
 
-		if (has_error) {
+		if (!(curCPU == curGPU))
+		{
 			cpf_error++;
 			discErr.push_back(curGPU);
 			discErrCPU.push_back(curCPU);
 		}
+
+		//for (int j = 0; j < CPU_cpf.size(); j++)
+		//{
+		//	if ((CPU_cpf.at(j).point_idx == curGPU.point_idx) && (CPU_cpf.at(j) == curGPU))
+		//	{
+		//		has_error = false;
+		//		break;
+		//	}
+		//}
+
+		//if (has_error) {
+		//	cpf_error++;
+		//	discErr.push_back(curGPU);
+		//	discErrCPU.push_back(curCPU);
+		//}
 	}
 
 	err_ratio = ((float)cpf_error / (float)CPU_cpf.size()) * 100;
 	cout << "DiscretizeCPF: Found " << cpf_error << " ( about " << err_ratio << "% ) errors." << endl;
-	for (int i = 0; i < discErr.size(); i++)
-	{
-		cout << discErr.at(i).data[0] << ", " << discErr.at(i).data[1] << ", " << discErr.at(i).data[2] << ", " << discErr.at(i).data[3] << " &&&& " <<
-			discErrCPU.at(i).data[0] << ", " << discErrCPU.at(i).data[1] << ", " << discErrCPU.at(i).data[2] << ", " << discErrCPU.at(i).data[3] << endl;
-	}
+	//for (int i = 0; i < discErr.size(); i++)
+	//{
+	//	cout << discErr.at(i).data[0] << ", " << discErr.at(i).data[1] << ", " << discErr.at(i).data[2] << ", " << discErr.at(i).data[3] << " &&&& " <<
+	//		discErrCPU.at(i).data[0] << ", " << discErrCPU.at(i).data[1] << ", " << discErrCPU.at(i).data[2] << ", " << discErrCPU.at(i).data[3] << endl;
+	//}
 
 	knn->reset();
 }

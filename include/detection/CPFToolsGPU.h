@@ -14,8 +14,8 @@ wsb@iastate.edu
 MIT License
 -------------------------------------------------------------------------------------------------------
 Last edits:
-20 October 2020
-- BUGFIX: Corrected DiscretizeCPF alpha calculation
+21 October 2020
+- BUGFIX: Patched memory leak in GetRefFrames
 
 */
 

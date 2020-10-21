@@ -4,7 +4,7 @@
 #include "CPFToolsGPU.h"
 
 namespace nsCPFToolsGPU {
-	int pc_size;
+	int* pc_size;
 
 	int* angle_bins;
 	float* max_ang_value;
@@ -32,11 +32,11 @@ using namespace nsCPFToolsGPU;
 
 void CPFToolsGPU::AllocateMemory(uint32_t size)
 {
-	pc_size = size;
-
+	cudaMallocManaged(&pc_size, sizeof(int));
 	cudaMallocManaged(&angle_bins, sizeof(int));
 	cudaMallocManaged(&max_ang_value, sizeof(int));
 	cudaMallocManaged(&min_ang_value, sizeof(int));
+	*pc_size = size;
 	*angle_bins = 12;
 	*max_ang_value = 0.0;
 	*min_ang_value = 10000000.0;
@@ -188,20 +188,19 @@ void GetRefFrameGPU(float3* p, float3* n, int numPts, float4* res)
 	float xz =		axis.x * axis.z; // ux * uz
 
 	//Find the rotation matrix of this reference frame
-	float3* rot = (float3*)malloc(3 * sizeof(float3));
-	rot[0] = make_float3(cost + (powf(axis.x, 2) * omcost), (xy * omcost) - (axis.z * sint), (xz * omcost) + (axis.y * sint));
-	rot[1] = make_float3((xy * omcost) + (axis.z * sint), cost + (powf(axis.y, 2) * omcost), (yz * omcost) - (axis.x * sint));
-	rot[2] = make_float3((xz * omcost) - (axis.y * sint), (yz * omcost) + (axis.x * sint), cost + (powf(axis.z, 2) * omcost));
+	float3 rot1 = make_float3(cost + (powf(axis.x, 2) * omcost), (xy * omcost) - (axis.z * sint), (xz * omcost) + (axis.y * sint));
+	float3 rot2 = make_float3((xy * omcost) + (axis.z * sint), cost + (powf(axis.y, 2) * omcost), (yz * omcost) - (axis.x * sint));
+	float3 rot3 = make_float3((xz * omcost) - (axis.y * sint), (yz * omcost) + (axis.x * sint), cost + (powf(axis.z, 2) * omcost));
 
 	//Translate the point to fit in the new rotation frame
-	float3 tinf = make_float3(rot[0].x * point.x + rot[0].y * point.y + rot[0].z * point.z,
-		rot[1].x * point.x + rot[1].y * point.y + rot[1].z * point.z,
-		rot[2].x * point.x + rot[2].y * point.y + rot[2].z * point.z);
+	float3 tinf = make_float3(rot1.x * point.x + rot1.y * point.y + rot1.z * point.z,
+		rot2.x * point.x + rot2.y * point.y + rot2.z * point.z,
+		rot3.x * point.x + rot3.y * point.y + rot3.z * point.z);
 
 	// create the reference frame
-	res[i * 4] =		make_float4(rot[0].x, rot[0].y, rot[0].z, tinf.x);
-	res[(i * 4) + 1] =  make_float4(rot[1].x, rot[1].y, rot[1].z, tinf.y);
-	res[(i * 4) + 2] =  make_float4(rot[2].x, rot[2].y, rot[2].z, tinf.z);
+	res[i * 4] =		make_float4(rot1.x, rot1.y, rot1.z, tinf.x);
+	res[(i * 4) + 1] =  make_float4(rot2.x, rot2.y, rot2.z, tinf.y);
+	res[(i * 4) + 2] =  make_float4(rot3.x, rot3.y, rot3.z, tinf.z);
 	res[(i * 4) + 3] =  make_float4(0, 0, 0, 1);
 }
 
@@ -314,8 +313,6 @@ void DiscretizeCPFGPU(CPFDiscreet* dst, uint32_t* curvatures, float4* ref_frames
 		int cur2 = curvatures[id];
 		int idx = (i * KNN_MATCHES_LENGTH) + iteration;
 
-		float3 p01;
-
 		float3 pt = pts[id];
 		float4* ref_frame = ref_frames + (i * 4);
 
@@ -392,7 +389,8 @@ void CPFToolsGPU::DiscretizeCPF(vector<CPFDiscreet>& dst, vector<uint32_t>& curv
 	CPFDiscreet null_CPF = CPFDiscreet();
 	for (int i = 0; i < pts.size() * KNN_MATCHES_LENGTH; i++)
 	{
-		if(!(discretized_cpfs[i] == null_CPF))
+		//TODO: There's something going on with the placement of CPFs here.  Find a fix.
+		if(!(discretized_cpfs[i].point_idx == -1))
 			dst.push_back(discretized_cpfs[i]);
 	}
 }
