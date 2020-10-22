@@ -14,8 +14,8 @@ wsb@iastate.edu
 MIT License
 -------------------------------------------------------------------------------------------------------
 Last edits:
-21 October 2020
-- BUGFIX: Patched memory leak in GetRefFrames
+22 October 2020
+- BUGFIX: DiscretizeCPFGPU now uses the vector itself as the normalized vector if its norm is 0.
 
 */
 

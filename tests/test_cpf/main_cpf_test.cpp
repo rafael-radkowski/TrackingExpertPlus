@@ -412,6 +412,7 @@ void main()
 	float tolerance = 0.0000001f;
 
 	//1. Test AngleBetween
+	cout << "-----Begin AngleBetween Test-----" << endl;
 	for (int i = 0; i < 20; i++)
 	{
 		vector<float> vec0 = RandomGenerator::FloatPosition(-i, i);
@@ -425,12 +426,14 @@ void main()
 
 		if (!(agpu <= acpu + tolerance || agpu >= acpu - tolerance))
 			std::cout << "[ERROR] - AngleBetween fails for CPFToolsGPU for vectors " << v0 << " and " << v1 << endl
-				<< "CPU: " << acpu << ", GPU: " << agpu << endl << endl;
+				<< "CPU: " << acpu << ", GPU: " << agpu << endl;
 	}
+	cout << endl;
 
 	points = new PointCloud();
 
 	//2. Test normal range, small point size
+	cout << "-----Begin stress test: Normal range, small point size-----" << endl;
 	CPFToolsGPU::AllocateMemory(100);
 	for (int i = 0; i < 20; i++)
 	{
@@ -438,20 +441,34 @@ void main()
 		run_stress(*points, i);
 	}
 	CPFToolsGPU::DeallocateMemory();
+	cout << endl;
 
 	CPFToolsGPU::AllocateMemory(10000);
 	//3. Test normal range, large point size
+	cout << "-----Begin stress test: Normal range, large point size-----" << endl;
 	for (int i = 0; i < 5; i++)
 	{
 		GenerateRandomPointCloud(*points, 10000);
 		run_stress(*points, i);
 	}
+	cout << endl;
 
 	//4. Test large range, large point size
+	cout << "-----Begin stress test: Large range, large point size-----" << endl;
 	for (int i = 0; i < 5; i++)
 	{
 		GenerateRandomPointCloud(*points, 10000, -3.0, 3.0);
 		run_stress(*points, i);
 	}
+	cout << endl;
+
+	//5. Test small range, large point size
+	cout << "-----Begin stress test: Small range, large point size-----" << endl;
+	for (int i = 0; i < 5; i++)
+	{
+		GenerateRandomPointCloud(*points, 10000, -1.0, 1.0);
+		run_stress(*points, i);
+	}
+	cout << endl;
 	CPFToolsGPU::DeallocateMemory();
 }

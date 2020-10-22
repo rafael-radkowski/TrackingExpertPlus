@@ -25,6 +25,7 @@ namespace nsCPFToolsGPU {
 
 	//DiscretizeCPF
 	CPFDiscreet* discretized_cpfs;
+	bool* valid;
 }
 
 using namespace texpert;
@@ -53,6 +54,7 @@ void CPFToolsGPU::AllocateMemory(uint32_t size)
 	cudaMallocManaged(&discretized_curvatures, size * sizeof(int));
 	
 	cudaMallocManaged(&discretized_cpfs, size * KNN_MATCHES_LENGTH * sizeof(CPFDiscreet));
+	cudaMallocManaged(&valid, size * KNN_MATCHES_LENGTH * sizeof(bool));
 }
 
 void CPFToolsGPU::DeallocateMemory()
@@ -300,18 +302,22 @@ void CPFToolsGPU::DiscretizeCurvature(vector<uint32_t>& dst, const vector<Eigen:
 }
 
 __global__
-void DiscretizeCPFGPU(CPFDiscreet* dst, uint32_t* curvatures, float4* ref_frames, float3* pts, int num_pts, Matches* matches, int iteration, float* max_angle_val, float* min_angle_val, int* ang_bins)
+void DiscretizeCPFGPU(CPFDiscreet* dst, uint32_t* curvatures, float4* ref_frames, float3* pts, int num_pts, Matches* matches, int iteration, float* max_angle_val, float* min_angle_val, int* ang_bins, bool* valid_dists)
 {
 	int i = (blockIdx.x * blockDim.x) + threadIdx.x;
 
 	if (i > num_pts)
 		return;
 
+	int idx = (i * KNN_MATCHES_LENGTH) + iteration;
+
 	if (matches[i].matches[iteration].distance > 0.0) {
 		int id = matches[i].matches[iteration].second;
 		int cur1 = curvatures[i];
 		int cur2 = curvatures[id];
-		int idx = (i * KNN_MATCHES_LENGTH) + iteration;
+
+
+		valid_dists[idx] = true;
 
 		float3 pt = pts[id];
 		float4* ref_frame = ref_frames + (i * 4);
@@ -328,7 +334,7 @@ void DiscretizeCPFGPU(CPFDiscreet* dst, uint32_t* curvatures, float4* ref_frames
 
 		//get the angle.
 		//The point pt is in the frame origin.  n is aligned with the x axis.
-		dst[idx].alpha = atan2(-pt_trans.z, pt_trans.y);
+		dst[idx].alpha = atan2(-1 * pt_trans.z, pt_trans.y);
 
 
 
@@ -337,14 +343,14 @@ void DiscretizeCPFGPU(CPFDiscreet* dst, uint32_t* curvatures, float4* ref_frames
 		double pn = sqrt(powf(pt.x, 2) + powf(pt.y, 2) + powf(pt.z, 2));
 		float3 p_norm;
 		if (pn == 0)
-			p_norm = make_float3(0, 0, 0);
+			p_norm = make_float3(pt.x, pt.y, pt.z);
 		else
 			p_norm = make_float3(pt.x / pn, pt.y / pn, pt.z / pn);
 
 		double ptrn = sqrt(powf(pt_trans.x, 2) + powf(pt_trans.y, 2) + powf(pt_trans.z, 2));
 		float3 ptr_norm;
 		if (ptrn == 0)
-			ptr_norm = make_float3(0, 0, 0);
+			ptr_norm = make_float3(pt_trans.x, pt_trans.y, pt_trans.z);
 		else
 			ptr_norm = make_float3(pt_trans.x / ptrn, pt_trans.y / ptrn, pt_trans.z / ptrn);
 
@@ -361,6 +367,8 @@ void DiscretizeCPFGPU(CPFDiscreet* dst, uint32_t* curvatures, float4* ref_frames
 			*min_angle_val = ang;
 		return;
 	}
+
+	valid_dists[idx] = false;
 }
 
 //static
@@ -379,7 +387,7 @@ void CPFToolsGPU::DiscretizeCPF(vector<CPFDiscreet>& dst, vector<uint32_t>& curv
 	int blocks = ceil((float) pts.size() / threads);
 	for (int i = 0; i < KNN_MATCHES_LENGTH; i++)
 	{
-		DiscretizeCPFGPU<<<blocks, threads>>>(discretized_cpfs, (uint32_t*)discretized_curvatures, RefFrames, vectorsA, pts.size(), pt_matches, i, max_ang_value, min_ang_value, angle_bins);
+		DiscretizeCPFGPU<<<blocks, threads>>>(discretized_cpfs, (uint32_t*)discretized_curvatures, RefFrames, vectorsA, pts.size(), pt_matches, i, max_ang_value, min_ang_value, angle_bins, valid);
 		cudaError error = cudaGetLastError();
 		if (error)
 			cout << "ERROR: CPFToolsGPU: DiscretizeCPF: " << cudaGetErrorString(error) << " on iteration " << i << endl;
@@ -389,8 +397,7 @@ void CPFToolsGPU::DiscretizeCPF(vector<CPFDiscreet>& dst, vector<uint32_t>& curv
 	CPFDiscreet null_CPF = CPFDiscreet();
 	for (int i = 0; i < pts.size() * KNN_MATCHES_LENGTH; i++)
 	{
-		//TODO: There's something going on with the placement of CPFs here.  Find a fix.
-		if(!(discretized_cpfs[i].point_idx == -1))
+		if(valid[i])
 			dst.push_back(discretized_cpfs[i]);
 	}
 }
