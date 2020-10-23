@@ -19,7 +19,7 @@ TEParams populateParams(Arguments params)
 	p.cluster_rot_threshold = params.fd_cluster_rot_th;
 	p.cluster_trans_threshold = params.fd_cluster_trans_th;
 	p.curvature_search_radius = params.fd_curvature_radius;
-	p.icp_num_max_iterations = params.icp_max_iterations;
+	p.icp_num_max_iterations = (float)params.icp_max_iterations;
 	p.icp_outlier_reject_angle = params.icp_outlier_ang_th;
 	p.icp_outlier_reject_distance = params.icp_outlier_dist_th;
 	p.icp_termination_dist = params.icp_min_rms;
@@ -51,11 +51,20 @@ void displayKeyboard(void) {
 	std::cout << "\n--------------------------------------------------------------------------" << std::endl;
 }
 
-// -scene ../data/test/Azure_Kinect_model_1_test.ply -model ../data/stanford_bunny_pc.obj -verbose
-// -cam AzureKinect -model ../data/stanford_bunny_pc.obj -verbose
+// -scene ../data/Azure_Kinect_model_1_2020-06-19_10-37-18_pc.obj -model ../data/stanford_bunny_pc.obj -verbose
+// -scene ../data/stanford_bunny_pc.obj -model ../data/stanford_bunny_pc.obj -verbose
+// -scene C:/Users/Tyler/Documents/TrackingExpertPlus/data/stanford_bunny_pc.obj -model C:/Users/Tyler/Documents/TrackingExpertPlus/data/stanford_bunny_pc.obj -verbose
+// -cam AzureKinect -model C:/Users/Tyler/Documents/TrackingExpertPlus/data/stanford_bunny_pc.obj -verbose
+
 
 int main(int argc, char** argv) {
-
+	
+	//using openCVwordl not debug for debug mode?
+	/*std::string location = "C:/Users/Tyler/Documents/TrackingExpertPlus";
+	std::string name = "pose2";
+	TrackingExpertDemo::generatePoseData(location, name);*/
+	
+	
 	std::cout << "TrackingExpertPlusDemo" << std::endl;
 	std::cout << "V0.5-20200803, Aug. 2020\n" << std::endl;
 	std::cout << "--------------------------------------------------------------------------" << std::endl;
