@@ -347,6 +347,12 @@ void run_stress(PointCloud pc, int iteration)
 
 				Eigen::Vector3f pt = T * pc.points[id];
 
+				for (int k = 0; k < 3; k++)
+				{
+					if (!(abs(pt(k)) > 10e-6))
+						pt(k) = 0;
+				}
+
 				CPFDiscreet cpf = CPFTools::DiscretizeCPF(cur1, cur2, pc.points.at(i), pt);
 
 				cpf.point_idx = i;

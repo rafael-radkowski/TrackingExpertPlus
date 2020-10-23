@@ -14,8 +14,8 @@ wsb@iastate.edu
 MIT License
 -------------------------------------------------------------------------------------------------------
 Last edits:
-22 October 2020
-- BUGFIX: DiscretizeCPFGPU now uses the vector itself as the normalized vector if its norm is 0.
+23 October 2020
+- BUGFIX: Added some more documentation
 
 */
 
@@ -77,10 +77,24 @@ public:
 	static void GetRefFrames(vector<Eigen::Affine3f>& dst, vector<Eigen::Vector3f>& p, vector<Eigen::Vector3f>& n);
 
 	/*!
+	Calculates the point curvatures from the given point cloud and places them in their corresponding
+	locations in dst.
+	@param dst - the vector in which the resulting point curvatures will be placed
+	@param n1 - the normals of the points in the point cloud
+	@param pc - the point cloud from which the curvatures will be found
+	@param matches - the matches for each point in the point cloud found by KNN.
+	@param range - 
 	*/
 	static void DiscretizeCurvature(vector<uint32_t>& dst, const vector<Eigen::Vector3f>& n1, PointCloud& pc, vector<Matches> matches, const float range = 10.0);
 
 	/*!
+	Calculates all discretized CPFs from a set of points and their corresponding curvatures, matches, and 
+	reference frames, placing the results in dst.
+	@param dst - the vector in which the resulting CPFDiscreets will be placed
+	@param curvatures - the curvatures of all corresponding points in pts
+	@param matches - the matches found by KNN from the points in pts
+	@param pts - the points in the point cloud used to find the CPFDiscreets
+	@param ref_frames - the reference frames corresponding to the points in pts
 	*/
 	static void DiscretizeCPF(vector<CPFDiscreet>& dst, vector<uint32_t>& curvatures, vector<Matches> matches, vector<Eigen::Vector3f> pts, vector<Eigen::Affine3f> ref_frames);
 

@@ -31,6 +31,10 @@ namespace nsCPFToolsGPU {
 using namespace texpert;
 using namespace nsCPFToolsGPU;
 
+/*
+---------------Memory Allocation Functions-------------------
+*/
+
 void CPFToolsGPU::AllocateMemory(uint32_t size)
 {
 	cudaMallocManaged(&pc_size, sizeof(int));
@@ -77,6 +81,9 @@ void CPFToolsGPU::DeallocateMemory()
 	cudaFree(discretized_cpfs);
 }
 
+/*
+--------------CPU-GPU Translation Functions-----------------
+*/
 void vecToPointer3F(float3* dst, const vector<Eigen::Vector3f>& src)
 {
 	Eigen::Vector3f curVec;
@@ -129,6 +136,9 @@ void pointerToVecI(std::vector<uint32_t>& dst, int* src, int num_e)
 }
 
 
+/*
+-----------------Main Class Functions--------------------
+*/
 
 //static
 __host__ __device__
@@ -213,6 +223,7 @@ void CPFToolsGPU::GetRefFrames(vector<Eigen::Affine3f>& dst, vector<Eigen::Vecto
 	vecToPointer3F(vectorsA, p);
 	vecToPointer3F(vectorsB, n);
 
+	//Get reference frames
 	int threads = 32;
 	int blocks = ceil((float) p.size() / threads);
 	GetRefFrameGPU<<<blocks, threads>>>(vectorsA, vectorsB, p.size(), RefFrames);
@@ -231,6 +242,7 @@ void CPFToolsGPU::GetRefFrames(vector<Eigen::Affine3f>& dst, vector<Eigen::Vecto
 	//	cout << RefFrames[(i * 4) + 3].x << ", " << RefFrames[(i * 4) + 3].y << ", " << RefFrames[(i * 4) + 3].z << ", " << RefFrames[(i * 4) + 3].w << endl;
 	//}
 
+	//Copy reference frames back to the CPU
 	pointerToVecM4F(dst, RefFrames, p.size());
 }
 
@@ -267,6 +279,7 @@ void CalculateDiscCurve(int* dst, double2* src, int num_curve)
 //static
 void CPFToolsGPU::DiscretizeCurvature(vector<uint32_t>& dst, const vector<Eigen::Vector3f>& n1, PointCloud& pc, vector<Matches> matches, const float range)
 {
+	//Copy vectors and values to GPU
 	vecToPointer3F(vectorsA, n1);
 	vecToPointer3F(pcN, pc.normals);
 	for (int i = 0; i < matches.size(); i++)
@@ -374,6 +387,7 @@ void DiscretizeCPFGPU(CPFDiscreet* dst, uint32_t* curvatures, float4* ref_frames
 //static
 void CPFToolsGPU::DiscretizeCPF(vector<CPFDiscreet>& dst, vector<uint32_t>& curvatures, vector<Matches> matches, vector<Eigen::Vector3f> pts, vector<Eigen::Affine3f> ref_frames)
 {
+	//Copy vectors to GPU
 	vecToPointerI(discretized_curvatures, curvatures);
 	vecToPointer3F(vectorsA, pts);
 	vecToPointerM4F(RefFrames, ref_frames);
@@ -383,6 +397,7 @@ void CPFToolsGPU::DiscretizeCPF(vector<CPFDiscreet>& dst, vector<uint32_t>& curv
 		discretized_cpfs[i] = CPFDiscreet();
 	}
 
+	//For each point, find the CPFDiscreet for each match
 	int threads = 64;
 	int blocks = ceil((float) pts.size() / threads);
 	for (int i = 0; i < KNN_MATCHES_LENGTH; i++)
@@ -394,6 +409,7 @@ void CPFToolsGPU::DiscretizeCPF(vector<CPFDiscreet>& dst, vector<uint32_t>& curv
 		cudaDeviceSynchronize();
 	}
 
+	//Push back all valid points
 	CPFDiscreet null_CPF = CPFDiscreet();
 	for (int i = 0; i < pts.size() * KNN_MATCHES_LENGTH; i++)
 	{
