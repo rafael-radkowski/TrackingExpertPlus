@@ -59,10 +59,10 @@ void displayKeyboard(void) {
 
 int main(int argc, char** argv) {
 	
-	//using openCVwordl not debug for debug mode?
-	/*std::string location = "C:/Users/Tyler/Documents/TrackingExpertPlus";
-	std::string name = "pose2";
-	TrackingExpertDemo::generatePoseData(location, name);*/
+	////using openCVwordl not debug for debug mode?
+	//std::string location = "C:/Users/Tyler/Documents/TrackingExpertPlus";
+	//std::string name = "pose2";
+	//TrackingExpertDemo::generatePoseData(location, name);
 	
 	
 	std::cout << "TrackingExpertPlusDemo" << std::endl;
