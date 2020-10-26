@@ -75,11 +75,11 @@ typedef struct CPFParams
 	float	cluster_rot_threshold;
 
 	CPFParams() {
-		multiplier = 10.0;
-		search_radius = 0.1;
-		angle_step = 12.0;
-		cluster_trans_threshold = 0.03;
-		cluster_rot_threshold = 0.8;
+		multiplier = 10.0f;
+		search_radius = 0.1f;
+		angle_step = 12.0f;
+		cluster_trans_threshold = 0.03f;
+		cluster_rot_threshold = 0.8f;
 	}
 
 }CPFParams;

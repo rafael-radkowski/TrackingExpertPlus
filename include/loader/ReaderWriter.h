@@ -62,7 +62,7 @@ protected:
 	// check the expected filetype of the object
 	static bool check_type(std::string path_and_file, std::string type) {
 		
-		int idx0 = path_and_file.find_last_of(".");
+		size_t idx0 = path_and_file.find_last_of(".");
 		std::string t = path_and_file.substr(idx0+1, path_and_file.size() - idx0 - 1);
 
 		// remove space

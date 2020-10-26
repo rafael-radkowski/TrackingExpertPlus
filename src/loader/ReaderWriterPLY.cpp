@@ -19,10 +19,10 @@ bool ReaderWriterPLY::Read(const std::string file, std::vector<Eigen::Vector3f>&
 
 
 	// append a ply ending 
-	int index = file.find_last_of(".");
+	size_t index = file.find_last_of(".");
 	std::string outfile;
 
-	if (index != -1)
+	if (index != std::string::npos)
 	{
 		outfile = file.substr(0, index);
 	}
@@ -78,32 +78,32 @@ bool ReaderWriterPLY::Read(const std::string file, std::vector<Eigen::Vector3f>&
 			float x, y, z, nx, ny, nz;
 			if (e.size() == 6) {
 				if(ReaderWriter::is_number(e[0]))
-					x = std::atof(e[0].c_str());
+					x = (float)std::atof(e[0].c_str());
 				else ErrorMsg("coordinate x is NaN at vertex " + std::to_string(count));
 
 				if(ReaderWriter::is_number(e[1]))
-					y = std::atof(e[1].c_str());
+					y = (float)std::atof(e[1].c_str());
 				else ErrorMsg("coordinate y is NaN at vertex " + std::to_string(count));
 
 				if(ReaderWriter::is_number(e[2]))
-					z = std::atof(e[2].c_str());
+					z = (float)std::atof(e[2].c_str());
 				else ErrorMsg("coordinate z is NaN at vertex " + std::to_string(count));
 						
 				if(ReaderWriter::is_number(e[3]))
-					nx = std::atof(e[3].c_str());
+					nx = (float)std::atof(e[3].c_str());
 				else ErrorMsg("coordinate nx is NaN at vertex " + std::to_string(count));
 
 				if(ReaderWriter::is_number(e[4]))
-					ny = std::atof(e[4].c_str());
+					ny = (float)std::atof(e[4].c_str());
 				else ErrorMsg("coordinate ny is NaN at vertex " + std::to_string(count));
 
 				if(ReaderWriter::is_number(e[5]))
-					nz = std::atof(e[5].c_str());
+					nz = (float)std::atof(e[5].c_str());
 				else ErrorMsg("coordinate nz is NaN at vertex " + std::to_string(count));
 
 				dst_points.push_back(Eigen::Vector3f(x, y, z));
 				Eigen::Vector3f n(nx, ny, nz);
-				if(n.norm() > 1.01);
+				if(n.norm() > 1.01f)
 					n.normalize();
 
 				dst_normals.push_back(n);
@@ -143,10 +143,10 @@ bool ReaderWriterPLY::Write(std::string file, std::vector<Eigen::Vector3f>& src_
 
 
 	// append a pcd ending 
-	int index = file.find_last_of(".");
+	size_t index = file.find_last_of(".");
 	std::string outfile;
 
-	if (index != -1)
+	if (index != std::string::npos)
 	{
 		outfile = file.substr(0, index);
 	}

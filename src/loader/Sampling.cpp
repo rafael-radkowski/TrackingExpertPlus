@@ -69,9 +69,9 @@ void Sampling::Uniform( PointCloud& src, PointCloud& dst, SamplingParam param)
     if(voxZ  > dimZ ) voxZ = dimZ;
 
     // number of cells
-    int vx = std::ceil ( dimX / voxX );
-    int vy = std::ceil ( dimY / voxY );
-    int vz = std::ceil ( dimZ / voxZ );
+    int vx = (int)std::ceil ( dimX / voxX );
+    int vy = (int)std::ceil ( dimY / voxY );
+    int vz = (int)std::ceil ( dimZ / voxZ );
 
     if(g_verbose  && g_verbose_level == 2){
         cout << "[INFO] Sampling - Num cells Vx: " << vx << endl;
@@ -94,9 +94,9 @@ void Sampling::Uniform( PointCloud& src, PointCloud& dst, SamplingParam param)
     vector<Eigen::Vector3f> p_ = src.points;
     for( int i=0; i<size; i++){
 		float v = std::max((p_[i].x() + offset_x), 0.0f);
-        int idx = ceil((p_[i].x() + offset_x) / voxX );
-        int idy = ceil((p_[i].y() + offset_y) / voxY );
-        int idz = ceil((p_[i].z() + offset_z) / voxZ );
+        int idx = (int)ceil((p_[i].x() + offset_x) / voxX );
+        int idy = (int)ceil((p_[i].y() + offset_y) / voxY );
+        int idz = (int)ceil((p_[i].z() + offset_z) / voxZ );
 
         if(cube[idx][idy][idz] == -1)
         {
