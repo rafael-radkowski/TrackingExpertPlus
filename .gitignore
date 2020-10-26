@@ -42,3 +42,6 @@ examples/trackingexpertdemo/src/TrackingExpertDemo.dir/
 data/Part_A_reduced_pc.ply
 data/Part_A_reduced_pc.obj
 data/Antenna_Coupler_model.obj
+*.obj
+*.ply
+*.txt
