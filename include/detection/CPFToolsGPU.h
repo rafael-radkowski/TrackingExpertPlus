@@ -14,8 +14,8 @@ wsb@iastate.edu
 MIT License
 -------------------------------------------------------------------------------------------------------
 Last edits:
-23 October 2020
-- BUGFIX: Added some more documentation
+27 October 2020
+- Added Reset, GetMaxMinAng, and SetParam functions
 
 */
 
@@ -85,7 +85,7 @@ public:
 	@param matches - the matches for each point in the point cloud found by KNN.
 	@param range - 
 	*/
-	static void DiscretizeCurvature(vector<uint32_t>& dst, const vector<Eigen::Vector3f>& n1, PointCloud& pc, vector<Matches> matches, const float range = 10.0);
+	static void DiscretizeCurvature(vector<uint32_t>& dst, const vector<Eigen::Vector3f>& n1, PointCloud& pc, vector<Matches> matches, const double range = 10.0);
 
 	/*!
 	Calculates all discretized CPFs from a set of points and their corresponding curvatures, matches, and 

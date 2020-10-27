@@ -277,7 +277,7 @@ void CalculateDiscCurve(int* dst, double2* src, int num_curve)
 }
 
 //static
-void CPFToolsGPU::DiscretizeCurvature(vector<uint32_t>& dst, const vector<Eigen::Vector3f>& n1, PointCloud& pc, vector<Matches> matches, const float range)
+void CPFToolsGPU::DiscretizeCurvature(vector<uint32_t>& dst, const vector<Eigen::Vector3f>& n1, PointCloud& pc, vector<Matches> matches, const double range)
 {
 	//Copy vectors and values to GPU
 	vecToPointer3F(vectorsA, n1);
@@ -302,14 +302,14 @@ void CPFToolsGPU::DiscretizeCurvature(vector<uint32_t>& dst, const vector<Eigen:
 
 	cudaError error = cudaGetLastError();
 	if (error)
-		cout << "ERROR: CPFToolsGPU: DiscretizeCurvature: DiscretizeCurvatureGPU: " << error << endl;
+		cout << "ERROR: CPFToolsGPU: DiscretizeCurvature: DiscretizeCurvatureGPU: " << cudaGetErrorString(error) << endl;
 
 	//curvature_pairs.x / curvature_pairs.y
 	CalculateDiscCurve<<<blocks, threads>>>(discretized_curvatures, curvature_pairs, pc.normals.size());
 	cudaDeviceSynchronize();
 	error = cudaGetLastError();
 	if (error)
-		cout << "ERROR: CPFToolsGPU: DiscretizeCurvature: CalculateDiscCurve: " << error << endl;
+		cout << "ERROR: CPFToolsGPU: DiscretizeCurvature: CalculateDiscCurve: " << cudaGetErrorString(error) << endl;
 
 	pointerToVecI(dst, discretized_curvatures, n1.size());
 }
@@ -416,4 +416,24 @@ void CPFToolsGPU::DiscretizeCPF(vector<CPFDiscreet>& dst, vector<uint32_t>& curv
 		if(valid[i])
 			dst.push_back(discretized_cpfs[i]);
 	}
+}
+
+//static 
+void CPFToolsGPU::GetMaxMinAng(float& max, float& min)
+{
+	max = *max_ang_value;
+	min = *min_ang_value;
+}
+
+//static 
+void CPFToolsGPU::Reset(void)
+{
+	*max_ang_value = 0.0;
+	*min_ang_value = 10000000.0;
+}
+
+//static 
+void CPFToolsGPU::SetParam(CPFParamGPU& param)
+{
+	*angle_bins = param.angle_bins;
 }

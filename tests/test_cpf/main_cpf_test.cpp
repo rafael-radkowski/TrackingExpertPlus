@@ -1,5 +1,7 @@
 #include "CPFToolsGPU.h"
 #include "CPFTools.h"
+#include "CPFMatchingExp.h"
+#include "CPFMatchingExpGPU.h"
 #include "RandomGenerator.h"
 
 using namespace texpert;
@@ -449,32 +451,71 @@ void main()
 	CPFToolsGPU::DeallocateMemory();
 	cout << endl;
 
-	CPFToolsGPU::AllocateMemory(10000);
-	//3. Test normal range, large point size
-	cout << "-----Begin stress test: Normal range, large point size-----" << endl;
-	for (int i = 0; i < 5; i++)
-	{
-		GenerateRandomPointCloud(*points, 10000);
-		run_stress(*points, i);
-	}
-	cout << endl;
+	//CPFToolsGPU::AllocateMemory(10000);
+	////3. Test normal range, large point size
+	//cout << "-----Begin stress test: Normal range, large point size-----" << endl;
+	//for (int i = 0; i < 5; i++)
+	//{
+	//	GenerateRandomPointCloud(*points, 10000);
+	//	run_stress(*points, i);
+	//}
+	//cout << endl;
 
-	//4. Test large range, large point size
-	cout << "-----Begin stress test: Large range, large point size-----" << endl;
-	for (int i = 0; i < 5; i++)
-	{
-		GenerateRandomPointCloud(*points, 10000, -3.0, 3.0);
-		run_stress(*points, i);
-	}
-	cout << endl;
+	////4. Test large range, large point size
+	//cout << "-----Begin stress test: Large range, large point size-----" << endl;
+	//for (int i = 0; i < 5; i++)
+	//{
+	//	GenerateRandomPointCloud(*points, 10000, -3.0, 3.0);
+	//	run_stress(*points, i);
+	//}
+	//cout << endl;
 
-	//5. Test small range, large point size
-	cout << "-----Begin stress test: Small range, large point size-----" << endl;
-	for (int i = 0; i < 5; i++)
-	{
-		GenerateRandomPointCloud(*points, 10000, -1.0, 1.0);
-		run_stress(*points, i);
-	}
+	////5. Test small range, large point size
+	//cout << "-----Begin stress test: Small range, large point size-----" << endl;
+	//for (int i = 0; i < 5; i++)
+	//{
+	//	GenerateRandomPointCloud(*points, 10000, -1.0, 1.0);
+	//	run_stress(*points, i);
+	//}
 	cout << endl;
 	CPFToolsGPU::DeallocateMemory();
+
+
+	//Begin CPFMatchingExpGPU tests
+
+	CPFMatchingExp* cpuMatching = new CPFMatchingExp();
+	CPFMatchingExpGPU* gpuMatching = new CPFMatchingExpGPU();
+	cpuMatching->setVerbose(true, 1);
+	gpuMatching->setVerbose(true, 1);
+
+	GenerateRandomPointCloud(*points, 1000, -1.0, 1.0);
+
+	PointCloud* scene = new PointCloud();
+	GenerateRandomPointCloud(*scene, 1000, -1.0, 1.0);
+
+	cpuMatching->setScene(*scene);
+	gpuMatching->setScene(*scene);
+
+	int cpu_id = cpuMatching->addModel(*points, "Cloud1");
+	int gpu_id = gpuMatching->addModel(*points, "Cloud1");
+
+	if (cpu_id == -1) cout << "ERROR: CPFMatchingExp: Could not add model" << endl;
+	if (gpu_id == -1) cout << "ERROR: CPFMatchingExpGPU: Could not add model" << endl;
+
+	if (!cpuMatching->match(cpu_id)) cout << "ERROR: CPFMatchingExp: match function did not work" << endl;
+	if (!gpuMatching->match(gpu_id)) cout << "ERROR: CPFMatchingExpGPU: match function did not work" << endl;
+
+	vector<Eigen::Affine3f> poses_gpu, poses_cpu;
+	vector<int> pose_votes_gpu, pose_votes_cpu;
+
+	cpuMatching->getPose(cpu_id, poses_cpu, pose_votes_cpu);
+	gpuMatching->getPose(gpu_id, poses_gpu, pose_votes_gpu);
+
+	for (int i = 0; i < poses_gpu.size() && i < poses_cpu.size(); i++)
+	{
+		cout << i << ": GPU: Votes: " << pose_votes_gpu.at(i) << endl;
+		cout << poses_gpu.at(i).matrix() << endl;
+		cout << "CPU: Votes: " << pose_votes_cpu.at(i) << endl;
+		cout << poses_cpu.at(i).matrix() << endl;
+	}
 }
