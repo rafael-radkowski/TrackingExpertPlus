@@ -59,6 +59,10 @@ void CPFToolsGPU::AllocateMemory(uint32_t size)
 	
 	cudaMallocManaged(&discretized_cpfs, size * KNN_MATCHES_LENGTH * sizeof(CPFDiscreet));
 	cudaMallocManaged(&valid, size * KNN_MATCHES_LENGTH * sizeof(bool));
+
+	cudaError error = cudaGetLastError();
+	if (error)
+		cout << "ERROR: AllocateMemory: " << cudaGetErrorString(error) << endl;
 }
 
 void CPFToolsGPU::DeallocateMemory()
@@ -79,6 +83,10 @@ void CPFToolsGPU::DeallocateMemory()
 	cudaFree(discretized_curvatures);
 
 	cudaFree(discretized_cpfs);
+
+	cudaError error = cudaGetLastError();
+	if (error)
+		cout << "ERROR: AllocateMemory: " << cudaGetErrorString(error) << endl;
 }
 
 /*
@@ -149,8 +157,19 @@ float AngleBetweenGPU(float3 a, float3 b)
 
 	float an = sqrtf(powf(a.x, 2) + powf(a.y, 2) + powf(a.z, 2));
 	float bn = sqrtf(powf(b.x, 2) + powf(b.y, 2) + powf(b.z, 2));
-	float3 a_norm = make_float3(a.x / an, a.y / an, a.z / an);
-	float3 b_norm = make_float3(b.x / bn, b.y / bn, b.z / bn);
+	float3 a_norm;
+	float3 b_norm;
+
+	if (an == 0)
+		a_norm = a;
+	else
+		a_norm = make_float3(a.x / an, a.y / an, a.z / an);
+
+	if (bn == 0)
+		b_norm = b;
+	else
+		b_norm = make_float3(b.x / bn, b.y / bn, b.z / bn);
+
 	float3 c = cross(a_norm, b_norm);
 
 

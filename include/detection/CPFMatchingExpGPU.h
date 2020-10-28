@@ -17,6 +17,8 @@ wsb@iastate.edu
 MIT License
 -------------------------------------------------------------------------------------------------------
 Last edits:
+28 October 2020
+- Added better allocation/deallocation of memory for CPFToolsGPU
 */
 
 //stl 

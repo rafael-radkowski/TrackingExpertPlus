@@ -49,7 +49,9 @@ int CPFMatchingExpGPU::addModel(PointCloud& points, std::string label)
 
 	if (points.size() > m_max_points)
 	{
-		CPFToolsGPU::DeallocateMemory();
+		if (m_max_points != 0)
+			CPFToolsGPU::DeallocateMemory();
+
 		CPFToolsGPU::AllocateMemory(points.size());
 
 		m_max_points = points.size();
@@ -93,7 +95,8 @@ bool CPFMatchingExpGPU::setScene(PointCloud& points)
 
 	if (points.size() > m_max_points)
 	{
-		CPFToolsGPU::DeallocateMemory();
+		if(m_max_points != 0)
+			CPFToolsGPU::DeallocateMemory();
 		CPFToolsGPU::AllocateMemory(points.size());
 
 		m_max_points = points.size();
@@ -102,9 +105,7 @@ bool CPFMatchingExpGPU::setScene(PointCloud& points)
 	//--------------------------------------------------------
 	// Start calculating descriptors
 
-
 	calculateDescriptors(points, m_params.search_radius, m_scene_descriptors, m_scene_curvatures);
-
 
 	if (m_verbose && m_verbose_level == 2) {
 		std::cout << "[INFO] - CPFMatchingExpGPU: finished extraction of " << m_scene_descriptors.size() << " scene descriptors for." << std::endl;

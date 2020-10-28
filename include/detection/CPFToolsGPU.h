@@ -14,8 +14,8 @@ wsb@iastate.edu
 MIT License
 -------------------------------------------------------------------------------------------------------
 Last edits:
-27 October 2020
-- Added Reset, GetMaxMinAng, and SetParam functions
+28 October 2020
+- Added error checking for AllocateMemory and DeallocateMemory
 
 */
 

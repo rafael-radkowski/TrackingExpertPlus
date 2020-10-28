@@ -477,16 +477,21 @@ void main()
 	//	GenerateRandomPointCloud(*points, 10000, -1.0, 1.0);
 	//	run_stress(*points, i);
 	//}
-	cout << endl;
-	CPFToolsGPU::DeallocateMemory();
+	//cout << endl;
+	//CPFToolsGPU::DeallocateMemory();
 
 
 	//Begin CPFMatchingExpGPU tests
 
+	CPFParams cpfParams = CPFParams();
+
 	CPFMatchingExp* cpuMatching = new CPFMatchingExp();
 	CPFMatchingExpGPU* gpuMatching = new CPFMatchingExpGPU();
-	cpuMatching->setVerbose(true, 1);
-	gpuMatching->setVerbose(true, 1);
+	cpuMatching->setVerbose(true, 2);
+	gpuMatching->setVerbose(true, 2);
+
+	cpuMatching->setParams(cpfParams);
+	gpuMatching->setParams(cpfParams);
 
 	GenerateRandomPointCloud(*points, 1000, -1.0, 1.0);
 
