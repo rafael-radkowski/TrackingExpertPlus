@@ -366,7 +366,7 @@ void DiscretizeCPFGPU(CPFDiscreet* dst, uint32_t* curvatures, float4* ref_frames
 
 		//get the angle.
 		//The point pt is in the frame origin.  n is aligned with the x axis.
-		dst[idx].alpha = atan2(-1 * pt_trans.z, pt_trans.y);
+		dst[idx].alpha = atan2((double)-pt_trans.z, (double)pt_trans.y);
 
 
 
@@ -386,11 +386,11 @@ void DiscretizeCPFGPU(CPFDiscreet* dst, uint32_t* curvatures, float4* ref_frames
 		else
 			ptr_norm = make_float3(pt_trans.x / ptrn, pt_trans.y / ptrn, pt_trans.z / ptrn);
 
-		float ang = (p_norm.x * ptr_norm.x) + (p_norm.y * ptr_norm.y) + (p_norm.z * ptr_norm.z);
+		double ang = (p_norm.x * ptr_norm.x) + (p_norm.y * ptr_norm.y) + (p_norm.z * ptr_norm.z);
 
 		dst[idx].data[0] = cur1;
 		dst[idx].data[1] = cur2;
-		dst[idx].data[2] = ((double)(ang + 1.0) * (double)(*ang_bins / 2.0));
+		dst[idx].data[2] = ((ang + 1.0) * ((double)*ang_bins / 2.0));
 		dst[idx].data[3] = 0; //cur1 - cur2
 
 		if (ang > *max_angle_val)

@@ -12,7 +12,7 @@ William Blanchard
 Iowa State University
 wsb@iastate.edu
 (847) 707-1421
-27 Oct. 2020
+27 Oct 2020
 
 MIT License
 -------------------------------------------------------------------------------------------------------
