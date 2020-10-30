@@ -1,4 +1,4 @@
-#include "CPFMatchingExp.h"
+#include "CPFMatchingExpGPU.h"
 
 #include "ResourceManager.h"
 
@@ -6,35 +6,37 @@ using namespace texpert;
 
 #define M_PI 3.14159265359
 
-CPFMatchingExp::CPFMatchingExp()
+CPFMatchingExpGPU::CPFMatchingExpGPU()
 {
 	m_verbose = false;
 	m_render_helpers = true;
 	m_verbose_level = 0;
 	m_multiplier = 10.0;
 
+	m_max_points = 0;
+
 	float angle_step_rad = m_params.angle_step / 180.0f * static_cast<float>(M_PI);
 	m_angle_bins = (int)(static_cast<float>(2 * M_PI) / angle_step_rad) + 1;
-	
+
 
 	m_knn = new KNN();
 }
 
-CPFMatchingExp::~CPFMatchingExp()
+CPFMatchingExpGPU::~CPFMatchingExpGPU()
 {
-	
+
 }
 
 
 /*
 Set the reference point set.
 */
-int CPFMatchingExp::addModel(PointCloud& points, std::string label)
+int CPFMatchingExpGPU::addModel(PointCloud& points, std::string label)
 {
-	if(points.size() == 0) return -1;
+	if (points.size() == 0) return -1;
 
 	if (points.points.size() != points.normals.size()) {
-		std::cout << "[ERROR] - CPFMatchingExp: points size " << points.points.size() << " != "  << points.normals.size() << " for " << label << std::endl;
+		std::cout << "[ERROR] - CPFMatchingExpGPU: points size " << points.points.size() << " != " << points.normals.size() << " for " << label << std::endl;
 		return -1;
 	}
 
@@ -42,9 +44,18 @@ int CPFMatchingExp::addModel(PointCloud& points, std::string label)
 	m_ref_labels.push_back(label);
 
 	if (m_verbose) {
-		std::cout << "[INFO] - CPFMatchingExp: start extracting descriptors from " << label << " with " << points.size() << " points." << std::endl;
+		std::cout << "[INFO] - CPFMatchingExpGPU: start extracting descriptors from " << label << " with " << points.size() << " points." << std::endl;
 	}
 
+	if (points.size() > m_max_points)
+	{
+		if (m_max_points != 0)
+			CPFToolsGPU::DeallocateMemory();
+
+		CPFToolsGPU::AllocateMemory(points.size());
+
+		m_max_points = points.size();
+	}
 
 	//--------------------------------------------------------
 	// Start calculating descriptors
@@ -61,47 +72,54 @@ int CPFMatchingExp::addModel(PointCloud& points, std::string label)
 	m_matching_results.push_back(CPFMatchingData());
 
 	if (m_verbose) {
-		std::cout << "[INFO] - CPFMatchingExp: finished extraction of " << descriptors.size() << " descriptors for  " << label << "." << std::endl;
+		std::cout << "[INFO] - CPFMatchingExpGPU: finished extraction of " << descriptors.size() << " descriptors for  " << label << "." << std::endl;
 	}
 
 	return m_model_descriptors.size() - 1;
 }
 
 
-bool CPFMatchingExp::setScene(PointCloud& points)
+bool CPFMatchingExpGPU::setScene(PointCloud& points)
 {
-	if(points.size() == 0) return false;
+	if (points.size() == 0) return false;
 
 	if (points.points.size() != points.normals.size()) {
-		std::cout << "[ERROR] - CPFMatchingExp: scene point size != normals size: " << points.points.size() << " != "  << points.normals.size() << "."  << std::endl;
+		std::cout << "[ERROR] - CPFMatchingExpGPU: scene point size != normals size: " << points.points.size() << " != " << points.normals.size() << "." << std::endl;
 	}
 
 	m_scene = points;
 
 	if (m_verbose && m_verbose_level == 2) {
-		std::cout << "[INFO] - CPFMatchingExp: start extracting scene descriptors for " << points.size() << " points." << std::endl;
+		std::cout << "[INFO] - CPFMatchingExpGPU: start extracting scene descriptors for " << points.size() << " points." << std::endl;
+	}
+
+	if (points.size() > m_max_points)
+	{
+		if(m_max_points != 0)
+			CPFToolsGPU::DeallocateMemory();
+		CPFToolsGPU::AllocateMemory(points.size());
+
+		m_max_points = points.size();
 	}
 
 	//--------------------------------------------------------
 	// Start calculating descriptors
 
-
 	calculateDescriptors(points, m_params.search_radius, m_scene_descriptors, m_scene_curvatures);
 
-
-	if (m_verbose  && m_verbose_level == 2) {
-		std::cout << "[INFO] - CPFMatchingExp: finished extraction of " << m_scene_descriptors.size() << " scene descriptors for." << std::endl;
+	if (m_verbose && m_verbose_level == 2) {
+		std::cout << "[INFO] - CPFMatchingExpGPU: finished extraction of " << m_scene_descriptors.size() << " scene descriptors for." << std::endl;
 	}
 
 	return true;
 }
 
 /*
-Detect all reference point in the camera point set. 
+Detect all reference point in the camera point set.
 */
-bool CPFMatchingExp::match(int model_id)
+bool CPFMatchingExpGPU::match(int model_id)
 {
-	if(model_id < 0 || model_id >= m_ref.size() ){
+	if (model_id < 0 || model_id >= m_ref.size()) {
 		std::cout << "[ERROR] - Selected model id " << model_id << " for matching does not exist.";
 		return false;
 	}
@@ -112,7 +130,7 @@ bool CPFMatchingExp::match(int model_id)
 
 	// initialize the render helpers. 
 	if (m_render_helpers) {
-		m_helpers.init(m_ref[model_id].size(), m_scene.size() );
+		m_helpers.init(m_ref[model_id].size(), m_scene.size());
 	}
 
 	// matching and voting
@@ -124,16 +142,16 @@ bool CPFMatchingExp::match(int model_id)
 
 	// get the siz best hits
 	int hits = 12;
-	if(m_matching_results[model_id].pose_clusters.size() < hits);
-		hits = m_matching_results[model_id].pose_clusters.size() -1;
+	if (m_matching_results[model_id].pose_clusters.size() < hits);
+	hits = m_matching_results[model_id].pose_clusters.size() - 1;
 
 
 	for (int i = 0; i < hits; i++) {
 		// <votes, cluster id> in pose_cluster
 		std::pair< int, int>  votes_cluster_index = m_matching_results[model_id].pose_cluster_votes[i];
-		
-		combinePoseCluster( m_matching_results[model_id].pose_clusters[votes_cluster_index.second], votes_cluster_index.first,  m_matching_results[model_id], false);
-		
+
+		combinePoseCluster(m_matching_results[model_id].pose_clusters[votes_cluster_index.second], votes_cluster_index.first, m_matching_results[model_id], false);
+
 		//m_matching_results[model_id].poses.push_back(  m_matching_results[model_id].pose_clusters[votes_cluster_index.second].front() ); // get the first matrix. 
 		//m_matching_results[model_id].poses_votes.push_back( votes_cluster_index.first);
 	}
@@ -143,7 +161,7 @@ bool CPFMatchingExp::match(int model_id)
 
 /*
 */
-bool CPFMatchingExp::setVerbose(bool verbose, int level)
+bool CPFMatchingExpGPU::setVerbose(bool verbose, int level)
 {
 	m_verbose_level = std::min(2, std::max(0, level));
 	m_verbose = verbose;
@@ -153,7 +171,7 @@ bool CPFMatchingExp::setVerbose(bool verbose, int level)
 /*
 Set the parameters for the extraction tool.
 */
-bool CPFMatchingExp::setParams(CPFParams params)
+bool CPFMatchingExpGPU::setParams(CPFParams params)
 {
 	m_params.angle_step = std::max(1.0f, std::min(180.0f, params.angle_step));
 	m_params.search_radius = std::max(0.001f, std::min(10.0f, params.search_radius));
@@ -170,11 +188,11 @@ bool CPFMatchingExp::setParams(CPFParams params)
 
 
 // Descriptor based on curvature pairs and the direction vector
-void CPFMatchingExp::calculateDescriptors(PointCloud& pc, float radius, std::vector<CPFDiscreet>& descriptors, std::vector<uint32_t>& curvatures)
+void CPFMatchingExpGPU::calculateDescriptors(PointCloud& pc, float radius, std::vector<CPFDiscreet>& descriptors, std::vector<uint32_t>& curvatures)
 {
-	CPFTools::CPFParam param;
+	CPFToolsGPU::CPFParamGPU param;
 	param.angle_bins = m_angle_bins;
-	CPFTools::SetParam(param);
+	CPFToolsGPU::SetParam(param);
 
 	//----------------------------------------------------------------------------------------------------------
 	// nearest neighbors
@@ -182,11 +200,11 @@ void CPFMatchingExp::calculateDescriptors(PointCloud& pc, float radius, std::vec
 	std::vector<Matches> matches;
 	size_t s = pc.size();
 
-	
+
 	m_knn->populate(pc);
 
 	matches.clear();
-	
+
 	m_knn->radius(pc, radius, matches);
 
 	//----------------------------------------------------------------------------------------------------------
@@ -195,67 +213,27 @@ void CPFMatchingExp::calculateDescriptors(PointCloud& pc, float radius, std::vec
 	curvatures.clear();
 	curvatures.reserve(s);
 
-	for (int i = 0; i < s; i++) {
-	
-		uint32_t curv = CPFTools::DiscretizeCurvature(pc.points[i], pc.normals[i], pc, matches[i], m_multiplier);
-		curvatures.push_back(curv);
-	}	
+	CPFToolsGPU::DiscretizeCurvature(curvatures, pc.normals, pc, matches, m_multiplier);
+
+	descriptors.clear();
+	descriptors.reserve(s);
 
 	//----------------------------------------------------------------------------------------------------------
 	// Calculate the descriptor
-	descriptors.clear();
-	descriptors.reserve(s);
-	for (int i = 0; i < s; i++) {
-		uint32_t cur1 = curvatures[i];
-
-		// find the reference frame for this point
-		Eigen::Affine3f T = CPFTools::GetRefFrame(pc.points[i], pc.normals[i]);
-
-		// current knn matches length as defined in Cuda_Types.h
-		const int num_matches = KNN_MATCHES_LENGTH;
-
-		for (int j= 0; j < num_matches; j++) {
-			if( matches[i].matches[j].distance > 0.0){
-
-				int id = matches[i].matches[j].second;
-				uint32_t cur2 =  curvatures[id];
-
-				// Move the point p1 into the coordinate frame of the point p0
-				Eigen::Vector3f pt = T * pc.points[id];
-
-				for (int k = 0; k < 3; k++)
-				{
-					if (abs(pt(k)) <= 10e-6)
-						pt(k) = 0;
-				}
-
-
-				CPFDiscreet cpf =  CPFTools::DiscretizeCPF(cur1, cur2, pc.points[i], pt); // get pc.points[id] into the current points coordinate frame.
-				//CPFDiscreet cpf =  CPFTools::DiscretizeCPF(cur1, cur2, pc.points[i], pc.points[id]);
-				cpf.point_idx = i;
-				
-
-				// get the angle
-				// The point p0 is in the frame orign. n is aligned with the x-axis. 
-				float alpha_m = atan2(-pt(2), pt(1));
-				cpf.alpha = alpha_m;
-
-				descriptors.push_back(cpf);
-			}
-			
-		}
-	}
+	std::vector<Eigen::Affine3f> Ts;
+	CPFToolsGPU::GetRefFrames(Ts, pc.points, pc.normals);
+	CPFToolsGPU::DiscretizeCPF(descriptors, curvatures, matches, pc.points, Ts);
 }
 
 
 /*
 Match the model and scene descriptors.
 */
-void CPFMatchingExp::matchDescriptors(	std::vector<CPFDiscreet>& src_model, std::vector<CPFDiscreet>& src_scene,  PointCloud& pc_model, PointCloud& pc_scene, CPFMatchingData& dst_data)
-									
+void CPFMatchingExpGPU::matchDescriptors(std::vector<CPFDiscreet>& src_model, std::vector<CPFDiscreet>& src_scene, PointCloud& pc_model, PointCloud& pc_scene, CPFMatchingData& dst_data)
+
 {
 	if (m_verbose && m_verbose_level == 2) {
-		std::cout << "[INFO] - CPFMatchingExp: Start matching descriptors." << std::endl;
+		std::cout << "[INFO] - CPFMatchingExpGPU: Start matching descriptors." << std::endl;
 	}
 
 	int scr_s_size = src_scene.size();
@@ -266,37 +244,37 @@ void CPFMatchingExp::matchDescriptors(	std::vector<CPFDiscreet>& src_model, std:
 
 	dst_data.voting_clear();
 
-	for(int i=0; i<model_point_size; i++){
+	for (int i = 0; i < model_point_size; i++) {
 
 		int point_id = i;
 
 		std::vector<int> accumulator(scene_point_size * m_angle_bins, 0);
-		
+
 		int count = 0;
-	
+
 		// -------------------------------------------------------------------
 		// For each point i and its descriptors, find matching descriptors.
-		for(int k=0; k<src_m_size; k++){
+		for (int k = 0; k < src_m_size; k++) {
 
 			CPFDiscreet src = src_model[k];
-	
-			if(src.point_idx != point_id) continue; // must be a descriptor for the current point i
+
+			if (src.point_idx != point_id) continue; // must be a descriptor for the current point i
 
 			// search for the destination descriptor
-			for(int j=0; j<scr_s_size; j++){
+			for (int j = 0; j < scr_s_size; j++) {
 
 				CPFDiscreet dst = src_scene[j];
 
 				// compare the descriptor
-				if(src.data[0] == dst.data[0] && src.data[1] == dst.data[1] && src.data[2] == dst.data[2] && dst.data[0] != 0){
-					
+				if (src.data[0] == dst.data[0] && src.data[1] == dst.data[1] && src.data[2] == dst.data[2] && dst.data[0] != 0) {
+
 					// Voting, fill the accumulator
 					float alpha = src.alpha - dst.alpha;
-					
+
 					int alpha_bin = static_cast<int>(static_cast<float>(m_angle_bins) * ((alpha + 2.0f * static_cast<float>(M_PI)) / (4.0f * static_cast<float>(M_PI))));
 					alpha_bin = std::max(0, std::min(alpha_bin, m_angle_bins));
 
-				
+
 					accumulator[dst.point_idx * m_angle_bins + alpha_bin]++;
 
 					// store the output vote pair
@@ -305,7 +283,7 @@ void CPFMatchingExp::matchDescriptors(	std::vector<CPFDiscreet>& src_model, std:
 
 					// render helpers store the matches
 					if (m_render_helpers) {
-						m_helpers.addMatchingPair(point_id,  dst.point_idx);
+						m_helpers.addMatchingPair(point_id, dst.point_idx);
 					}
 					//pair_ids.push_back(make_pair(i, dst.point_idx));
 
@@ -333,8 +311,8 @@ void CPFMatchingExp::matchDescriptors(	std::vector<CPFDiscreet>& src_model, std:
 		// -----------------------------------------------------------------------
 		// Recover the pose
 
-		for(int k=0; k<max_votes_idx.size();k++){
-			if(max_vote == max_votes_value[k]){
+		for (int k = 0; k < max_votes_idx.size(); k++) {
+			if (max_vote == max_votes_value[k]) {
 
 				int max_scene_id = max_votes_idx[k] / m_angle_bins; // model id
 				int max_alpha = max_votes_idx[k] % m_angle_bins; // restores the angle
@@ -354,7 +332,7 @@ void CPFMatchingExp::matchDescriptors(	std::vector<CPFDiscreet>& src_model, std:
 				Eigen::AngleAxisf rot(angle, Eigen::Vector3f::UnitX());
 
 				// Compose the transformations for the final pose
-				Eigen::Affine3f final_transformation( Tmg.inverse() * rot * T  );
+				Eigen::Affine3f final_transformation(Tmg.inverse() * rot * T);
 
 
 				// RENDER HELPER
@@ -371,9 +349,9 @@ void CPFMatchingExp::matchDescriptors(	std::vector<CPFDiscreet>& src_model, std:
 		}
 
 	}
-	
+
 	if (m_verbose && m_verbose_level == 2) {
-		std::cout << "[INFO] - CPFMatchingExp: Found " << dst_data.pose_candidates.size() << " pose candidates." << std::endl;
+		std::cout << "[INFO] - CPFMatchingExpGPU: Found " << dst_data.pose_candidates.size() << " pose candidates." << std::endl;
 	}
 
 
@@ -381,16 +359,16 @@ void CPFMatchingExp::matchDescriptors(	std::vector<CPFDiscreet>& src_model, std:
 
 
 
-bool CPFMatchingExp::clustering(CPFMatchingData& data)
+bool CPFMatchingExpGPU::clustering(CPFMatchingData& data)
 {
 
-	if( data.pose_candidates.size() == 0){
+	if (data.pose_candidates.size() == 0) {
 		if (m_verbose) {
-			std::cout << "[INFO] - CPFMatchingExp: Found " << data.pose_candidates.size() << " pose candidates." << std::endl;
+			std::cout << "[INFO] - CPFMatchingExpGPU: Found " << data.pose_candidates.size() << " pose candidates." << std::endl;
 		}
 		return false;
 	}
-	
+
 	data.cluster_clear();
 	int cluster_count = 0;
 
@@ -407,7 +385,7 @@ bool CPFMatchingExp::clustering(CPFMatchingData& data)
 				cluster_found = true;
 				data.pose_clusters[j].push_back(pose); // remember the cluster
 				data.pose_cluster_votes[j].first += data.pose_candidates_votes[i]; // count the votes
-				
+
 				// RENDER HELPER
 				if (m_render_helpers) {
 					data.debug_pose_candidates_id[j].push_back(i); // for debugging. Store the pose candiate id. 
@@ -423,14 +401,14 @@ bool CPFMatchingExp::clustering(CPFMatchingData& data)
 			data.pose_clusters.push_back(cluster); // remember the cluster
 			data.pose_cluster_votes.push_back(make_pair(data.pose_candidates_votes[i], cluster_count)); // count the votes
 			cluster_count++;
-			
+
 			// RENDER HELPER
 			// to render the lines appropriate
 			if (m_render_helpers) {
-			
+
 				std::vector<int> debug_id;
 				debug_id.push_back(i);
-				data.debug_pose_candidates_id.push_back( debug_id); // for debugging. Store the pose candiate id. 
+				data.debug_pose_candidates_id.push_back(debug_id); // for debugging. Store the pose candiate id. 
 			}
 		}
 
@@ -439,20 +417,20 @@ bool CPFMatchingExp::clustering(CPFMatchingData& data)
 	}
 
 	// sort the cluster
-	std::sort(data.pose_cluster_votes.begin(), data.pose_cluster_votes.end(), 
-			  [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
-				return a.first > b.first;});
+	std::sort(data.pose_cluster_votes.begin(), data.pose_cluster_votes.end(),
+		[](const std::pair<int, int>& a, const std::pair<int, int>& b) {
+			return a.first > b.first; });
 
 
 	if (m_verbose) {
-		std::cout << "[INFO] - CPFMatchingExp: Found " << data.pose_clusters.size() << " pose clusters." << std::endl;
+		std::cout << "[INFO] - CPFMatchingExpGPU: Found " << data.pose_clusters.size() << " pose clusters." << std::endl;
 	}
 
 	return true;
 }
 
 
-bool CPFMatchingExp::similarPose(Eigen::Affine3f a, Eigen::Affine3f b)
+bool CPFMatchingExpGPU::similarPose(Eigen::Affine3f a, Eigen::Affine3f b)
 {
 	float translation_threshold = 0.03;
 	float rotation_threshold = 0.8;
@@ -471,9 +449,9 @@ bool CPFMatchingExp::similarPose(Eigen::Affine3f a, Eigen::Affine3f b)
 /*
 Return the poses for a particular model;
 */
-bool  CPFMatchingExp::getPose(const int model_id, std::vector<Eigen::Affine3f >& poses, std::vector<int >& pose_votes)
+bool  CPFMatchingExpGPU::getPose(const int model_id, std::vector<Eigen::Affine3f >& poses, std::vector<int >& pose_votes)
 {
-	if(model_id < 0 || model_id >= m_ref.size() ){
+	if (model_id < 0 || model_id >= m_ref.size()) {
 		std::cout << "[ERROR] - Selected model id " << model_id << " for matching does not exist.";
 		return false;
 	}
@@ -485,11 +463,11 @@ bool  CPFMatchingExp::getPose(const int model_id, std::vector<Eigen::Affine3f >&
 }
 
 
-bool CPFMatchingExp::combinePoseCluster(std::vector<Eigen::Affine3f>& pose_clustser, int votes, CPFMatchingData& dst_data, bool invert = false)
+bool CPFMatchingExpGPU::combinePoseCluster(std::vector<Eigen::Affine3f>& pose_clustser, int votes, CPFMatchingData& dst_data, bool invert = false)
 {
 	if (pose_clustser.size() == 0) {
 		if (m_verbose) {
-			std::cout << "[ERROR] - CPFMatchingExp:combinePoseCluster: No pose clusters give ( " << pose_clustser.size() << " )." << std::endl;
+			std::cout << "[ERROR] - CPFMatchingExpGPU:combinePoseCluster: No pose clusters give ( " << pose_clustser.size() << " )." << std::endl;
 		}
 		return false;
 	}
@@ -502,54 +480,54 @@ bool CPFMatchingExp::combinePoseCluster(std::vector<Eigen::Affine3f>& pose_clust
 		[&](const Eigen::Affine3f& p) {
 			trans_avg += p.translation();
 			rot_avg += Eigen::Quaternionf(p.rotation()).coeffs();
-	});
-	
+		});
+
 	size_t size = pose_clustser.size();
 
 	trans_avg /= (float)size;
 	rot_avg /= (float)size;
 
 	Eigen::Affine3f pose;
-	pose= Eigen::Affine3f::Identity();
+	pose = Eigen::Affine3f::Identity();
 	pose.linear().matrix() = Eigen::Quaternionf(rot_avg).normalized().toRotationMatrix();
 	pose.translation().matrix() = trans_avg;
-	
+
 
 	// Inverse to move the model into the scene point cloud. 
-	if(invert)
+	if (invert)
 		pose = pose.inverse();
 
 	dst_data.poses.push_back(pose);
 	dst_data.poses_votes.push_back(votes);
-	
+
 	return true;
 }
 
 
 /*
 Enable or disable render helpers that
-allow one to debug the code. 
+allow one to debug the code.
 */
-bool CPFMatchingExp::enableRenderHelpers(bool enable)
+bool CPFMatchingExpGPU::enableRenderHelpers(bool enable)
 {
 	m_render_helpers = enable;
 	return m_render_helpers;
 }
 
 
-CPFRenderHelpers& CPFMatchingExp::getRenderHelper(void)
+CPFRenderHelpers& CPFMatchingExpGPU::getRenderHelper(void)
 {
 	return m_helpers;
 }
 
 
-bool CPFMatchingExp::getPoseClusterPairs(const int cluster_id, std::vector< std::pair<int, int> >& cluster_point_pairs)
+bool CPFMatchingExpGPU::getPoseClusterPairs(const int cluster_id, std::vector< std::pair<int, int> >& cluster_point_pairs)
 {
 	cluster_point_pairs.clear();
 
 	int model_id = 0;
 
-	if(cluster_id >= m_matching_results[model_id].pose_cluster_votes.size() ) return false;
+	if (cluster_id >= m_matching_results[model_id].pose_cluster_votes.size()) return false;
 
 
 	// votes, cluster id
@@ -570,24 +548,24 @@ bool CPFMatchingExp::getPoseClusterPairs(const int cluster_id, std::vector< std:
 }
 
 
-int CPFMatchingExp::getNumPoseClusters(int model_id)
+int CPFMatchingExpGPU::getNumPoseClusters(int model_id)
 {
-	if(model_id >= m_matching_results.size())
+	if (model_id >= m_matching_results.size())
 		return -1;
 
 	return m_matching_results[model_id].pose_clusters.size();
 }
 
 
-bool CPFMatchingExp::getModelCurvature(const int model_id, std::vector<uint32_t>& model_cu )
+bool CPFMatchingExpGPU::getModelCurvature(const int model_id, std::vector<uint32_t>& model_cu)
 {
 	model_cu = m_model_curvatures[model_id];
 	return true;
 }
 
 
-bool CPFMatchingExp::getSceneCurvature(std::vector<uint32_t>& scene_cu) 
+bool CPFMatchingExpGPU::getSceneCurvature(std::vector<uint32_t>& scene_cu)
 {
-	scene_cu =  m_scene_curvatures;
+	scene_cu = m_scene_curvatures;
 	return true;
 }

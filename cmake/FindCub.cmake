@@ -24,6 +24,7 @@ find_path(
     NAMES cub/cub.cuh
     PATHS "C:/SDK/cub-1.8.0"
 		  "D:/SDK_RC/cub-1.8.0"
+          "D:/SDK/cub-1.8.0"
 )
 
 mark_as_advanced(

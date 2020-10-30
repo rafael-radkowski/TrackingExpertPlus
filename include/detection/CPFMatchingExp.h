@@ -19,10 +19,9 @@ MIT License
 -------------------------------------------------------------------------------------------------------
 Last edits:
 
-Aug 5, 2020, RR
-- Added a KNN resource manager to the class. 
-  The resource manager makes sure that only one instance of the kd-tree exists. 
-  The kd-tree eats up a lot of gpu memory. Multiple instances exhaust the gpu resources too fast. 
+Oct 30, 2020, William Blanchard
+- Fixed case in CalculateDescriptors where points put in their own reference frame
+	would have nonzero position vectors.
 */
 
 //stl 
