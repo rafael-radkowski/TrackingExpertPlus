@@ -14,8 +14,9 @@ wsb@iastate.edu
 MIT License
 -------------------------------------------------------------------------------------------------------
 Last edits:
-28 October 2020
-- Added error checking for AllocateMemory and DeallocateMemory
+30 October 2020
+- Fixed case in DiscretizeCPF where points matched against each other would have
+	a nonzero angle between them.
 
 */
 

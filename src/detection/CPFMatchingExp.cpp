@@ -223,6 +223,12 @@ void CPFMatchingExp::calculateDescriptors(PointCloud& pc, float radius, std::vec
 				// Move the point p1 into the coordinate frame of the point p0
 				Eigen::Vector3f pt = T * pc.points[id];
 
+				for (int k = 0; k < 3; k++)
+				{
+					if (abs(pt(k)) <= 10e-6)
+						pt(k) = 0;
+				}
+
 
 				CPFDiscreet cpf =  CPFTools::DiscretizeCPF(cur1, cur2, pc.points[i], pt); // get pc.points[id] into the current points coordinate frame.
 				//CPFDiscreet cpf =  CPFTools::DiscretizeCPF(cur1, cur2, pc.points[i], pc.points[id]);

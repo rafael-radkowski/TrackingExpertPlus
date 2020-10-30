@@ -416,10 +416,14 @@ void run_stress(PointCloud pc, int iteration)
 
 	err_ratio = ((float)cpf_error / (float)CPU_cpf.size()) * 100;
 	cout << "DiscretizeCPF: Found " << cpf_error << " ( about " << err_ratio << "% ) errors." << endl;
+	//for (int i = 0; i < discErr.size(); i++)
+	//{
+	//	cout << discErr.at(i).data[0] << ", " << discErr.at(i).data[1] << ", " << discErr.at(i).data[2] << ", " << discErr.at(i).data[3] << " &&& " << 
+	//		discErrCPU.at(i).data[0] << ", " << discErrCPU.at(i).data[1] << ", " << discErrCPU.at(i).data[2] << ", " << discErrCPU.at(i).data[3] << endl;
+	//}
 	for (int i = 0; i < discErr.size(); i++)
 	{
-		cout << discErr.at(i).data[0] << ", " << discErr.at(i).data[1] << ", " << discErr.at(i).data[2] << ", " << discErr.at(i).data[3] << " &&& " << 
-			discErrCPU.at(i).data[0] << ", " << discErrCPU.at(i).data[1] << ", " << discErrCPU.at(i).data[2] << ", " << discErrCPU.at(i).data[3] << endl;
+		cout << discErr.at(i).alpha << " &&& " << discErrCPU.at(i).alpha << endl;
 	}
 
 

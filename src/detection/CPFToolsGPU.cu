@@ -359,7 +359,7 @@ void DiscretizeCPFGPU(CPFDiscreet* dst, uint32_t* curvatures, float4* ref_frames
 		dst[idx].point_idx = i;
 
 
-		float3 pt_trans = make_float3(
+		double3 pt_trans = make_double3(
 			(ref_frame[0].x * pt.x) + (ref_frame[0].y * pt.y) + (ref_frame[0].z * pt.z) + ref_frame[0].w,
 			(ref_frame[1].x * pt.x) + (ref_frame[1].y * pt.y) + (ref_frame[1].z * pt.z) + ref_frame[1].w, 
 			(ref_frame[2].x * pt.x) + (ref_frame[2].y * pt.y) + (ref_frame[2].z * pt.z) + ref_frame[2].w);
@@ -373,24 +373,27 @@ void DiscretizeCPFGPU(CPFDiscreet* dst, uint32_t* curvatures, float4* ref_frames
 		pt = pts[i];
 
 		double pn = sqrt(powf(pt.x, 2) + powf(pt.y, 2) + powf(pt.z, 2));
-		float3 p_norm;
+		double3 p_norm;
 		if (pn == 0)
-			p_norm = make_float3(pt.x, pt.y, pt.z);
+			p_norm = make_double3(pt.x, pt.y, pt.z);
 		else
-			p_norm = make_float3(pt.x / pn, pt.y / pn, pt.z / pn);
+			p_norm = make_double3(pt.x / pn, pt.y / pn, pt.z / pn);
 
 		double ptrn = sqrt(powf(pt_trans.x, 2) + powf(pt_trans.y, 2) + powf(pt_trans.z, 2));
-		float3 ptr_norm;
+		double3 ptr_norm;
 		if (ptrn == 0)
-			ptr_norm = make_float3(pt_trans.x, pt_trans.y, pt_trans.z);
+			ptr_norm = make_double3(pt_trans.x, pt_trans.y, pt_trans.z);
 		else
-			ptr_norm = make_float3(pt_trans.x / ptrn, pt_trans.y / ptrn, pt_trans.z / ptrn);
+			ptr_norm = make_double3(pt_trans.x / ptrn, pt_trans.y / ptrn, pt_trans.z / ptrn);
 
 		double ang = (p_norm.x * ptr_norm.x) + (p_norm.y * ptr_norm.y) + (p_norm.z * ptr_norm.z);
 
 		dst[idx].data[0] = cur1;
 		dst[idx].data[1] = cur2;
-		dst[idx].data[2] = ((ang + 1.0) * ((double)*ang_bins / 2.0));
+		if (i == id)
+			dst[idx].data[2] = (double)*ang_bins / 2.0;
+		else
+			dst[idx].data[2] = ((ang + 1.0) * ((double)*ang_bins / 2.0));
 		dst[idx].data[3] = 0; //cur1 - cur2
 
 		if (ang > *max_angle_val)
