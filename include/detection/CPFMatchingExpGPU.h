@@ -40,10 +40,11 @@ Last edits:
 #include "CPFTypes.h"
 #include "CPFToolsGPU.h"
 #include "KNN.h"
+#include "CPFMatchingWrapper.h"
 
 namespace texpert {
 
-	class CPFMatchingExpGPU
+	class CPFMatchingExpGPU : public CPFMatchingWrapper
 	{
 	private:
 

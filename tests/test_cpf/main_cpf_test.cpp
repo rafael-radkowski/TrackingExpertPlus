@@ -3,6 +3,7 @@
 #include "CPFMatchingExp.h"
 #include "CPFMatchingExpGPU.h"
 #include "RandomGenerator.h"
+#include "CPFMatchingWrapper.h"
 
 using namespace texpert;
 
@@ -533,6 +534,35 @@ void main()
 
 	cpuMatching->getPose(cpu_id, poses_cpu, pose_votes_cpu);
 	gpuMatching->getPose(gpu_id, poses_gpu, pose_votes_gpu);
+
+	//for (int i = 0; i < poses_gpu.size() && i < poses_cpu.size(); i++)
+	//{
+	//	cout << i << ": GPU: Votes: " << pose_votes_gpu.at(i) << endl;
+	//	cout << poses_gpu.at(i).matrix() << endl;
+	//	cout << "CPU: Votes: " << pose_votes_cpu.at(i) << endl;
+	//	cout << poses_cpu.at(i).matrix() << endl;
+	//}
+
+	//CPFMatchingWrapper test
+	CPFMatchingWrapper* wrapped = new CPFMatchingExp();
+	wrapped->setVerbose(true, 2);
+	wrapped->setParams(cpfParams);
+
+	wrapped->setScene(*scene);
+	cpu_id = wrapped->addModel(*points, "Cloud2");
+	if (cpu_id == -1) cout << "ERROR: CPFMatchingExp: Could not add model" << endl;
+	if (!wrapped->match(cpu_id)) cout << "ERROR: CPFMatchingExp: match function did not work" << endl;
+	wrapped->getPose(cpu_id, poses_cpu, pose_votes_cpu);
+
+	wrapped = new CPFMatchingExpGPU();
+	wrapped->setVerbose(true, 2);
+	wrapped->setParams(cpfParams);
+
+	wrapped->setScene(*scene);
+	gpu_id = wrapped->addModel(*points, "Cloud2");
+	if (gpu_id == -1) cout << "ERROR: CPFMatchingExp: Could not add model" << endl;
+	if (!wrapped->match(gpu_id)) cout << "ERROR: CPFMatchingExp: match function did not work" << endl;
+	wrapped->getPose(gpu_id, poses_gpu, pose_votes_gpu);
 
 	for (int i = 0; i < poses_gpu.size() && i < poses_cpu.size(); i++)
 	{

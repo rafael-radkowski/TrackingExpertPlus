@@ -43,10 +43,11 @@ Oct 30, 2020, William Blanchard
 #include "CPFTypes.h"
 #include "CPFTools.h"
 #include "KNN.h"
+#include "CPFMatchingWrapper.h"
 
 namespace texpert{
 
-class CPFMatchingExp
+class CPFMatchingExp : public CPFMatchingWrapper
 {
 private:
 
