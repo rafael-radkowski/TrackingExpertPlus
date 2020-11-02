@@ -225,8 +225,8 @@ GLPointCloudRenderer::GLPointCloudRenderer(vector<Eigen::Vector3f>& src_points, 
 	glUniform3fv( program_normals_locations[5], 1, &_normal_color[0]);
 	glUniform1f(  glGetUniformLocation(program_normals, "normal_length"), _normal_length );
 
-	
-	
+	// update the points if points are available.
+	updatePoints();
 }
 
 
