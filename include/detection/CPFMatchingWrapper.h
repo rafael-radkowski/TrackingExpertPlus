@@ -1,5 +1,22 @@
 #pragma once
+/*
+@class CPFMatchingWrapper
 
+@brief The pure virtual class provides an interface for the CPFMatchingExp
+and CPFMatchingExpGPU classes.
+
+William Blanchard
+Iowa State University
+wsb@iastate.edu
+(847) 707-1421
+1 November 2020
+
+MIT License
+-------------------------------------------------------------------------------------------------------
+Last edits:
+1 November 2020
+- Added class opening documentation
+*/
 #include <vector>
 
 #include "Types.h"
