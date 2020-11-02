@@ -470,38 +470,38 @@ void main()
 	CPFToolsGPU::DeallocateMemory();
 	cout << endl;
 
-	CPFToolsGPU::AllocateMemory(10000);
-	//3. Test normal range, large point size
-	cout << "-----Begin stress test: Normal range, large point size-----" << endl;
-	for (int i = 0; i < 5; i++)
-	{
-		GenerateRandomPointCloud(*points, 10000);
-		run_stress(*points, i);
-	}
-	cout << endl;
+	//CPFToolsGPU::AllocateMemory(10000);
+	////3. Test normal range, large point size
+	//cout << "-----Begin stress test: Normal range, large point size-----" << endl;
+	//for (int i = 0; i < 5; i++)
+	//{
+	//	GenerateRandomPointCloud(*points, 10000);
+	//	run_stress(*points, i);
+	//}
+	//cout << endl;
 
-	//4. Test large range, large point size
-	cout << "-----Begin stress test: Large range, large point size-----" << endl;
-	for (int i = 0; i < 5; i++)
-	{
-		GenerateRandomPointCloud(*points, 10000, -3.0, 3.0);
-		run_stress(*points, i);
-	}
-	cout << endl;
+	////4. Test large range, large point size
+	//cout << "-----Begin stress test: Large range, large point size-----" << endl;
+	//for (int i = 0; i < 5; i++)
+	//{
+	//	GenerateRandomPointCloud(*points, 10000, -3.0, 3.0);
+	//	run_stress(*points, i);
+	//}
+	//cout << endl;
 
-	//5. Test small range, large point size
-	cout << "-----Begin stress test: Small range, large point size-----" << endl;
-	for (int i = 0; i < 5; i++)
-	{
-		GenerateRandomPointCloud(*points, 10000, -1.0, 1.0);
-		run_stress(*points, i);
-	}
-	cout << endl;
-	CPFToolsGPU::DeallocateMemory();
+	////5. Test small range, large point size
+	//cout << "-----Begin stress test: Small range, large point size-----" << endl;
+	//for (int i = 0; i < 5; i++)
+	//{
+	//	GenerateRandomPointCloud(*points, 10000, -1.0, 1.0);
+	//	run_stress(*points, i);
+	//}
+	//cout << endl;
+	//CPFToolsGPU::DeallocateMemory();
 
 
 	//Begin CPFMatchingExpGPU tests
-	cout << "-----Begin CPFMatchingExpGPU test-----" << endl;
+
 	CPFParams cpfParams = CPFParams();
 
 	CPFMatchingExp* cpuMatching = new CPFMatchingExp();
@@ -535,17 +535,15 @@ void main()
 	cpuMatching->getPose(cpu_id, poses_cpu, pose_votes_cpu);
 	gpuMatching->getPose(gpu_id, poses_gpu, pose_votes_gpu);
 
-	for (int i = 0; i < poses_gpu.size() && i < poses_cpu.size() && i < 12; i++)
-	{
-		cout << i << ": GPU: Votes: " << pose_votes_gpu.at(i) << endl;
-		cout << poses_gpu.at(i).matrix() << endl;
-		cout << "CPU: Votes: " << pose_votes_cpu.at(i) << endl;
-		cout << poses_cpu.at(i).matrix() << endl;
-	}
-	cout << endl << endl;
+	//for (int i = 0; i < poses_gpu.size() && i < poses_cpu.size(); i++)
+	//{
+	//	cout << i << ": GPU: Votes: " << pose_votes_gpu.at(i) << endl;
+	//	cout << poses_gpu.at(i).matrix() << endl;
+	//	cout << "CPU: Votes: " << pose_votes_cpu.at(i) << endl;
+	//	cout << poses_cpu.at(i).matrix() << endl;
+	//}
 
 	//CPFMatchingWrapper test
-	cout << "-----Begin CPFMatchingWrapper test-----" << endl;
 	CPFMatchingWrapper* wrapped = new CPFMatchingExp();
 	wrapped->setVerbose(true, 2);
 	wrapped->setParams(cpfParams);
@@ -566,11 +564,11 @@ void main()
 	if (!wrapped->match(gpu_id)) cout << "ERROR: CPFMatchingExp: match function did not work" << endl;
 	wrapped->getPose(gpu_id, poses_gpu, pose_votes_gpu);
 
-	for (int i = 0; i < poses_gpu.size() && i < poses_cpu.size() && i < 12; i++)
-	{
-		cout << i << ": GPU: Votes: " << pose_votes_gpu.at(i) << endl;
-		cout << poses_gpu.at(i).matrix() << endl;
-		cout << "CPU: Votes: " << pose_votes_cpu.at(i) << endl;
-		cout << poses_cpu.at(i).matrix() << endl;
-	}
+	//for (int i = 0; i < poses_gpu.size() && i < poses_cpu.size(); i++)
+//{
+//	cout << i << ": GPU: Votes: " << pose_votes_gpu.at(i) << endl;
+//	cout << poses_gpu.at(i).matrix() << endl;
+//	cout << "CPU: Votes: " << pose_votes_cpu.at(i) << endl;
+//	cout << poses_cpu.at(i).matrix() << endl;
+//}
 }
