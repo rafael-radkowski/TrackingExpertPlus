@@ -61,6 +61,8 @@ public:
 	*/
 	static void DeallocateMemory();
 
+	static void AssignPointCloud(PointCloud& pc);
+
 	/*!
 	Finds the angle between two vectors
 	@param a - vector to calculate angle from

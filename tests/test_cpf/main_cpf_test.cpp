@@ -299,22 +299,22 @@ void run_stress(PointCloud pc, int iteration)
 	Eigen::Affine3f curRefCPU;
 
 	CPFToolsGPU::GetRefFrames(refFramesGPU, pc.points, pc.normals);
-	if (refFramesGPU.empty())
-	{
-		cout << "GetRefFrames Failed!" << endl;
-		return;
-	}
+	//if (refFramesGPU.empty())
+	//{
+	//	cout << "GetRefFrames Failed!" << endl;
+	//	return;
+	//}
 
 	for (int i = 0; i < pc.size(); i++) {
 		curRefCPU = CPFTools::GetRefFrame(pc.points.at(i), pc.normals.at(i));
 
 		refFramesCPU.push_back(curRefCPU);
-		if (!(curRefCPU.matrix().isApprox(refFramesGPU.at(i).matrix())))
-			ref_errors++;
+	//	if (!(curRefCPU.matrix().isApprox(refFramesGPU.at(i).matrix())))
+	//		ref_errors++;
 	}
 
 	float err_ratio = ((float)ref_errors / (float)pc.size()) * 100;
-	cout << "GetRefFrame: Found " << ref_errors << " ( about " << err_ratio << "% ) errors." << endl;
+	//cout << "GetRefFrame: Found " << ref_errors << " ( about " << err_ratio << "% ) errors." << endl;
 
 	int curve_error = 0;
 	vector<uint32_t> CPU_curvatures;

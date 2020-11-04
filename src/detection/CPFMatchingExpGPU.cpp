@@ -207,6 +207,8 @@ void CPFMatchingExpGPU::calculateDescriptors(PointCloud& pc, float radius, std::
 
 	m_knn->radius(pc, radius, matches);
 
+	CPFToolsGPU::AssignPointCloud(pc);
+
 	//----------------------------------------------------------------------------------------------------------
 	// Calculate point curvatures
 

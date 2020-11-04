@@ -22,7 +22,7 @@ void TrackingExpertRegistration::init(void)
 	m_rms = 100000.0;
 
 	// create an ICP and feature descriptor instance. 
-	m_fd = new CPFMatchingExp();
+	m_fd = new CPFMatchingExpGPU();
 	m_icp = new ICP();
 
 	// set the default params.
