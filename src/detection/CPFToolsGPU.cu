@@ -101,19 +101,19 @@ void CPFToolsGPU::DeallocateMemory()
 */
 void vecToPointer3F(float3* dst, const vector<Eigen::Vector3f>& src)
 {
-	start = std::chrono::high_resolution_clock::now();
+	//start = std::chrono::high_resolution_clock::now();
 	Eigen::Vector3f curVec;
 	for (int i = 0; i < src.size(); i++) {
 		curVec = src.at(i);
 		dst[i] = make_float3(curVec[0], curVec[1], curVec[2]);
 	}
-	stop = std::chrono::high_resolution_clock::now();
+	//stop = std::chrono::high_resolution_clock::now();
 	//cout << "vecToPointer3f runtime: " << duration_cast<microseconds>(stop - start).count() << " microseconds" << endl;
 }
 
 void pointerToVecM4F(vector<Eigen::Affine3f>& dst, float4* src, int num_src)
 {
-	start = std::chrono::high_resolution_clock::now();
+	//start = std::chrono::high_resolution_clock::now();
 	Eigen::Affine3f affine;
 	for (int i = 0; i < num_src; i++)
 	{
@@ -124,13 +124,13 @@ void pointerToVecM4F(vector<Eigen::Affine3f>& dst, float4* src, int num_src)
 
 		dst.push_back(Eigen::Affine3f(affine));
 	}
-	stop = std::chrono::high_resolution_clock::now();
+	//stop = std::chrono::high_resolution_clock::now();
 	//cout << "pointerToVecM4F runtime: " << duration_cast<microseconds>(stop - start).count() << " microseconds" << endl;
 }
 
 void vecToPointerM4F(float4* dst, vector<Eigen::Affine3f>& src)
 {
-	start = std::chrono::high_resolution_clock::now();
+	//start = std::chrono::high_resolution_clock::now();
 	Eigen::Matrix4f curMatrix;
 	for (int i = 0; i < src.size(); i++)
 	{
@@ -140,34 +140,49 @@ void vecToPointerM4F(float4* dst, vector<Eigen::Affine3f>& src)
 		dst[(i * 4) + 2] = make_float4(curMatrix(2), curMatrix(6), curMatrix(10), curMatrix(14));
 		dst[(i * 4) + 3] = make_float4(curMatrix(3), curMatrix(7), curMatrix(11), curMatrix(15));
 	}
-	stop = std::chrono::high_resolution_clock::now();
+	//stop = std::chrono::high_resolution_clock::now();
 	//cout << "vecToPointerM4F runtime: " << duration_cast<microseconds>(stop - start).count() << " microseconds" << endl;
 }
 
 void vecToPointerI(int* dst, std::vector<uint32_t>& src)
 {
-	start = std::chrono::high_resolution_clock::now();
+	//start = std::chrono::high_resolution_clock::now();
 	for (int i = 0; i < src.size(); i++)
 	{
 		dst[i] = src.at(i);
 	}
-	stop = std::chrono::high_resolution_clock::now();
+	//stop = std::chrono::high_resolution_clock::now();
 	//cout << "vecToPointerI runtime: " << duration_cast<microseconds>(stop - start).count() << " microseconds" << endl;
 }
 
 void pointerToVecI(std::vector<uint32_t>& dst, int* src, int num_e)
 {
-	start = std::chrono::high_resolution_clock::now();
+	//start = std::chrono::high_resolution_clock::now();
 	for (int i = 0; i < num_e; i++)
 		dst.push_back(src[i]);
-	stop = std::chrono::high_resolution_clock::now();
+	//stop = std::chrono::high_resolution_clock::now();
 	//cout << "pointerToVecI runtime: " << duration_cast<microseconds>(stop - start).count() << " microseconds" << endl;
 }
 
 void CPFToolsGPU::AssignPointCloud(PointCloud& pc)
 {
+	//start = std::chrono::high_resolution_clock::now();
 	vecToPointer3F(pcN, pc.normals);
 	vecToPointer3F(pcP, pc.points);
+	//stop = std::chrono::high_resolution_clock::now();
+	//cout << "AssignPointCloud runtime: " << duration_cast<microseconds>(stop - start).count() << " microseconds" << endl;
+}
+
+void CPFToolsGPU::AssignMatches(vector<Matches>& matches)
+{
+	//start = std::chrono::high_resolution_clock::now();
+	for (int i = 0; i < matches.size(); i++)
+	{
+		pt_matches[i] = matches.at(i);
+	}
+	//stop = std::chrono::high_resolution_clock::now();
+	//cout << "AssignMatches runtime: " << duration_cast<microseconds>(stop - start).count() << " microseconds" << endl;
+
 }
 
 /*
@@ -268,6 +283,7 @@ void CPFToolsGPU::GetRefFrames(vector<Eigen::Affine3f>& dst, vector<Eigen::Vecto
 	//vecToPointer3F(vectorsA, p);
 	//vecToPointer3F(vectorsB, n);
 
+	//start = std::chrono::high_resolution_clock::now();
 	//Get reference frames
 	int threads = 32;
 	int blocks = ceil((float) p.size() / threads);
@@ -278,14 +294,8 @@ void CPFToolsGPU::GetRefFrames(vector<Eigen::Affine3f>& dst, vector<Eigen::Vecto
 	if (error)
 		cout << "ERROR: CPFToolsGPU: GetRefFrames: " << cudaGetErrorString(error) << endl;
 
-	//cout << "Before the ref frame" << endl;
-	//for (int i = 0; i < p.size(); i++)
-	//{
-	//	cout << RefFrames[(i * 4)].x << ", " << RefFrames[(i * 4)].y << ", " << RefFrames[(i * 4)].z << ", " << RefFrames[(i * 4)].w << endl;
-	//	cout << RefFrames[(i * 4) + 1].x << ", " << RefFrames[(i * 4) + 1].y << ", " << RefFrames[(i * 4) + 1].z << ", " << RefFrames[(i * 4) + 1].w << endl;
-	//	cout << RefFrames[(i * 4) + 2].x << ", " << RefFrames[(i * 4) + 2].y << ", " << RefFrames[(i * 4) + 2].z << ", " << RefFrames[(i * 4) + 2].w << endl;
-	//	cout << RefFrames[(i * 4) + 3].x << ", " << RefFrames[(i * 4) + 3].y << ", " << RefFrames[(i * 4) + 3].z << ", " << RefFrames[(i * 4) + 3].w << endl;
-	//}
+	//stop = std::chrono::high_resolution_clock::now();
+	//cout << "RefFrames runtime: " << duration_cast<microseconds>(stop - start).count() << " microseconds" << endl;
 
 	//Copy reference frames back to the CPU
 	//pointerToVecM4F(dst, RefFrames, p.size());
@@ -327,6 +337,7 @@ void CPFToolsGPU::DiscretizeCurvature(vector<uint32_t>& dst, const vector<Eigen:
 	//Copy vectors and values to GPU
 	//vecToPointer3F(vectorsA, n1);
 	//vecToPointer3F(pcN, pc.normals);
+	//start = std::chrono::high_resolution_clock::now();
 	for (int i = 0; i < matches.size(); i++)
 	{
 		pt_matches[i] = matches.at(i);
@@ -357,6 +368,8 @@ void CPFToolsGPU::DiscretizeCurvature(vector<uint32_t>& dst, const vector<Eigen:
 		cout << "ERROR: CPFToolsGPU: DiscretizeCurvature: CalculateDiscCurve: " << cudaGetErrorString(error) << endl;
 
 	pointerToVecI(dst, discretized_curvatures, n1.size());
+	//stop = std::chrono::high_resolution_clock::now();
+	//cout << "Curvature runtime: " << duration_cast<microseconds>(stop - start).count() << " microseconds" << endl;
 }
 
 __global__
@@ -364,25 +377,28 @@ void DiscretizeCPFGPU(CPFDiscreet* dst, uint32_t* curvatures, float4* ref_frames
 {
 	int i = (blockIdx.x * blockDim.x) + threadIdx.x;
 
-	if (i > num_pts)
+	if (i > num_pts * KNN_MATCHES_LENGTH)
 		return;
+
+	int it = i % KNN_MATCHES_LENGTH;
+	int ii = i / KNN_MATCHES_LENGTH;
 
 	int idx = (i * KNN_MATCHES_LENGTH) + iteration;
 
-	if (matches[i].matches[iteration].distance > 0.0) {
-		int id = matches[i].matches[iteration].second;
-		int cur1 = curvatures[i];
+	if (matches[ii].matches[it].distance > 0.0) {
+		int id = matches[ii].matches[it].second;
+		int cur1 = curvatures[ii];
 		int cur2 = curvatures[id];
 
 
-		valid_dists[idx] = true;
+		valid_dists[i] = true;
 
 		float3 pt = pts[id];
-		float4* ref_frame = ref_frames + (i * 4);
+		float4* ref_frame = ref_frames + (ii * 4);
 
 		double3 ptd = make_double3(pt.x, pt.y, pt.z);
 
-		dst[idx].point_idx = i;
+		dst[i].point_idx = ii;
 
 
 		double3 pt_trans = make_double3(
@@ -392,11 +408,11 @@ void DiscretizeCPFGPU(CPFDiscreet* dst, uint32_t* curvatures, float4* ref_frames
 
 		//get the angle.
 		//The point pt is in the frame origin.  n is aligned with the x axis.
-		dst[idx].alpha = atan2((double)-pt_trans.z, (double)pt_trans.y);
+		dst[i].alpha = atan2((double)-pt_trans.z, (double)pt_trans.y);
 
 
 
-		pt = pts[i];
+		pt = pts[ii];
 
 		double pn = sqrt(powf(pt.x, 2) + powf(pt.y, 2) + powf(pt.z, 2));
 		double3 p_norm;
@@ -414,13 +430,13 @@ void DiscretizeCPFGPU(CPFDiscreet* dst, uint32_t* curvatures, float4* ref_frames
 
 		double ang = (p_norm.x * ptr_norm.x) + (p_norm.y * ptr_norm.y) + (p_norm.z * ptr_norm.z);
 
-		dst[idx].data[0] = cur1;
-		dst[idx].data[1] = cur2;
-		if (i == id)
-			dst[idx].data[2] = (double)*ang_bins / 2.0;
+		dst[i].data[0] = cur1;
+		dst[i].data[1] = cur2;
+		if (ii == id)
+			dst[i].data[2] = (double)*ang_bins / 2.0;
 		else
-			dst[idx].data[2] = ((ang + 1.0) * ((double)*ang_bins / 2.0));
-		dst[idx].data[3] = 0; //cur1 - cur2
+			dst[i].data[2] = ((ang + 1.0) * ((double)*ang_bins / 2.0));
+		dst[i].data[3] = 0; //cur1 - cur2
 
 		if (ang > *max_angle_val)
 			*max_angle_val = ang;
@@ -429,41 +445,41 @@ void DiscretizeCPFGPU(CPFDiscreet* dst, uint32_t* curvatures, float4* ref_frames
 		return;
 	}
 
-	valid_dists[idx] = false;
+	valid_dists[i] = false;
 }
 
 //static
 void CPFToolsGPU::DiscretizeCPF(vector<CPFDiscreet>& dst, vector<uint32_t>& curvatures, vector<Matches> matches, vector<Eigen::Vector3f> pts, vector<Eigen::Affine3f> ref_frames)
 {
+	//start = std::chrono::high_resolution_clock::now();
 	//Copy vectors to GPU
-	vecToPointerI(discretized_curvatures, curvatures);
+	//vecToPointerI(discretized_curvatures, curvatures);
 	//vecToPointer3F(vectorsA, pts);
 	//vecToPointerM4F(RefFrames, ref_frames);
-	for (int i = 0; i < matches.size(); i++)
-	{
-		pt_matches[i] = matches.at(i);
-		discretized_cpfs[i] = CPFDiscreet();
-	}
 
 	//For each point, find the CPFDiscreet for each match
-	int threads = 64;
-	int blocks = ceil((float) pts.size() / threads);
-	for (int i = 0; i < KNN_MATCHES_LENGTH; i++)
-	{
+	int threads = 128;
+	int blocks = ceil((float) pts.size() * KNN_MATCHES_LENGTH / threads);
+	int i = 0;
+	//for (int i = 0; i < KNN_MATCHES_LENGTH; i++)
+	//{
 		DiscretizeCPFGPU<<<blocks, threads>>>(discretized_cpfs, (uint32_t*)discretized_curvatures, RefFrames, pcP, pts.size(), pt_matches, i, max_ang_value, min_ang_value, angle_bins, valid);
 		cudaError error = cudaGetLastError();
 		if (error)
 			cout << "ERROR: CPFToolsGPU: DiscretizeCPF: " << cudaGetErrorString(error) << " on iteration " << i << endl;
 		cudaDeviceSynchronize();
-	}
+	//}
 
 	//Push back all valid points
-	CPFDiscreet null_CPF = CPFDiscreet();
+	//dst.resize(pts.size() * KNN_MATCHES_LENGTH);
+	//memcpy(dst.data(), discretized_cpfs, pts.size() * KNN_MATCHES_LENGTH * sizeof(CPFDiscreet));
 	for (int i = 0; i < pts.size() * KNN_MATCHES_LENGTH; i++)
 	{
 		if(valid[i])
 			dst.push_back(discretized_cpfs[i]);
 	}
+	//stop = std::chrono::high_resolution_clock::now();
+	//cout << "CPF runtime: " << duration_cast<microseconds>(stop - start).count() << " microseconds" << endl;
 }
 
 //static 

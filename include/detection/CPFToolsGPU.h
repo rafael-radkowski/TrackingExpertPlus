@@ -14,9 +14,8 @@ wsb@iastate.edu
 MIT License
 -------------------------------------------------------------------------------------------------------
 Last edits:
-30 October 2020
-- Fixed case in DiscretizeCPF where points matched against each other would have
-	a nonzero angle between them.
+5 November 2020
+- Optimized DiscretizeCPF
 
 */
 
@@ -62,6 +61,8 @@ public:
 	static void DeallocateMemory();
 
 	static void AssignPointCloud(PointCloud& pc);
+
+	static void AssignMatches(vector<Matches>& matches);
 
 	/*!
 	Finds the angle between two vectors

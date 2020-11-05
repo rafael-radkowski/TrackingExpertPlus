@@ -383,14 +383,20 @@ void run_stress(PointCloud pc, int iteration)
 	vector<CPFDiscreet> discErrCPU;
 	bool has_error;
 
-	if (CPU_cpf.size() != GPU_cpf.size())
+	if (CPU_cpf.size() != GPU_cpf.size()) {
 		cout << "WARNING: Result of CPU and GPU DiscretizeCPF functions not of the same size." << endl;
-
+		cout << "(CPU: " << CPU_cpf.size() << ", GPU: " << GPU_cpf.size() << ")" << endl;
+	}
+	int gpuIDX = 0;
 	for (int i = 0; i < CPU_cpf.size() && i < GPU_cpf.size(); i++)
 	{
 		has_error = true;
 		curCPU = CPU_cpf.at(i);
-		curGPU = GPU_cpf.at(i);
+		curGPU = GPU_cpf.at(gpuIDX);
+		while (curGPU.data[0] == 0) {
+			gpuIDX++;
+			curGPU = GPU_cpf.at(gpuIDX);
+		}
 
 		if (!(AbsCPFEquals(curCPU, curGPU)))
 		{
@@ -398,6 +404,8 @@ void run_stress(PointCloud pc, int iteration)
 			discErr.push_back(curGPU);
 			discErrCPU.push_back(curCPU);
 		}
+
+		gpuIDX++;
 
 		//for (int j = 0; j < CPU_cpf.size(); j++)
 		//{
@@ -465,6 +473,7 @@ void main()
 	for (int i = 0; i < 20; i++)
 	{
 		GenerateRandomPointCloud(*points, 100);
+		CPFToolsGPU::AssignPointCloud(*points);
 		run_stress(*points, i);
 	}
 	CPFToolsGPU::DeallocateMemory();
