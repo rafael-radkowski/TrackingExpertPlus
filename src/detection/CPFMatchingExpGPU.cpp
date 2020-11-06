@@ -24,7 +24,7 @@ CPFMatchingExpGPU::CPFMatchingExpGPU()
 
 CPFMatchingExpGPU::~CPFMatchingExpGPU()
 {
-
+	CPFToolsGPU::DeallocateMemory();
 }
 
 
