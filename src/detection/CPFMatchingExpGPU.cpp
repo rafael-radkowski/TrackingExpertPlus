@@ -261,12 +261,13 @@ void CPFMatchingExpGPU::matchDescriptors(std::vector<CPFDiscreet>& src_model, st
 
 			CPFDiscreet src = src_model[k];
 
-			if (src.point_idx != point_id) continue; // must be a descriptor for the current point i
+			if (src.point_idx != point_id || src.data[0] == 0) continue; // must be a descriptor for the current point i
 
 			// search for the destination descriptor
 			for (int j = 0; j < scr_s_size; j++) {
 
 				CPFDiscreet dst = src_scene[j];
+				if (dst.data[0] == 0) continue;
 
 				// compare the descriptor
 				if (src.data[0] == dst.data[0] && src.data[1] == dst.data[1] && src.data[2] == dst.data[2] && dst.data[0] != 0) {

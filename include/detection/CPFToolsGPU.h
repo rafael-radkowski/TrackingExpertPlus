@@ -14,8 +14,9 @@ wsb@iastate.edu
 MIT License
 -------------------------------------------------------------------------------------------------------
 Last edits:
-5 November 2020
-- Optimized DiscretizeCPF
+6 November 2020
+- Optimized copying of memory from the GPU to the CPU and vice versa
+- Code cleanup
 
 */
 
