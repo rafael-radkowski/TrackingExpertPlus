@@ -31,5 +31,5 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 
 
 # build the gearbox demo
-#add_subdirectory(gear_demo)
+add_subdirectory(gear_demo)
 add_subdirectory(trackingexpertdemo)
