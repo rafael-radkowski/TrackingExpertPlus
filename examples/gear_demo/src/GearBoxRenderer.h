@@ -17,7 +17,6 @@ class GearBoxRenderer
 {
 private:
 	std::vector<cs557::OBJModel*> models;
-	PartDatabase* parts;
 
 public:
 	GearBoxRenderer();
@@ -28,14 +27,14 @@ public:
 
 	@param filepath - the path and name of the .txt file with the list of .objs to load
 	*/
-	bool loadModels(std::string filepath);
+	bool loadModelsIntoDatabase(const char* filepath);
 
 	/*
 	Add a model from the stored PartDatabase into this GearBoxRenderer
 
 	@param id - the id of the object from the PartDatabase to load into this GearBoxRenderer
 	*/
-	bool addModel(int id);
+	void addModel(cs557::OBJModel* model);
 
 	/*
 	Set the transformation of an object at the given index

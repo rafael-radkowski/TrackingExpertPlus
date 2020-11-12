@@ -4,17 +4,23 @@
 */
 
 //std
-#include <vector>
+#include <unordered_map>
 
 #include "FileUtils.h"
 
 //gl_support
 #include "ModelOBJ.h"
 
+typedef struct Model
+{
+	int id;
+	cs557::OBJModel* model;
+};
+
 class PartDatabase
 {
 private:
-	std::vector<cs557::OBJModel*> models;
+	std::unordered_map<int, Model*> models;
 
 public:
 	PartDatabase();
@@ -28,7 +34,7 @@ public:
 
 	@param path - the path of the .txt file to load .obj files from.
 	*/
-	void loadObjsFromFile(std::string path);
+	bool loadObjsFromFile(const char* path);
 
 	/*
 	Get the object specified by the given line of the .txt file used to
@@ -38,5 +44,5 @@ public:
 	
 	@return a pointer to the OBJModel stored at the given id
 	*/
-	cs557::OBJModel* getObj(int id);
+	Model* getObj(int id);
 };
