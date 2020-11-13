@@ -29,12 +29,18 @@
 // TrackingExpert
 #include "trackingx.h"
 #include "graphicsx.h"
+#include "ICaptureDevice.h"
+
+//#include "KinectAzureCaptureDevice.h"  // the camera
+//#include "PointCloudProducer.h"
+//#define _WITH_PRODUCER
 
 // local
 #include "DemoScene.h"
+#include "GearBoxRenderer.h"
 
 // instance of a structure core camera 
-texpert::StructureCoreCaptureDevice* camera;
+texpert::ICaptureDevice* camera;
 
 // The OpenGL window
 isu_ar::GLViewer* window;
@@ -43,6 +49,7 @@ isu_ar::GLViewer* window;
 // demo content 
 DemoScene* gear;
 
+PartDatabase* database;
 
 // The Video Background
 isu_gfx::GLVideoCanvas*	video_bg;
@@ -55,8 +62,8 @@ The main render and processing loop.
 */
 void render_loop(glm::mat4 pm, glm::mat4 vm) {
 
-	// fetch a new frame	
-	camera->getRGBFrame(img_color);
+	//// fetch a new frame	
+	//camera->getRGBFrame(img_color);
 
 
 
@@ -71,18 +78,18 @@ int main(int argc, char* argv)
 	std::cout << "Version 0.9" << endl;
 
 
-	/*
-	Open a camera device. 
-	*/
-	camera =  new texpert::StructureCoreCaptureDevice();
+	///*
+	//Open a camera device. 
+	//*/
+	//camera =  new KinectAzureCaptureDevice();
 
-	/*
-	Test if the camera is ready to run. 
-	*/
-	if (!camera->isOpen()) {
-		std::cout << "\n[ERROR] - Cannot access camera." << std::endl;
-		return -1;
-	}
+	///*
+	//Test if the camera is ready to run. 
+	//*/
+	//if (!camera->isOpen()) {
+	//	std::cout << "\n[ERROR] - Cannot access camera." << std::endl;
+	//	return -1;
+	//}
 
 
 	
@@ -101,10 +108,11 @@ int main(int argc, char* argv)
 	/*
 	Create the video background
 	*/
-	camera->getRGBFrame(img_color);
+	/*camera->getRGBFrame(img_color);
 	video_bg = new isu_gfx::GLVideoCanvas();
-	video_bg->create(img_color.rows,  img_color.cols, (unsigned char*)img_color.data, true);
+	video_bg->create(img_color.rows,  img_color.cols, (unsigned char*)img_color.data, true);*/
 
+	database->loadObjsFromFile("D:\WorkRepos\TrackingExpertPlus\examples\gear_demo\models\load_models.txt");
 	
 	gear = new DemoScene();
 	gear->create();

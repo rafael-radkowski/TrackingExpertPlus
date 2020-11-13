@@ -13,14 +13,22 @@
 
 typedef struct Model
 {
-	int id;
+	std::string name = "null";
+	bool visible = false;
 	cs557::OBJModel* model;
+
+	Model()
+	{
+		name = "null";
+		visible = false;
+		model = new cs557::OBJModel();
+	}
 };
 
 class PartDatabase
 {
 private:
-	std::unordered_map<int, Model*> models;
+	std::unordered_map<int, Model> models;
 
 public:
 	PartDatabase();
@@ -44,5 +52,5 @@ public:
 	
 	@return a pointer to the OBJModel stored at the given id
 	*/
-	Model* getObj(int id);
+	Model getObj(int id);
 };

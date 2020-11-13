@@ -2,7 +2,7 @@
 
 PartDatabase::PartDatabase()
 {
-	models = std::vector<cs557::OBJModel*>();
+	models = std::unordered_map<int, Model>(50);
 }
 
 PartDatabase::~PartDatabase()
@@ -12,7 +12,7 @@ PartDatabase::~PartDatabase()
 
 bool PartDatabase::loadObjsFromFile(const char* path)
 {
-	models.clear();
+	//models.clear();
 
 	fstream objList = fstream();
 
@@ -24,28 +24,37 @@ bool PartDatabase::loadObjsFromFile(const char* path)
 	}
 
 	char* fileLine = (char*)malloc(100 * sizeof(char));
+
+	int idx = 0;
+	Model nModel;
 	while (!objList.eof())
 	{
-		cs557::OBJModel* model = new cs557::OBJModel();
+		nModel = Model();
 		objList.getline(fileLine, 100);
 		
 		if (std::experimental::filesystem::exists(fileLine))
 		{
-			model->create(fileLine);
+			nModel.model->create(fileLine);
+			nModel.visible = false;
+			nModel.name = std::experimental::filesystem::path(fileLine).filename().string();
 		}
 
 		else
 		{
+			nModel.name = "null";
+			nModel.visible = false;
 			cout << "WARNING: PartDatabase: File " << fileLine << " does not exist.  It will be ignored.\n";
 		}
 
-		models.push_back(model);
+		models.insert({ idx, nModel });
+
+		idx++;
 	}
 
 	return true;
 }
 
-cs557::OBJModel* PartDatabase::getObj(int id)
+Model PartDatabase::getObj(int id)
 {
 	return models.at(id);
 }

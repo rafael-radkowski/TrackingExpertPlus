@@ -12,29 +12,25 @@
 #include "ModelOBJ.h"
 
 #include "PartDatabase.h"
+#include "AssemblySequence.h"
 
 class GearBoxRenderer
 {
 private:
-	std::vector<cs557::OBJModel*> models;
+	std::vector<Model*> models;
 
 public:
 	GearBoxRenderer();
 	~GearBoxRenderer();
 
 	/*
-	Load models into the stored PartDatabase
-
-	@param filepath - the path and name of the .txt file with the list of .objs to load
-	*/
-	bool loadModelsIntoDatabase(const char* filepath);
-
-	/*
 	Add a model from the stored PartDatabase into this GearBoxRenderer
 
 	@param id - the id of the object from the PartDatabase to load into this GearBoxRenderer
 	*/
-	void addModel(cs557::OBJModel* model);
+	void addModel(Model* model);
+
+	void claerModels();
 
 	/*
 	Set the transformation of an object at the given index
