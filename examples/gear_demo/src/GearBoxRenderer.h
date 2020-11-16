@@ -17,7 +17,7 @@
 class GearBoxRenderer
 {
 private:
-	std::vector<Model*> models;
+	std::unordered_map<string, Model*> _models;
 
 public:
 	GearBoxRenderer();
@@ -28,9 +28,9 @@ public:
 
 	@param id - the id of the object from the PartDatabase to load into this GearBoxRenderer
 	*/
-	void addModel(Model* model);
+	void addModel(Model* model, string model_name);
 
-	void claerModels();
+	void clearModels();
 
 	/*
 	Set the transformation of an object at the given index
@@ -38,7 +38,7 @@ public:
 	@param id - the id of the object whose transformation is being changed.
 	@param transform - the transformation to be applied to the object
 	*/
-	void setTransform(int id, glm::mat4 transform);
+	void setTransform(string model_name, glm::mat4 transform);
 
 	/*
 	Calls all rendering processes.

@@ -31,9 +31,9 @@
 #include "graphicsx.h"
 #include "ICaptureDevice.h"
 
-//#include "KinectAzureCaptureDevice.h"  // the camera
-//#include "PointCloudProducer.h"
-//#define _WITH_PRODUCER
+#include "KinectAzureCaptureDevice.h"  // the camera
+#include "PointCloudProducer.h"
+#define _WITH_PRODUCER
 
 // local
 #include "DemoScene.h"
@@ -50,6 +50,7 @@ isu_ar::GLViewer* window;
 DemoScene* gear;
 
 PartDatabase* database;
+GearBoxRenderer* renderer;
 
 // The Video Background
 isu_gfx::GLVideoCanvas*	video_bg;
@@ -62,8 +63,8 @@ The main render and processing loop.
 */
 void render_loop(glm::mat4 pm, glm::mat4 vm) {
 
-	//// fetch a new frame	
-	//camera->getRGBFrame(img_color);
+	// fetch a new frame	
+	camera->getRGBFrame(img_color);
 
 
 
@@ -78,18 +79,18 @@ int main(int argc, char* argv)
 	std::cout << "Version 0.9" << endl;
 
 
-	///*
-	//Open a camera device. 
-	//*/
-	//camera =  new KinectAzureCaptureDevice();
+	/*
+	Open a camera device. 
+	*/
+	camera =  new KinectAzureCaptureDevice();
 
-	///*
-	//Test if the camera is ready to run. 
-	//*/
-	//if (!camera->isOpen()) {
-	//	std::cout << "\n[ERROR] - Cannot access camera." << std::endl;
-	//	return -1;
-	//}
+	/*
+	Test if the camera is ready to run. 
+	*/
+	if (!camera->isOpen()) {
+		std::cout << "\n[ERROR] - Cannot access camera." << std::endl;
+		return -1;
+	}
 
 
 	
@@ -112,8 +113,34 @@ int main(int argc, char* argv)
 	video_bg = new isu_gfx::GLVideoCanvas();
 	video_bg->create(img_color.rows,  img_color.cols, (unsigned char*)img_color.data, true);*/
 
-	database->loadObjsFromFile("D:\WorkRepos\TrackingExpertPlus\examples\gear_demo\models\load_models.txt");
-	
+	/*
+	Load part models
+	*/
+	database = new PartDatabase();
+	database->loadObjsFromFile("D:/WorkRepos/TrackingExpertPlus/examples/gear_demo/models/load_models.txt");
+	//database->loadObjsFromFile("D:/noPath.txt");  //This is meant to break 
+
+	renderer = new GearBoxRenderer();
+
+	int idx = 0;
+	for (int i = 0; i < database->getNumModels(); i++)
+	{
+		Model* curModel = database->getObj(i);
+		if (!curModel->name.compare("null") == 0)
+		{
+			renderer->addModel(curModel, curModel->name);
+			idx++;
+		}
+	}
+
+	std::vector<int> sequence = std::vector<int>();
+	for (int i = 0; i < 24; i++)
+	{
+		sequence.push_back(i);
+	}
+
+	AssemblySequence::setSeq(sequence);
+
 	gear = new DemoScene();
 	gear->create();
 	

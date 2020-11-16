@@ -2,29 +2,29 @@
 
 GearBoxRenderer::GearBoxRenderer()
 {
-	models = std::vector<Model*>();
+	_models = std::unordered_map<string, Model*>();
 }
 
 GearBoxRenderer::~GearBoxRenderer()
 {
 }
 
-void GearBoxRenderer::addModel(Model* model)
+void GearBoxRenderer::addModel(Model* model, string model_name)
 {
-	models.push_back(model);
+	_models.insert(std::make_pair(model_name, model));
 }
 
-void GearBoxRenderer::claerModels()
+void GearBoxRenderer::clearModels()
 {
-	models.clear();
+	_models.clear();
 }
 
-void GearBoxRenderer::setTransform(int id, glm::mat4 transform)
+void GearBoxRenderer::setTransform(string model_name, glm::mat4 transform)
 {
-	models.at(id)->model->setModelMatrix(transform);
+	_models.at(model_name)->model->setModelMatrix(transform);
 }
 
 void GearBoxRenderer::draw(glm::mat4 proj, glm::mat4 vm)
 {
-	AssemblySequence::process(models, proj, vm);
+	AssemblySequence::process(_models, proj, vm);
 }

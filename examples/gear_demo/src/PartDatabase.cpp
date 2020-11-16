@@ -2,7 +2,8 @@
 
 PartDatabase::PartDatabase()
 {
-	models = std::unordered_map<int, Model>(50);
+	models = std::unordered_map<int, Model*>();
+	size = 0;
 }
 
 PartDatabase::~PartDatabase()
@@ -12,49 +13,45 @@ PartDatabase::~PartDatabase()
 
 bool PartDatabase::loadObjsFromFile(const char* path)
 {
-	//models.clear();
+	models.clear();
 
-	fstream objList = fstream();
+	ifstream objList(path);
 
-	objList.open(path, ios_base::in);
-	if (objList.bad())
+	if (!objList)
 	{
 		cout << "ERROR: PartDatabase: loadObjsFromFile: Failed to open file: " << path << "\n";
 		return false;
 	}
 
-	char* fileLine = (char*)malloc(100 * sizeof(char));
+	char fileLine[100];
 
 	int idx = 0;
-	Model nModel;
+	Model* nModel;
 	while (!objList.eof())
 	{
-		nModel = Model();
+		nModel = new Model();
 		objList.getline(fileLine, 100);
 		
 		if (std::experimental::filesystem::exists(fileLine))
 		{
-			nModel.model->create(fileLine);
-			nModel.visible = false;
-			nModel.name = std::experimental::filesystem::path(fileLine).filename().string();
+			nModel->model->create(fileLine);
+			nModel->visible = false;
+			nModel->name = std::experimental::filesystem::path(fileLine).filename().string();
 		}
 
 		else
 		{
-			nModel.name = "null";
-			nModel.visible = false;
+			nModel->name = "null";
+			nModel->visible = false;
 			cout << "WARNING: PartDatabase: File " << fileLine << " does not exist.  It will be ignored.\n";
 		}
 
-		models.insert({ idx, nModel });
+		models.insert(std::make_pair(idx, nModel));
 
 		idx++;
 	}
 
-	return true;
-}
+	size = idx;
 
-Model PartDatabase::getObj(int id)
-{
-	return models.at(id);
+	return true;
 }

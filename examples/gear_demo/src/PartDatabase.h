@@ -28,7 +28,9 @@ typedef struct Model
 class PartDatabase
 {
 private:
-	std::unordered_map<int, Model> models;
+	std::unordered_map<int, Model*> models;
+
+	int size;
 
 public:
 	PartDatabase();
@@ -44,6 +46,8 @@ public:
 	*/
 	bool loadObjsFromFile(const char* path);
 
+	int getNumModels() { return size; };
+
 	/*
 	Get the object specified by the given line of the .txt file used to
 	load .obj files from.
@@ -52,5 +56,5 @@ public:
 	
 	@return a pointer to the OBJModel stored at the given id
 	*/
-	Model getObj(int id);
+	Model* getObj(int id) { return models.at(id); };
 };
