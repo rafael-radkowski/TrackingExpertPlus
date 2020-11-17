@@ -1,235 +1,254 @@
 #include "AssemblySequence.h"
+#include <iterator>
 
-namespace ns_AssemblySequence
+bool setModelVisible(string name, Sequence& sequence)
 {
-	int _current_state = 0;
-	int* _forward;
-	int* _backward;
+	if (sequence._models.find(name) != sequence._models.end())
+	{
+		sequence._models.find(name)->second->visible = true;
+		return true;
+	}
 
-	std::unordered_map<string, Model*> _models;
+	return false;
 }
 
-using namespace ns_AssemblySequence;
-
-void stage00()
-{
-
+void stage00(Sequence& sequence)
+{		
+	setModelVisible("N1-001_pc_gfx.obj", sequence);
 }
-void stage01()
+void stage01(Sequence& sequence)
 {
-
+	setModelVisible("N1-002_pc_gfx.obj", sequence);
 }
-void stage02()
+void stage02(Sequence& sequence)
 {
-
+	setModelVisible("N1-001_pc_gfx.obj", sequence);
+	setModelVisible("N1-002_pc_gfx.obj", sequence);
 }
-void stage03()
+void stage03(Sequence& sequence)
 {
-
+	setModelVisible("N1-003_pc_gfx.obj", sequence);
 }
-void stage04()
+void stage04(Sequence& sequence)
 {
-
+	setModelVisible("N1-001_pc_gfx.obj", sequence);
+	setModelVisible("N1-002_pc_gfx.obj", sequence);
+	setModelVisible("N1-003_pc_gfx.obj", sequence);
 }
-void stage05()
-{
-
-}
-void stage06()
-{
-
-}
-void stage07()
+void stage05(Sequence& sequence)
 {
 
 }
-void stage08()
+void stage06(Sequence& sequence)
 {
 
 }
-void stage09()
+void stage07(Sequence& sequence)
 {
 
 }
-void stage10()
+void stage08(Sequence& sequence)
 {
 
 }
-void stage11()
+void stage09(Sequence& sequence)
 {
 
 }
-void stage12()
+void stage10(Sequence& sequence)
 {
 
 }
-void stage13()
+void stage11(Sequence& sequence)
 {
 
 }
-void stage14()
+void stage12(Sequence& sequence)
 {
 
 }
-void stage15()
+void stage13(Sequence& sequence)
 {
 
 }
-void stage16()
+void stage14(Sequence& sequence)
 {
 
 }
-void stage17()
+void stage15(Sequence& sequence)
 {
 
 }
-void stage18()
+void stage16(Sequence& sequence)
 {
 
 }
-void stage19()
+void stage17(Sequence& sequence)
 {
 
 }
-void stage20()
+void stage18(Sequence& sequence)
 {
 
 }
-void stage21()
+void stage19(Sequence& sequence)
 {
 
 }
-void stage22()
+void stage20(Sequence& sequence)
 {
 
 }
-void stage23()
+void stage21(Sequence& sequence)
+{
+
+}
+void stage22(Sequence& sequence)
+{
+
+}
+void stage23(Sequence& sequence)
 {
 
 }
 
-//static
-void AssemblySequence::process(std::unordered_map<string, Model*> models, glm::mat4 proj, glm::mat4 vm)
+void setStage(Sequence& sequence)
 {
-	_models = models;
+	for (auto i = sequence._models.begin(); i != sequence._models.end(); i++)
+	{
+		i->second->visible = false;
+	}
 
-	switch (_current_state)
+	switch (sequence._current_state)
 	{
 	case 0:
-		stage00();
+		stage00(sequence);
 		break;
 	case 1:
-		stage01();
+		stage01(sequence);
 		break;
 	case 2:
-		stage02();
+		stage02(sequence);
 		break;
 	case 3:
-		stage03();
+		stage03(sequence);
 		break;
 	case 4:
-		stage04();
+		stage04(sequence);
 		break;
 	case 5:
-		stage05();
+		stage05(sequence);
 		break;
 	case 6:
-		stage06();
+		stage06(sequence);
 		break;
 	case 7:
-		stage07();
+		stage07(sequence);
 		break;
 	case 8:
-		stage08();
+		stage08(sequence);
 		break;
 	case 9:
-		stage09();
+		stage09(sequence);
 		break;
 	case 10:
-		stage10();
+		stage10(sequence);
 		break;
 	case 11:
-		stage11();
+		stage11(sequence);
 		break;
 	case 12:
-		stage12();
+		stage12(sequence);
 		break;
 	case 13:
-		stage13();
+		stage13(sequence);
 		break;
 	case 14:
-		stage14();
+		stage14(sequence);
 		break;
 	case 15:
-		stage15();
+		stage15(sequence);
 		break;
 	case 16:
-		stage16();
+		stage16(sequence);
 		break;
 	case 17:
-		stage17();
+		stage17(sequence);
 		break;
 	case 18:
-		stage18();
+		stage18(sequence);
 		break;
 	case 19:
-		stage19();
+		stage19(sequence);
 		break;
 	case 20:
-		stage20();
+		stage20(sequence);
 		break;
 	case 21:
-		stage21();
+		stage21(sequence);
 		break;
 	case 22:
-		stage22();
+		stage22(sequence);
 		break;
 	case 23:
-		stage23();
+		stage23(sequence);
 		break;
 	}
+}
 
-	for (auto i = _models.begin(); i != _models.end(); i++)
+//static
+void AssemblySequence::process(Sequence& sequence, glm::mat4 proj, glm::mat4 vm)
+{
+	Model* curModel;
+
+	for (auto i = sequence._models.begin(); i != sequence._models.end(); i++)
 	{
-		if (i->second->name.compare("null") != 0 && i->second->visible)
-			i->second->model->draw(proj, vm);
+		curModel = i->second;
+		if (curModel->name.compare("null") != 0 && curModel->visible)
+			curModel->model->draw(proj, vm);
 	}
 }
 
 //static
-bool AssemblySequence::nextStage()
+bool AssemblySequence::nextStage(Sequence& sequence)
 {
-	if (_forward[_current_state] > 23) return false;
-	_current_state = _forward[_current_state];
+	if (sequence._forward[sequence._current_state] > 23) return false;
+	sequence._current_state = sequence._forward[sequence._current_state];
+
+	setStage(sequence);
+
 	return true;
 }
 
 //static
-bool AssemblySequence::prevStage()
+bool AssemblySequence::prevStage(Sequence& sequence)
 {
-	if (_backward[_current_state] < 0) return false;
-	_current_state = _backward[_current_state];
+	if (sequence._backward[sequence._current_state] < 0) return false;
+	sequence._current_state = sequence._backward[sequence._current_state];
+
+	setStage(sequence);
+
 	return true;
 }
 
 //static
-void AssemblySequence::setSeq(std::vector<int> sequence)
+void AssemblySequence::setSeq(std::vector<int> order, Sequence& sequence)
 {
-	delete[] _forward;
-	delete[] _backward;
+	delete[] sequence._forward;
+	delete[] sequence._backward;
 
-	_forward = (int*)malloc(sequence.size() * sizeof(int));
-	_backward = (int*)malloc(sequence.size() * sizeof(int));
+	sequence._forward = (int*)malloc(order.size() * sizeof(int));
+	sequence._backward = (int*)malloc(order.size() * sizeof(int));
 
-	for (int i = 0; i < sequence.size() - 1; i++)
+	for (int i = 0; i < order.size() - 1; i++)
 	{
-		_forward[i] = sequence.at(i + 1);
+		sequence._forward[i] = order.at(i + 1);
 	}
-	_forward[sequence.size() - 1] = sequence.at(0);
+	sequence._forward[order.size() - 1] = order.at(0);
 
-	_backward[0] = sequence.at(sequence.size() - 1);
-	for (int i = 1; i < sequence.size(); i++)
+	sequence._backward[0] = order.at(order.size() - 1);
+	for (int i = 1; i < order.size(); i++)
 	{
-		_backward[i] = sequence.at(i - 1);
+		sequence._backward[i] = order.at(i - 1);
 	}
 }

@@ -8,22 +8,7 @@
 
 #include "FileUtils.h"
 
-//gl_support
-#include "ModelOBJ.h"
-
-typedef struct Model
-{
-	std::string name = "null";
-	bool visible = false;
-	cs557::OBJModel* model;
-
-	Model()
-	{
-		name = "null";
-		visible = false;
-		model = new cs557::OBJModel();
-	}
-};
+#include "Sequence.h"
 
 class PartDatabase
 {

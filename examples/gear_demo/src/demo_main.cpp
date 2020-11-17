@@ -38,6 +38,7 @@
 // local
 #include "DemoScene.h"
 #include "GearBoxRenderer.h"
+#include "PartDatabase.h"
 
 // instance of a structure core camera 
 texpert::ICaptureDevice* camera;
@@ -109,9 +110,9 @@ int main(int argc, char* argv)
 	/*
 	Create the video background
 	*/
-	/*camera->getRGBFrame(img_color);
+	camera->getRGBFrame(img_color);
 	video_bg = new isu_gfx::GLVideoCanvas();
-	video_bg->create(img_color.rows,  img_color.cols, (unsigned char*)img_color.data, true);*/
+	video_bg->create(img_color.rows,  img_color.cols, (unsigned char*)img_color.data, true);
 
 	/*
 	Load part models
@@ -120,8 +121,10 @@ int main(int argc, char* argv)
 	database->loadObjsFromFile("D:/WorkRepos/TrackingExpertPlus/examples/gear_demo/models/load_models.txt");
 	//database->loadObjsFromFile("D:/noPath.txt");  //This is meant to break 
 
+	/*
+	Load models into the GearBoxRenderer sequence
+	*/
 	renderer = new GearBoxRenderer();
-
 	int idx = 0;
 	for (int i = 0; i < database->getNumModels(); i++)
 	{
@@ -132,14 +135,6 @@ int main(int argc, char* argv)
 			idx++;
 		}
 	}
-
-	std::vector<int> sequence = std::vector<int>();
-	for (int i = 0; i < 24; i++)
-	{
-		sequence.push_back(i);
-	}
-
-	AssemblySequence::setSeq(sequence);
 
 	gear = new DemoScene();
 	gear->create();

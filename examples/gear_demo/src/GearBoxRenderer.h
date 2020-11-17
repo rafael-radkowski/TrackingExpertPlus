@@ -8,16 +8,15 @@
 
 #include "FileUtils.h"
 
-//gl_support
-#include "ModelOBJ.h"
-
-#include "PartDatabase.h"
+#include "Sequence.h"
 #include "AssemblySequence.h"
+
+
 
 class GearBoxRenderer
 {
 private:
-	std::unordered_map<string, Model*> _models;
+	Sequence asm_seq;
 
 public:
 	GearBoxRenderer();

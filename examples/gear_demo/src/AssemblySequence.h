@@ -2,20 +2,15 @@
 
 #include <vector>
 #include <unordered_map>
-#include "GearBoxRenderer.h"
+#include "Sequence.h"
 
 class AssemblySequence
 {
 public:
 
-	AssemblySequence();
-	~AssemblySequence();
+	static void process(Sequence& sequence, glm::mat4 proj, glm::mat4 vm);
+	static bool nextStage(Sequence& sequence);
+	static bool prevStage(Sequence& sequence);
 
-
-	static void process(std::unordered_map<string, Model*> models, glm::mat4 proj, glm::mat4 vm);
-	static bool nextStage();
-	static bool prevStage();
-
-	static void setSeq(std::vector<int> sequence);
-
+	static void setSeq(std::vector<int> order, Sequence& sequence);
 };
