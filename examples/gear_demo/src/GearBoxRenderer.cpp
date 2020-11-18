@@ -34,6 +34,19 @@ void GearBoxRenderer::setTransform(string model_name, glm::mat4 transform)
 	asm_seq._models.at(model_name)->model->setModelMatrix(transform);
 }
 
+void GearBoxRenderer::progress(bool forward)
+{
+	if (forward)
+		AssemblySequence::nextStage(asm_seq);
+	else
+		AssemblySequence::prevStage(asm_seq);
+}
+
+void GearBoxRenderer::updateInPlace()
+{
+	AssemblySequence::update(asm_seq);
+}
+
 void GearBoxRenderer::draw(glm::mat4 proj, glm::mat4 vm)
 {
 	AssemblySequence::process(asm_seq, proj, vm);

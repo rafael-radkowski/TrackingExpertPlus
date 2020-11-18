@@ -67,10 +67,31 @@ void render_loop(glm::mat4 pm, glm::mat4 vm) {
 	// fetch a new frame	
 	camera->getRGBFrame(img_color);
 
+	//TODO: Get the video to display on the background
+	//video_bg->draw(pm, vm, glm::mat4());
+	//gear->draw(pm, vm);
+	renderer->draw(pm, vm);
+}
 
+void getKey(int key, int action)
+{
+	switch (action)
+	{
+	case 0: //Key up
+		break;
 
-	video_bg->draw(pm, vm, glm::mat4());
-	gear->draw(pm, vm);
+	case 1: //Key down
+		switch (key)
+		{
+		case 68: //d
+			renderer->progress(true);
+			break;
+		case 65: //a
+			renderer->progress(false);
+			break;
+		}
+		break;
+	}
 }
 
 
@@ -102,7 +123,7 @@ int main(int argc, char* argv)
 	window = new isu_ar::GLViewer();
 	window->create(1280, 960, "Gear Box Demo");
 	window->addRenderFcn(render_loop);
-	//window->addKeyboardCallback(std::bind(&FMEvalApp::keyboard_callback, this, _1, _2));
+	window->addKeyboardCallback(getKey);
 	window->setViewMatrix(glm::lookAt(glm::vec3(1.0f, 0.0, -0.5f), glm::vec3(0.0f, 0.0f, 0.f), glm::vec3(0.0f, 1.0f, 0.0f)));
 	window->setClearColor(glm::vec4(1, 1, 1, 1));
 	window->enableCameraControl(true);
@@ -136,10 +157,10 @@ int main(int argc, char* argv)
 		}
 	}
 
-	gear = new DemoScene();
-	gear->create();
+	//gear = new DemoScene();
+	//gear->create();
 	
-	
+	renderer->updateInPlace();
 	
 	window->start();
 

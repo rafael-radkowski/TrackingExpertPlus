@@ -112,7 +112,7 @@ void stage23(Sequence& sequence)
 
 }
 
-void setStage(Sequence& sequence)
+void AssemblySequence::update(Sequence& sequence)
 {
 	for (auto i = sequence._models.begin(); i != sequence._models.end(); i++)
 	{
@@ -215,7 +215,7 @@ bool AssemblySequence::nextStage(Sequence& sequence)
 	if (sequence._forward[sequence._current_state] > 23) return false;
 	sequence._current_state = sequence._forward[sequence._current_state];
 
-	setStage(sequence);
+	update(sequence);
 
 	return true;
 }
@@ -226,7 +226,7 @@ bool AssemblySequence::prevStage(Sequence& sequence)
 	if (sequence._backward[sequence._current_state] < 0) return false;
 	sequence._current_state = sequence._backward[sequence._current_state];
 
-	setStage(sequence);
+	update(sequence);
 
 	return true;
 }

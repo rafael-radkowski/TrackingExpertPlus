@@ -39,6 +39,10 @@ public:
 	*/
 	void setTransform(string model_name, glm::mat4 transform);
 
+	void progress(bool forward);
+
+	void updateInPlace();
+
 	/*
 	Calls all rendering processes.
 
