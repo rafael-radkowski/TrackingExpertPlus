@@ -68,7 +68,7 @@ void render_loop(glm::mat4 pm, glm::mat4 vm) {
 	camera->getRGBFrame(img_color);
 
 	//TODO: Get the video to display on the background
-	//video_bg->draw(pm, vm, glm::mat4());
+	video_bg->draw(pm, vm, glm::mat4());
 	//gear->draw(pm, vm);
 	renderer->draw(pm, vm);
 }
@@ -105,6 +105,7 @@ int main(int argc, char* argv)
 	Open a camera device. 
 	*/
 	camera =  new KinectAzureCaptureDevice();
+	//img_color = cv::Mat(camera->getRows(texpert::CaptureDeviceComponent::COLOR), camera->getCols(texpert::CaptureDeviceComponent::COLOR), CV_8UC4);
 
 	/*
 	Test if the camera is ready to run. 
@@ -113,8 +114,6 @@ int main(int argc, char* argv)
 		std::cout << "\n[ERROR] - Cannot access camera." << std::endl;
 		return -1;
 	}
-
-
 	
 	/*
 	create the renderer.

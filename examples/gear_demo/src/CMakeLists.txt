@@ -92,6 +92,13 @@ set(Demo_SRC
 	demo_main.cpp
 	DemoScene.h
 	DemoScene.cpp
+	AssemblySequence.cpp
+	AssemblySequence.h
+	GearBoxRenderer.cpp
+	GearBoxRenderer.h
+	PartDatabase.cpp
+	PartDatabase.h
+	Sequence.h
 )
 
 
