@@ -41,7 +41,7 @@
 #include "PartDatabase.h"
 
 // instance of a structure core camera 
-texpert::ICaptureDevice* camera;
+KinectAzureCaptureDevice* camera;
 
 // The OpenGL window
 isu_ar::GLViewer* window;
@@ -56,6 +56,7 @@ GearBoxRenderer* renderer;
 // The Video Background
 isu_gfx::GLVideoCanvas*	video_bg;
 cv::Mat img_color;
+cv::Mat img_resized;
 
 /*
 The main render and processing loop. 
@@ -65,10 +66,22 @@ The main render and processing loop.
 void render_loop(glm::mat4 pm, glm::mat4 vm) {
 
 	// fetch a new frame	
+
+	//imshow("Hej", img_color);
+
 	camera->getRGBFrame(img_color);
 
 	//TODO: Get the video to display on the background
-	video_bg->draw(pm, vm, glm::mat4());
+	/*
+	The issue may involve either my graphics driver or the card itself (NVIDIA GeForce 970M).
+	The function glTextureSubImage2D is included in a OGL extension package called ARB_direct_state_access
+	that is only used in GL version 4.5 and above.  For either of the aforementioned reasons (due to the 
+	age of either) or for reasons relating to my software fluency, GLEW insists that this extension 
+	package, along with GL versions 4.5 and 4.6, does not exist.  I am still working on a solution for
+	my end, but otherwise, it seems like this function should work on more modern graphics cards.
+	*/
+	video_bg->draw(pm, vm, glm::mat4(1.0f));
+
 	//gear->draw(pm, vm);
 	renderer->draw(pm, vm);
 }
@@ -100,7 +113,6 @@ int main(int argc, char* argv)
 	std::cout << "TrackingExpert+ Gear Box Demo" << endl;
 	std::cout << "Version 0.9" << endl;
 
-
 	/*
 	Open a camera device. 
 	*/
@@ -114,7 +126,9 @@ int main(int argc, char* argv)
 		std::cout << "\n[ERROR] - Cannot access camera." << std::endl;
 		return -1;
 	}
-	
+
+	//camera->changeResolution(1536);
+
 	/*
 	create the renderer.
 	The renderer executes the main loop in this demo. 
