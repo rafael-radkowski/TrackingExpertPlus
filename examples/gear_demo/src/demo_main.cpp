@@ -70,17 +70,16 @@ void render_loop(glm::mat4 pm, glm::mat4 vm) {
 	//imshow("Hej", img_color);
 
 	camera->getRGBFrame(img_color);
+	cv::resize(img_color, img_resized, cv::Size(480, 640));
+	//cv::resize(img_resized, img_color, cv::Size(640, 480));
 
-	//TODO: Get the video to display on the background
-	/*
-	The issue may involve either my graphics driver or the card itself (NVIDIA GeForce 970M).
-	The function glTextureSubImage2D is included in a OGL extension package called ARB_direct_state_access
-	that is only used in GL version 4.5 and above.  For either of the aforementioned reasons (due to the 
-	age of either) or for reasons relating to my software fluency, GLEW insists that this extension 
-	package, along with GL versions 4.5 and 4.6, does not exist.  I am still working on a solution for
-	my end, but otherwise, it seems like this function should work on more modern graphics cards.
-	*/
-	video_bg->draw(pm, vm, glm::mat4(1.0f));
+	////img_resized = cv::Mat(img_color, cv::Range(0, 480), cv::Range(0, 640));
+	//memcpy(imgData, (unsigned char*)img_resized.data, img_resized.rows * img_resized.cols * sizeof(unsigned char));
+
+
+	//imshow("Hej", img_resized);
+
+	video_bg->draw(pm, vm, glm::mat4());
 
 	//gear->draw(pm, vm);
 	renderer->draw(pm, vm);
@@ -145,8 +144,15 @@ int main(int argc, char* argv)
 	Create the video background
 	*/
 	camera->getRGBFrame(img_color);
+	/*img_resized = cv::Mat(cv::Size(640, 480), CV_8UC4);
+	cv::resize(img_resized, img_color, cv::Size(640, 480));
+	imgData = (unsigned char*)malloc(img_resized.rows * img_resized.cols * sizeof(unsigned char));
+	memcpy(imgData, (unsigned char*)img_resized.data, img_resized.rows * img_resized.cols * sizeof(unsigned char));*/
+
+	//This solution is not perfect, but it does get the best image out of the other attempts made thus far.
+	cv::resize(img_color, img_resized, cv::Size(480, 640));
 	video_bg = new isu_gfx::GLVideoCanvas();
-	video_bg->create(img_color.rows,  img_color.cols, (unsigned char*)img_color.data, true);
+	video_bg->create(img_color.rows, img_color.cols, (unsigned char*)img_resized.data, true);
 
 	/*
 	Load part models
