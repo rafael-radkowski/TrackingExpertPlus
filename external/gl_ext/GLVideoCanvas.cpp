@@ -80,8 +80,8 @@ bool GLVideoCanvas::create(int rows, int cols, unsigned char* video_ptr, bool fu
 	// This overwrite the default shader program
 	program = -1;
 
-	_width = width;
-	_height = height;
+	_width = cols;
+	_height = rows;
 
 	float center_x = 0.0;
 	float center_y = 0.0;
@@ -91,10 +91,10 @@ bool GLVideoCanvas::create(int rows, int cols, unsigned char* video_ptr, bool fu
 	float vertices[] = {
 		//--------------------------------------------------------
 		// xy-plane, positive z direction, texture coordinates
-		-_width / 2.0f + center_x, -_height / 2.0f + center_y, 0.0f, 0.0f, 1.0f, // 0k
-		-_width / 2.0f + center_x, _height / 2.0f + center_y, 0.0f, 0.0f, 0.0f,
-		_width / 2.0f + center_x, -_height / 2.0f + center_y, 0.0f, 1.0f, 1.0f, // ok
-		_width / 2.0f + center_x, _height / 2.0f + center_y,  0.0f, 1.0f, 0.0f
+		-width / 2.0f + center_x, -height / 2.0f + center_y, 0.0f, 0.0f, 1.0f, // 0k
+		-width / 2.0f + center_x, height / 2.0f + center_y, 0.0f, 0.0f, 0.0f,
+		width / 2.0f + center_x, -height / 2.0f + center_y, 0.0f, 1.0f, 1.0f, // ok
+		width / 2.0f + center_x, height / 2.0f + center_y,  0.0f, 1.0f, 0.0f
 
 	};
 
@@ -134,8 +134,13 @@ bool GLVideoCanvas::create(int rows, int cols, unsigned char* video_ptr, bool fu
 
 
 	// create a texture using the video
-	cs557::CreateTexture2D(640, 480, 3, (unsigned char*)_video_ptr, &_texture_id, GL_CLAMP_TO_BORDER, GL_TEXTURE0);
-
+	cs557::CreateTexture2D(_width, _height, 3, (unsigned char*)_video_ptr, &_texture_id, GL_CLAMP_TO_BORDER, GL_TEXTURE0);
+	GLenum err = glGetError();
+	while (err != GL_NO_ERROR)
+	{
+		cout << err << endl;
+		err = glGetError();
+	}
 
 	// Activate the texture unit and bind the texture. 
 	glActiveTexture(GL_TEXTURE0);
@@ -181,7 +186,11 @@ void GLVideoCanvas::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix, glm::
 	 // Bind the buffer and switch it to an active buffer
 	glBindVertexArray(vaoID[0]);
 
-	glLineWidth((GLfloat)3.0);
+	GLint* range = (GLint*)malloc(sizeof(GLint));
+	glGetIntegerv(GL_ALIASED_LINE_WIDTH_RANGE, range);
+
+	cout << *range << endl;
+	glLineWidth((GLfloat)*range);
 
 	// Draw the triangles
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -204,6 +213,6 @@ void GLVideoCanvas::updateVideo(void)
 	if (_texture_id == 0 || _video_ptr == NULL)
 		return;
 
-	glTextureSubImage2D(_texture_id, 0, 0, 0, 640, 480, GL_BGR, GL_UNSIGNED_BYTE, _video_ptr);
+	glTextureSubImage2D(_texture_id, 0, 0, 0, _width, _height, GL_BGR, GL_UNSIGNED_BYTE, _video_ptr);
 
 }

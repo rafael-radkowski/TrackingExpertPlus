@@ -75,7 +75,20 @@ void render_loop(glm::mat4 pm, glm::mat4 vm) {
 	video_bg->draw(pm, vm, glm::mat4());
 
 	//gear->draw(pm, vm);
+
 	renderer->draw(pm, vm);
+
+	GLenum err = glGetError();
+	while (err != GL_NO_ERROR)
+	{
+		cout << err << endl;
+		err = glGetError();
+	}
+
+	cout << "------" << endl;
+
+	cout << "End Loop" << endl;
+
 }
 
 void getKey(int key, int action)
@@ -126,7 +139,7 @@ int main(int argc, char* argv)
 	The renderer executes the main loop in this demo. 
 	*/
 	window = new isu_ar::GLViewer();
-	window->create(640, 480, "Gear Box Demo");
+	window->create(1280, 960, "Gear Box Demo");
 	window->addRenderFcn(render_loop);
 	window->addKeyboardCallback(getKey);
 	window->setViewMatrix(glm::lookAt(glm::vec3(1.0f, 0.0, -0.5f), glm::vec3(0.0f, 0.0f, 0.f), glm::vec3(0.0f, 1.0f, 0.0f)));
@@ -146,19 +159,10 @@ int main(int argc, char* argv)
 	memcpy(imgData, (unsigned char*)img_resized.data, img_resized.rows * img_resized.cols * sizeof(unsigned char));*/
 
 	//This solution is not perfect, but it does get the best image out of the other attempts made thus far.
-	cv::resize(img_color, img_resized, cv::Size(480, 640), camera->getCameraParam().at<float>(0, 0), camera->getCameraParam().at<float>(1, 1));
+	//cv::resize(img_color, img_resized, cv::Size(480, 640), camera->getCameraParam().at<float>(0, 0), camera->getCameraParam().at<float>(1, 1));
 
 	video_bg = new isu_gfx::GLVideoCanvas();
-	video_bg->create(img_color.rows, img_color.cols, (unsigned char*)img_resized.data, true);
-
-	GLenum err = glGetError();
-	while (err != GL_NO_ERROR)
-	{
-		cout << err << endl;
-		err = glGetError();
-	}
-
-	cout << "------" << endl;
+	video_bg->create(img_color.rows, img_color.cols, (unsigned char*)img_color.data, true);
 
 	/*
 	Load part models
