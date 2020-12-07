@@ -37,79 +37,123 @@ void stage04(Sequence& sequence)
 }
 void stage05(Sequence& sequence)
 {
-
+	setModelVisible("N0-000_pc_gfx.obj", sequence);
+	setModelVisible("N1-001_pc_gfx.obj", sequence);
+	setModelVisible("N1-002_pc_gfx.obj", sequence);
+	setModelVisible("N1-003_pc_gfx.obj", sequence);
 }
 void stage06(Sequence& sequence)
 {
-
+	setModelVisible("N4-001_pc_gfx.obj", sequence);
 }
 void stage07(Sequence& sequence)
 {
-
+	setModelVisible("N4-002_pc_gfx.obj", sequence);
 }
 void stage08(Sequence& sequence)
 {
-
+	setModelVisible("N4-001_pc_gfx.obj", sequence);
+	setModelVisible("N4-002_pc_gfx.obj", sequence);
 }
 void stage09(Sequence& sequence)
 {
-
+	setModelVisible("N3-002_pc_gfx.obj", sequence);
 }
 void stage10(Sequence& sequence)
 {
-
+	setModelVisible("N4-001_pc_gfx.obj", sequence);
+	setModelVisible("N4-002_pc_gfx.obj", sequence);
+	setModelVisible("N3-002_pc_gfx.obj", sequence);
 }
 void stage11(Sequence& sequence)
 {
-
+	setModelVisible("N4-004_pc_gfx.obj", sequence);
 }
 void stage12(Sequence& sequence)
 {
-
+	setModelVisible("N4-004_pc_gfx.obj", sequence);
+	setModelVisible("N4-001_pc_gfx.obj", sequence);
+	setModelVisible("N4-002_pc_gfx.obj", sequence);
+	setModelVisible("N3-002_pc_gfx.obj", sequence);
 }
 void stage13(Sequence& sequence)
 {
-
+	setModelVisible("N4-003_pc_gfx.obj", sequence);
 }
 void stage14(Sequence& sequence)
 {
-
+	setModelVisible("N4-003_pc_gfx.obj", sequence);
+	setModelVisible("N4-004_pc_gfx.obj", sequence);
+	setModelVisible("N4-001_pc_gfx.obj", sequence);
+	setModelVisible("N4-002_pc_gfx.obj", sequence);
+	setModelVisible("N3-002_pc_gfx.obj", sequence);
 }
 void stage15(Sequence& sequence)
 {
-
+	setModelVisible("N0-000_pc_gfx.obj", sequence);
+	setModelVisible("N1-001_pc_gfx.obj", sequence);
+	setModelVisible("N1-002_pc_gfx.obj", sequence);
+	setModelVisible("N1-003_pc_gfx.obj", sequence);
+	setModelVisible("N4-003_pc_gfx.obj", sequence);
+	setModelVisible("N4-004_pc_gfx.obj", sequence);
+	setModelVisible("N4-001_pc_gfx.obj", sequence);
+	setModelVisible("N4-002_pc_gfx.obj", sequence);
+	setModelVisible("N3-002_pc_gfx.obj", sequence);
 }
 void stage16(Sequence& sequence)
 {
-
+	setModelVisible("N2-001_pc_gfx.obj", sequence);
 }
 void stage17(Sequence& sequence)
 {
-
+	setModelVisible("N3-001_pc_gfx.obj", sequence);
 }
 void stage18(Sequence& sequence)
 {
-
+	setModelVisible("N2-001_pc_gfx.obj", sequence);
+	setModelVisible("N3-001_pc_gfx.obj", sequence);
 }
 void stage19(Sequence& sequence)
 {
-
+	setModelVisible("N3-002_pc_gfx.obj", sequence);
 }
 void stage20(Sequence& sequence)
 {
-
+	setModelVisible("N2-001_pc_gfx.obj", sequence);
+	setModelVisible("N3-001_pc_gfx.obj", sequence);
+	setModelVisible("N3-002_pc_gfx.obj", sequence);
 }
 void stage21(Sequence& sequence)
 {
-
+	setModelVisible("N2-001_pc_gfx.obj", sequence);
+	setModelVisible("N2-002_pc_gfx.obj", sequence);
+	setModelVisible("N3-001_pc_gfx.obj", sequence);
+	setModelVisible("N3-002_pc_gfx.obj", sequence);
 }
 void stage22(Sequence& sequence)
 {
-
+	setModelVisible("N2-001_pc_gfx.obj", sequence);
+	setModelVisible("N2-002_pc_gfx.obj", sequence);
+	setModelVisible("N2-003_pc_gfx.obj", sequence);
+	setModelVisible("N3-001_pc_gfx.obj", sequence);
+	setModelVisible("N3-002_pc_gfx.obj", sequence);
 }
 void stage23(Sequence& sequence)
 {
-
+	setModelVisible("N0-000_pc_gfx.obj", sequence);
+	setModelVisible("N1-001_pc_gfx.obj", sequence);
+	setModelVisible("N1-002_pc_gfx.obj", sequence);
+	setModelVisible("N1-003_pc_gfx.obj", sequence);
+	setModelVisible("N4-003_pc_gfx.obj", sequence);
+	setModelVisible("N4-004_pc_gfx.obj", sequence);
+	setModelVisible("N4-001_pc_gfx.obj", sequence);
+	setModelVisible("N4-002_pc_gfx.obj", sequence);
+	setModelVisible("N3-002_pc_gfx.obj", sequence);
+	setModelVisible("N2-001_pc_gfx.obj", sequence);
+	setModelVisible("N2-002_pc_gfx.obj", sequence);
+	setModelVisible("N2-003_pc_gfx.obj", sequence);
+	setModelVisible("N3-001_pc_gfx.obj", sequence);
+	setModelVisible("N3-002_pc_gfx.obj", sequence);
 }
 
 void AssemblySequence::update(Sequence& sequence)

@@ -67,7 +67,7 @@ void render_loop(glm::mat4 pm, glm::mat4 vm) {
 
 	// fetch a new frame	
 	camera->getRGBFrame(img_color);
-	//cv::resize(img_color, img_resized, cv::Size(480, 640), camera->getCameraParam().at<float>(0, 0), camera->getCameraParam().at<float>(1, 1));
+	cv::resize(img_color, img_resized, cv::Size(480, 640), camera->getCameraParam().at<float>(0, 0), camera->getCameraParam().at<float>(1, 1));
 	////img_resized = cv::Mat(img_color, cv::Range(0, 480), cv::Range(0, 640));
 	//memcpy(imgData, (unsigned char*)img_resized.data, img_resized.rows * img_resized.cols * sizeof(unsigned char));
 	//imshow("Hej", img_color);
@@ -126,25 +126,39 @@ int main(int argc, char* argv)
 	The renderer executes the main loop in this demo. 
 	*/
 	window = new isu_ar::GLViewer();
-	window->create(1280, 720, "Gear Box Demo");
+	window->create(640, 480, "Gear Box Demo");
 	window->addRenderFcn(render_loop);
 	window->addKeyboardCallback(getKey);
 	window->setViewMatrix(glm::lookAt(glm::vec3(1.0f, 0.0, -0.5f), glm::vec3(0.0f, 0.0f, 0.f), glm::vec3(0.0f, 1.0f, 0.0f)));
 	window->setClearColor(glm::vec4(1, 1, 1, 1));
 	window->enableCameraControl(true);
+
+
 	
 	/*
 	Create the video background
 	*/
 	camera->getRGBFrame(img_color);
+
 	/*img_resized = cv::Mat(cv::Size(640, 480), CV_8UC4);
 	cv::resize(img_resized, img_color, cv::Size(640, 480));
 	imgData = (unsigned char*)malloc(img_resized.rows * img_resized.cols * sizeof(unsigned char));
 	memcpy(imgData, (unsigned char*)img_resized.data, img_resized.rows * img_resized.cols * sizeof(unsigned char));*/
+
 	//This solution is not perfect, but it does get the best image out of the other attempts made thus far.
-	//cv::resize(img_color, img_resized, cv::Size(480, 640), camera->getCameraParam().at<float>(0, 0), camera->getCameraParam().at<float>(1, 1));
+	cv::resize(img_color, img_resized, cv::Size(480, 640), camera->getCameraParam().at<float>(0, 0), camera->getCameraParam().at<float>(1, 1));
+
 	video_bg = new isu_gfx::GLVideoCanvas();
-	video_bg->create(img_color.rows, img_color.cols, (unsigned char*)img_color.data, true);
+	video_bg->create(img_color.rows, img_color.cols, (unsigned char*)img_resized.data, true);
+
+	GLenum err = glGetError();
+	while (err != GL_NO_ERROR)
+	{
+		cout << err << endl;
+		err = glGetError();
+	}
+
+	cout << "------" << endl;
 
 	/*
 	Load part models

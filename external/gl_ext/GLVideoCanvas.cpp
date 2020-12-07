@@ -54,12 +54,12 @@ GLVideoCanvas::GLVideoCanvas()
 {
 	_video_ptr = NULL;
 	_width = 0;
-	_height = 0; 
+	_height = 0;
 	_rows = 0;
 	_cols = 0;
 }
-		
-		
+
+
 GLVideoCanvas::~GLVideoCanvas()
 {
 
@@ -80,34 +80,34 @@ bool GLVideoCanvas::create(int rows, int cols, unsigned char* video_ptr, bool fu
 	// This overwrite the default shader program
 	program = -1;
 
-	_width = cols;
-	_height = rows; 
+	_width = width;
+	_height = height;
 
 	float center_x = 0.0;
 	float center_y = 0.0;
 	float center_z = 0.0;
 
 
-	float vertices[] = { 
+	float vertices[] = {
 		//--------------------------------------------------------
 		// xy-plane, positive z direction, texture coordinates
-		-width / 2.0f + center_x, -height / 2.0f + center_y, 0.0f, 0.0f, 1.0f, // 0k
-		-width / 2.0f + center_x, height / 2.0f + center_y, 0.0f, 0.0f, 0.0f,
-		width / 2.0f + center_x, -height / 2.0f + center_y, 0.0f, 1.0f, 1.0f, // ok
-		width / 2.0f + center_x, height / 2.0f + center_y,  0.0f, 1.0f, 0.0f
-		
+		-_width / 2.0f + center_x, -_height / 2.0f + center_y, 0.0f, 0.0f, 1.0f, // 0k
+		-_width / 2.0f + center_x, _height / 2.0f + center_y, 0.0f, 0.0f, 0.0f,
+		_width / 2.0f + center_x, -_height / 2.0f + center_y, 0.0f, 1.0f, 1.0f, // ok
+		_width / 2.0f + center_x, _height / 2.0f + center_y,  0.0f, 1.0f, 0.0f
+
 	};
 
 
 	float normals[] = { 0.0f, 0.0f, 1.0f, //
-		0.0f, 0.0f, 1.0f, 
-		0.0f, 0.0f, 1.0f, 
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
 		0.0f, 0.0f, 1.0f,
 	};
 
 
 	// create a shader program only if the progrm was not overwritten. 
-	if(program == -1)
+	if (program == -1)
 		program = cs557::CreateShaderProgram(vs_string_canvas_410, fs_string_canvas_410);
 
 	glUseProgram(program);
@@ -118,8 +118,8 @@ bool GLVideoCanvas::create(int rows, int cols, unsigned char* video_ptr, bool fu
 
 
 	// create a vertex buffer object
-	cs557::CreateVertexObjects53(vaoID, vboID, vertices, normals, 4, 
-						  pos_location, texture_location, normal_location);
+	cs557::CreateVertexObjects53(vaoID, vboID, vertices, normals, 4,
+		pos_location, texture_location, normal_location);
 
 
 	// Find the id's of the related variable name in your shader code. 
@@ -127,25 +127,25 @@ bool GLVideoCanvas::create(int rows, int cols, unsigned char* video_ptr, bool fu
 	viewMatrixLocation = glGetUniformLocation(program, "viewMatrix"); // Get the location of our view matrix in the shader
 	modelMatrixLocation = glGetUniformLocation(program, "modelMatrix"); // Get the location of our model matrix in the shader
 
-	
+
 	glBindAttribLocation(program, pos_location, "in_Position");
 	glBindAttribLocation(program, texture_location, "in_Texture");
 	glBindAttribLocation(program, normal_location, "in_Normal");
 
 
 	// create a texture using the video
-	cs557::CreateTexture2D(_width, _height, 3, (unsigned char*)_video_ptr, &_texture_id,  GL_CLAMP_TO_BORDER, GL_TEXTURE0);
+	cs557::CreateTexture2D(640, 480, 3, (unsigned char*)_video_ptr, &_texture_id, GL_CLAMP_TO_BORDER, GL_TEXTURE0);
 
 
 	// Activate the texture unit and bind the texture. 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, _texture_id);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, _texture_id);
 
 
-    // Fetch the texture location and set the parameter to 0.
-    // Note that 0 is the number of the texture unit GL_TEXTURE0.
-    int video_location = glGetUniformLocation(program, "video");
-    glUniform1i(video_location, 0);
+	// Fetch the texture location and set the parameter to 0.
+	// Note that 0 is the number of the texture unit GL_TEXTURE0.
+	int video_location = glGetUniformLocation(program, "video");
+	glUniform1i(video_location, 0);
 	glUseProgram(0);
 
 	return true;
@@ -185,7 +185,7 @@ void GLVideoCanvas::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix, glm::
 
 	// Draw the triangles
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	
+
 	// Unbind our Vertex Array Object
 	glBindVertexArray(0);
 
@@ -201,9 +201,9 @@ Update the video content
 */
 void GLVideoCanvas::updateVideo(void)
 {
-	if(_texture_id == 0 || _video_ptr == NULL)
+	if (_texture_id == 0 || _video_ptr == NULL)
 		return;
 
-	glTextureSubImage2D(_texture_id, 0, 0,0,_width,_height, GL_BGR, GL_UNSIGNED_BYTE, _video_ptr); 
+	glTextureSubImage2D(_texture_id, 0, 0, 0, 640, 480, GL_BGR, GL_UNSIGNED_BYTE, _video_ptr);
 
 }
