@@ -37,6 +37,11 @@ bool PartDatabase::loadObjsFromFile(const char* path)
 			nModel->model->create(fileLine);
 			nModel->visible = false;
 			nModel->name = std::experimental::filesystem::path(fileLine).filename().string();
+			GLenum err = glGetError();
+			while (err != GL_NO_ERROR)
+			{
+				err = glGetError();
+			}
 		}
 
 		else

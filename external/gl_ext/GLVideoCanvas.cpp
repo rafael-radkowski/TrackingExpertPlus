@@ -127,7 +127,6 @@ bool GLVideoCanvas::create(int rows, int cols, unsigned char* video_ptr, bool fu
 	viewMatrixLocation = glGetUniformLocation(program, "viewMatrix"); // Get the location of our view matrix in the shader
 	modelMatrixLocation = glGetUniformLocation(program, "modelMatrix"); // Get the location of our model matrix in the shader
 
-
 	glBindAttribLocation(program, pos_location, "in_Position");
 	glBindAttribLocation(program, texture_location, "in_Texture");
 	glBindAttribLocation(program, normal_location, "in_Normal");
@@ -135,12 +134,6 @@ bool GLVideoCanvas::create(int rows, int cols, unsigned char* video_ptr, bool fu
 
 	// create a texture using the video
 	cs557::CreateTexture2D(_width, _height, 3, (unsigned char*)_video_ptr, &_texture_id, GL_CLAMP_TO_BORDER, GL_TEXTURE0);
-	GLenum err = glGetError();
-	while (err != GL_NO_ERROR)
-	{
-		cout << err << endl;
-		err = glGetError();
-	}
 
 	// Activate the texture unit and bind the texture. 
 	glActiveTexture(GL_TEXTURE0);
@@ -167,8 +160,6 @@ Draw the coordinate system
 */
 void GLVideoCanvas::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix, glm::mat4 modelMatrix)
 {
-
-
 	// Enable the shader program
 	glUseProgram(program);
 
@@ -182,14 +173,11 @@ void GLVideoCanvas::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix, glm::
 	glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, &modelMatrix[0][0]); // send the model matrix to our shader
 	glUniformMatrix4fv(projMatrixLocation, 1, GL_FALSE, &projectionMatrix[0][0]); // send the projection matrix to our shader
 
-
 	 // Bind the buffer and switch it to an active buffer
 	glBindVertexArray(vaoID[0]);
 
 	GLint* range = (GLint*)malloc(sizeof(GLint));
 	glGetIntegerv(GL_ALIASED_LINE_WIDTH_RANGE, range);
-
-	cout << *range << endl;
 	glLineWidth((GLfloat)*range);
 
 	// Draw the triangles

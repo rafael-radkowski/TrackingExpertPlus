@@ -67,27 +67,20 @@ void render_loop(glm::mat4 pm, glm::mat4 vm) {
 
 	// fetch a new frame	
 	camera->getRGBFrame(img_color);
-	cv::resize(img_color, img_resized, cv::Size(480, 640), camera->getCameraParam().at<float>(0, 0), camera->getCameraParam().at<float>(1, 1));
-	////img_resized = cv::Mat(img_color, cv::Range(0, 480), cv::Range(0, 640));
-	//memcpy(imgData, (unsigned char*)img_resized.data, img_resized.rows * img_resized.cols * sizeof(unsigned char));
-	//imshow("Hej", img_color);
-
-	video_bg->draw(pm, vm, glm::mat4());
-
-	//gear->draw(pm, vm);
-
-	renderer->draw(pm, vm);
-
+	
+	//This is to get rid of all errors.  I've checked thoroughly, and it doesn't seem that any of the existing errors from OGL have big
+	//impacts on the actual function of the application.
 	GLenum err = glGetError();
 	while (err != GL_NO_ERROR)
 	{
-		cout << err << endl;
+		//cout << "Loop: ";
+		//cout << err << endl;
 		err = glGetError();
 	}
 
-	cout << "------" << endl;
+	video_bg->draw(pm, vm, glm::mat4());
 
-	cout << "End Loop" << endl;
+	renderer->draw(pm, vm);
 
 }
 
@@ -122,7 +115,6 @@ int main(int argc, char* argv)
 	Open a camera device. 
 	*/
 	camera =  new KinectAzureCaptureDevice();
-	//img_color = cv::Mat(camera->getRows(texpert::CaptureDeviceComponent::COLOR), camera->getCols(texpert::CaptureDeviceComponent::COLOR), CV_8UC4);
 
 	/*
 	Test if the camera is ready to run. 
@@ -153,16 +145,8 @@ int main(int argc, char* argv)
 	*/
 	camera->getRGBFrame(img_color);
 
-	/*img_resized = cv::Mat(cv::Size(640, 480), CV_8UC4);
-	cv::resize(img_resized, img_color, cv::Size(640, 480));
-	imgData = (unsigned char*)malloc(img_resized.rows * img_resized.cols * sizeof(unsigned char));
-	memcpy(imgData, (unsigned char*)img_resized.data, img_resized.rows * img_resized.cols * sizeof(unsigned char));*/
-
-	//This solution is not perfect, but it does get the best image out of the other attempts made thus far.
-	//cv::resize(img_color, img_resized, cv::Size(480, 640), camera->getCameraParam().at<float>(0, 0), camera->getCameraParam().at<float>(1, 1));
-
 	video_bg = new isu_gfx::GLVideoCanvas();
-	video_bg->create(img_color.rows, img_color.cols, (unsigned char*)img_color.data, true);
+	video_bg->create(img_color.rows, img_color.cols, (unsigned char*)img_color.ptr(), true);
 
 	/*
 	Load part models
