@@ -56,7 +56,7 @@ GearBoxRenderer* renderer;
 // The Video Background
 isu_gfx::GLVideoCanvas*	video_bg;
 cv::Mat img_color;
-cv::Mat img_resized;
+cv::Mat img_ref;
 
 /*
 The main render and processing loop. 
@@ -66,17 +66,8 @@ The main render and processing loop.
 void render_loop(glm::mat4 pm, glm::mat4 vm) {
 
 	// fetch a new frame	
-	camera->getRGBFrame(img_color);
-	
-	//This is to get rid of all errors.  I've checked thoroughly, and it doesn't seem that any of the existing errors from OGL have big
-	//impacts on the actual function of the application.
-	GLenum err = glGetError();
-	while (err != GL_NO_ERROR)
-	{
-		//cout << "Loop: ";
-		//cout << err << endl;
-		err = glGetError();
-	}
+	camera->getRGBFrame(img_ref);
+	memcpy(img_color.ptr(), img_ref.ptr(), img_ref.rows * img_ref.cols * sizeof(CV_8UC4));
 
 	video_bg->draw(pm, vm, glm::mat4());
 
@@ -124,14 +115,12 @@ int main(int argc, char* argv)
 		return -1;
 	}
 
-	//camera->changeResolution(1536);
-
 	/*
 	create the renderer.
 	The renderer executes the main loop in this demo. 
 	*/
 	window = new isu_ar::GLViewer();
-	window->create(1280, 960, "Gear Box Demo");
+	window->create(camera->getCols(texpert::CaptureDeviceComponent::COLOR), camera->getRows(texpert::CaptureDeviceComponent::COLOR), "Gear Box Demo");
 	window->addRenderFcn(render_loop);
 	window->addKeyboardCallback(getKey);
 	window->setViewMatrix(glm::lookAt(glm::vec3(1.0f, 0.0, -0.5f), glm::vec3(0.0f, 0.0f, 0.f), glm::vec3(0.0f, 1.0f, 0.0f)));
@@ -146,14 +135,13 @@ int main(int argc, char* argv)
 	camera->getRGBFrame(img_color);
 
 	video_bg = new isu_gfx::GLVideoCanvas();
-	video_bg->create(img_color.rows, img_color.cols, (unsigned char*)img_color.ptr(), true);
+	video_bg->create(img_color.rows, img_color.cols, img_color.ptr(), true);
 
 	/*
 	Load part models
 	*/
 	database = new PartDatabase();
 	database->loadObjsFromFile("D:/WorkRepos/TrackingExpertPlus/examples/gear_demo/models/load_models.txt");
-	//database->loadObjsFromFile("D:/noPath.txt");  //This is meant to break 
 
 	/*
 	Load models into the GearBoxRenderer sequence
@@ -169,9 +157,6 @@ int main(int argc, char* argv)
 			idx++;
 		}
 	}
-
-	//gear = new DemoScene();
-	//gear->create();
 	
 	renderer->updateInPlace();
 	
@@ -180,6 +165,7 @@ int main(int argc, char* argv)
 	// cleanup
 	delete camera;
 	delete video_bg;
+	delete database;
 	delete window;
 
 	return 1;

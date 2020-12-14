@@ -12,8 +12,20 @@ bool setModelVisible(string name, Sequence& sequence)
 	return false;
 }
 
+bool setModelPos(string name, Sequence& sequence, glm::mat4 pos)
+{
+	if (sequence._models.find(name) != sequence._models.end())
+	{
+		sequence._models.find(name)->second->model->setModelMatrix(pos);
+		return true;
+	}
+
+	return false;
+}
+
 void stage00(Sequence& sequence)
-{		
+{
+	setModelPos("N1-001_pc_gfx.obj", sequence, glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.12f)));
 	setModelVisible("N1-001_pc_gfx.obj", sequence);
 }
 void stage01(Sequence& sequence)

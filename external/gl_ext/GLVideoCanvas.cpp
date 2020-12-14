@@ -133,9 +133,10 @@ bool GLVideoCanvas::create(int rows, int cols, unsigned char* video_ptr, bool fu
 
 
 	// create a texture using the video
-	cs557::CreateTexture2D(_width, _height, 3, (unsigned char*)_video_ptr, &_texture_id, GL_CLAMP_TO_BORDER, GL_TEXTURE0);
+	cs557::CreateTexture2D(_width, _height, 4, (unsigned char*)_video_ptr, &_texture_id, GL_CLAMP_TO_BORDER, GL_TEXTURE0);
 
 	// Activate the texture unit and bind the texture. 
+	//This seems unnecessary, given that it looks like this is taken care of in CreateTexture2D
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, _texture_id);
 
@@ -162,6 +163,8 @@ void GLVideoCanvas::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix, glm::
 {
 	// Enable the shader program
 	glUseProgram(program);
+
+	glActiveTexture(GL_TEXTURE0);
 
 
 	// update the video texture
@@ -201,6 +204,10 @@ void GLVideoCanvas::updateVideo(void)
 	if (_texture_id == 0 || _video_ptr == NULL)
 		return;
 
-	glTextureSubImage2D(_texture_id, 0, 0, 0, _width, _height, GL_BGR, GL_UNSIGNED_BYTE, _video_ptr);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, _width);
+	
+
+	glTextureSubImage2D(_texture_id, 0, 0, 0, _width, _height, GL_BGRA, GL_UNSIGNED_BYTE, (unsigned char*)_video_ptr);
 
 }
