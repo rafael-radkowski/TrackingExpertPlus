@@ -10,12 +10,14 @@ typedef struct Model
 	std::string name = "null";
 	bool visible = false;
 	cs557::OBJModel* model;
+	int duplicates = 0;
 
 	Model()
 	{
 		name = "null";
 		visible = false;
 		model = new cs557::OBJModel();
+		duplicates = 0;
 	}
 };
 

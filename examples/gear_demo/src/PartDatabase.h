@@ -31,6 +31,8 @@ public:
 	*/
 	bool loadObjsFromFile(const char* path);
 
+	bool setNumDuplicates(const char* name, int num_dupes);
+
 	int getNumModels() { return size; };
 
 	/*

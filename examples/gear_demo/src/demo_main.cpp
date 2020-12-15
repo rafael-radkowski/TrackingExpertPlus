@@ -143,6 +143,8 @@ int main(int argc, char* argv)
 	database = new PartDatabase();
 	database->loadObjsFromFile("D:/WorkRepos/TrackingExpertPlus/examples/gear_demo/models/load_models.txt");
 
+	database->setNumDuplicates("N1-002_pc_gfx.obj", 1);
+
 	/*
 	Load models into the GearBoxRenderer sequence
 	*/

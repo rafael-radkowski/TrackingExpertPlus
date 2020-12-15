@@ -1,6 +1,8 @@
 #include "AssemblySequence.h"
 #include <iterator>
 
+#define PI 3.1415926535
+
 bool setModelVisible(string name, Sequence& sequence)
 {
 	if (sequence._models.find(name) != sequence._models.end())
@@ -34,17 +36,22 @@ void stage01(Sequence& sequence)
 }
 void stage02(Sequence& sequence)
 {
+	setModelPos("N1-002_pc_gfx.obj-1", sequence, glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 0.0f)));
 	setModelVisible("N1-001_pc_gfx.obj", sequence);
 	setModelVisible("N1-002_pc_gfx.obj", sequence);
+	setModelVisible("N1-002_pc_gfx.obj-1", sequence);
 }
 void stage03(Sequence& sequence)
 {
+	setModelPos("N1-003_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, 0.0f, 0.0f)));
 	setModelVisible("N1-003_pc_gfx.obj", sequence);
 }
 void stage04(Sequence& sequence)
 {
+	setModelPos("N1-003_pc_gfx.obj", sequence, glm::rotate(glm::translate(glm::vec3(0.0f, -0.1f, 0.0f)), (float)-PI / 2, glm::vec3(0, 0, 1)));
 	setModelVisible("N1-001_pc_gfx.obj", sequence);
 	setModelVisible("N1-002_pc_gfx.obj", sequence);
+	setModelVisible("N1-002_pc_gfx.obj-1", sequence);
 	setModelVisible("N1-003_pc_gfx.obj", sequence);
 }
 void stage05(Sequence& sequence)
@@ -64,6 +71,7 @@ void stage07(Sequence& sequence)
 }
 void stage08(Sequence& sequence)
 {
+	setModelPos("N4-002_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, -0.2f, 0.0f)));
 	setModelVisible("N4-001_pc_gfx.obj", sequence);
 	setModelVisible("N4-002_pc_gfx.obj", sequence);
 }
