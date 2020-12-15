@@ -25,6 +25,14 @@ bool setModelPos(string name, Sequence& sequence, glm::mat4 pos)
 	return false;
 }
 
+
+/*
+TODO: Set the positions for all of the elements when they are put into the gearbox frame.
+*/
+
+/*
+Phase 1
+*/
 void stage00(Sequence& sequence)
 {
 	setModelPos("N1-001_pc_gfx.obj", sequence, glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.12f)));
@@ -32,10 +40,12 @@ void stage00(Sequence& sequence)
 }
 void stage01(Sequence& sequence)
 {
+	setModelPos("N1-002_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, 0.0f, 0.0f)));
 	setModelVisible("N1-002_pc_gfx.obj", sequence);
 }
 void stage02(Sequence& sequence)
 {
+	setModelPos("N1-001_pc_gfx.obj", sequence, glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.12f)));
 	setModelPos("N1-002_pc_gfx.obj-1", sequence, glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 0.0f)));
 	setModelVisible("N1-001_pc_gfx.obj", sequence);
 	setModelVisible("N1-002_pc_gfx.obj", sequence);
@@ -43,24 +53,38 @@ void stage02(Sequence& sequence)
 }
 void stage03(Sequence& sequence)
 {
+	setModelPos("N1-001_pc_gfx.obj", sequence, glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.12f)));
+	setModelPos("N1-002_pc_gfx.obj-1", sequence, glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 0.0f)));
 	setModelPos("N1-003_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, 0.0f, 0.0f)));
 	setModelVisible("N1-003_pc_gfx.obj", sequence);
 }
 void stage04(Sequence& sequence)
 {
+	setModelPos("N1-001_pc_gfx.obj", sequence, glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.12f)));
+	setModelPos("N1-002_pc_gfx.obj-1", sequence, glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, 0.0f)));
 	setModelPos("N1-003_pc_gfx.obj", sequence, glm::rotate(glm::translate(glm::vec3(0.0f, -0.1f, 0.0f)), (float)-PI / 2, glm::vec3(0, 0, 1)));
 	setModelVisible("N1-001_pc_gfx.obj", sequence);
 	setModelVisible("N1-002_pc_gfx.obj", sequence);
 	setModelVisible("N1-002_pc_gfx.obj-1", sequence);
 	setModelVisible("N1-003_pc_gfx.obj", sequence);
 }
+
+
 void stage05(Sequence& sequence)
 {
+	setModelPos("N1-001_pc_gfx.obj", sequence, glm::rotate(glm::translate(glm::vec3(0.3f, -0.1f, 0.2f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+	setModelPos("N1-002_pc_gfx.obj-1", sequence, glm::translate(glm::vec3(0.0f, 0.3f, 0.0f)));
+	setModelPos("N1-003_pc_gfx.obj", sequence, glm::rotate(glm::translate(glm::vec3(0.0f, -0.1f, 0.0f)), (float)-PI / 2, glm::vec3(0, 0, 1)));
 	setModelVisible("N0-000_pc_gfx.obj", sequence);
 	setModelVisible("N1-001_pc_gfx.obj", sequence);
 	setModelVisible("N1-002_pc_gfx.obj", sequence);
+	setModelVisible("N1-002_pc_gfx.obj-1", sequence);
 	setModelVisible("N1-003_pc_gfx.obj", sequence);
 }
+
+/*
+Phase 2
+*/
 void stage06(Sequence& sequence)
 {
 	setModelVisible("N4-001_pc_gfx.obj", sequence);
@@ -71,16 +95,19 @@ void stage07(Sequence& sequence)
 }
 void stage08(Sequence& sequence)
 {
-	setModelPos("N4-002_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, -0.2f, 0.0f)));
+	setModelPos("N4-002_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, -0.15f, 0.0f)));
 	setModelVisible("N4-001_pc_gfx.obj", sequence);
 	setModelVisible("N4-002_pc_gfx.obj", sequence);
 }
 void stage09(Sequence& sequence)
 {
+	setModelPos("N3-002_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, 0.0f, 0.0f)));
 	setModelVisible("N3-002_pc_gfx.obj", sequence);
 }
 void stage10(Sequence& sequence)
 {
+	setModelPos("N4-002_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, -0.15f, 0.0f)));
+	setModelPos("N3-002_pc_gfx.obj", sequence, glm::rotate(glm::translate(glm::vec3(0.0f, -0.25f, 0.0f)), (float)-PI / 2, glm::vec3(0, 0, 1)));
 	setModelVisible("N4-001_pc_gfx.obj", sequence);
 	setModelVisible("N4-002_pc_gfx.obj", sequence);
 	setModelVisible("N3-002_pc_gfx.obj", sequence);
@@ -91,6 +118,8 @@ void stage11(Sequence& sequence)
 }
 void stage12(Sequence& sequence)
 {
+	setModelPos("N4-002_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, -0.15f, 0.0f)));
+	setModelPos("N3-002_pc_gfx.obj", sequence, glm::rotate(glm::translate(glm::vec3(0.0f, -0.25f, 0.0f)), (float)-PI / 2, glm::vec3(0, 0, 1)));
 	setModelVisible("N4-004_pc_gfx.obj", sequence);
 	setModelVisible("N4-001_pc_gfx.obj", sequence);
 	setModelVisible("N4-002_pc_gfx.obj", sequence);
@@ -98,21 +127,28 @@ void stage12(Sequence& sequence)
 }
 void stage13(Sequence& sequence)
 {
+	setModelPos("N4-003_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, 0.0f, 0.0f)));
 	setModelVisible("N4-003_pc_gfx.obj", sequence);
 }
 void stage14(Sequence& sequence)
 {
+	setModelPos("N4-002_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, -0.15f, 0.0f)));
+	setModelPos("N3-002_pc_gfx.obj", sequence, glm::rotate(glm::translate(glm::vec3(0.0f, -0.25f, 0.0f)), (float)-PI / 2, glm::vec3(0, 0, 1)));
+	setModelPos("N4-003_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, 0.15f, 0.0f)));
 	setModelVisible("N4-003_pc_gfx.obj", sequence);
 	setModelVisible("N4-004_pc_gfx.obj", sequence);
 	setModelVisible("N4-001_pc_gfx.obj", sequence);
 	setModelVisible("N4-002_pc_gfx.obj", sequence);
 	setModelVisible("N3-002_pc_gfx.obj", sequence);
 }
+
+
 void stage15(Sequence& sequence)
 {
 	setModelVisible("N0-000_pc_gfx.obj", sequence);
 	setModelVisible("N1-001_pc_gfx.obj", sequence);
 	setModelVisible("N1-002_pc_gfx.obj", sequence);
+	setModelVisible("N1-002_pc_gfx.obj-1", sequence);
 	setModelVisible("N1-003_pc_gfx.obj", sequence);
 	setModelVisible("N4-003_pc_gfx.obj", sequence);
 	setModelVisible("N4-004_pc_gfx.obj", sequence);
@@ -120,49 +156,75 @@ void stage15(Sequence& sequence)
 	setModelVisible("N4-002_pc_gfx.obj", sequence);
 	setModelVisible("N3-002_pc_gfx.obj", sequence);
 }
+
+/*
+Phase 3
+*/
 void stage16(Sequence& sequence)
 {
+	setModelPos("N2-001_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, 0.0f, 0.19f)));
 	setModelVisible("N2-001_pc_gfx.obj", sequence);
 }
 void stage17(Sequence& sequence)
 {
+	setModelPos("N3-001_pc_gfx.obj", sequence, glm::mat4(1.0));
 	setModelVisible("N3-001_pc_gfx.obj", sequence);
 }
 void stage18(Sequence& sequence)
 {
+	setModelPos("N2-001_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, 0.0f, 0.19f)));
+	setModelPos("N3-001_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, 0.3f, 0.0f)));
 	setModelVisible("N2-001_pc_gfx.obj", sequence);
 	setModelVisible("N3-001_pc_gfx.obj", sequence);
 }
 void stage19(Sequence& sequence)
 {
-	setModelVisible("N3-002_pc_gfx.obj", sequence);
+	setModelPos("N2-001_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, 0.0f, 0.19f)));
+	setModelPos("N3-001_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, 0.3f, 0.0f)));
+	setModelPos("N3-002_pc_gfx.obj-1", sequence, glm::mat4(1.0));
+	setModelVisible("N3-002_pc_gfx.obj-1", sequence);
 }
 void stage20(Sequence& sequence)
 {
+	setModelPos("N2-001_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, 0.0f, 0.19f)));
+	setModelPos("N3-001_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, 0.3f, 0.0f)));
+	setModelPos("N3-002_pc_gfx.obj-1", sequence, glm::rotate(glm::translate(glm::vec3(0.0f, 0.6f, 0.0f)), (float)PI / 2, glm::vec3(0, 0, 1)));
 	setModelVisible("N2-001_pc_gfx.obj", sequence);
 	setModelVisible("N3-001_pc_gfx.obj", sequence);
-	setModelVisible("N3-002_pc_gfx.obj", sequence);
+	setModelVisible("N3-002_pc_gfx.obj-1", sequence);
 }
 void stage21(Sequence& sequence)
 {
+	setModelPos("N2-001_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, 0.0f, 0.19f)));
+	setModelPos("N3-001_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, 0.3f, 0.0f)));
+	setModelPos("N3-002_pc_gfx.obj-1", sequence, glm::rotate(glm::translate(glm::vec3(0.0f, 0.6f, 0.0f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+	setModelPos("N2-002_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, -0.55f, 0.0f)));
 	setModelVisible("N2-001_pc_gfx.obj", sequence);
 	setModelVisible("N2-002_pc_gfx.obj", sequence);
 	setModelVisible("N3-001_pc_gfx.obj", sequence);
-	setModelVisible("N3-002_pc_gfx.obj", sequence);
+	setModelVisible("N3-002_pc_gfx.obj-1", sequence);
 }
 void stage22(Sequence& sequence)
 {
+	setModelPos("N2-001_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, 0.0f, 0.19f)));
+	setModelPos("N3-001_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, 0.3f, 0.0f)));
+	setModelPos("N3-002_pc_gfx.obj-1", sequence, glm::rotate(glm::translate(glm::vec3(0.0f, 0.6f, 0.0f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+	setModelPos("N2-002_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, -0.55f, 0.0f)));
+	setModelPos("N2-003_pc_gfx.obj", sequence, glm::translate(glm::vec3(0.0f, -0.65f, 0.0f)));
 	setModelVisible("N2-001_pc_gfx.obj", sequence);
 	setModelVisible("N2-002_pc_gfx.obj", sequence);
 	setModelVisible("N2-003_pc_gfx.obj", sequence);
 	setModelVisible("N3-001_pc_gfx.obj", sequence);
-	setModelVisible("N3-002_pc_gfx.obj", sequence);
+	setModelVisible("N3-002_pc_gfx.obj-1", sequence);
 }
+
+
 void stage23(Sequence& sequence)
 {
 	setModelVisible("N0-000_pc_gfx.obj", sequence);
 	setModelVisible("N1-001_pc_gfx.obj", sequence);
 	setModelVisible("N1-002_pc_gfx.obj", sequence);
+	setModelVisible("N1-002_pc_gfx.obj-1", sequence);
 	setModelVisible("N1-003_pc_gfx.obj", sequence);
 	setModelVisible("N4-003_pc_gfx.obj", sequence);
 	setModelVisible("N4-004_pc_gfx.obj", sequence);
@@ -174,6 +236,7 @@ void stage23(Sequence& sequence)
 	setModelVisible("N2-003_pc_gfx.obj", sequence);
 	setModelVisible("N3-001_pc_gfx.obj", sequence);
 	setModelVisible("N3-002_pc_gfx.obj", sequence);
+	setModelVisible("N3-002_pc_gfx.obj-1", sequence);
 }
 
 void AssemblySequence::update(Sequence& sequence)
