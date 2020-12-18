@@ -101,6 +101,7 @@ int main(int argc, char* argv)
 {
 	std::cout << "TrackingExpert+ Gear Box Demo" << endl;
 	std::cout << "Version 0.9" << endl;
+	std::cout << "-----------------------------" << endl;
 
 	/*
 	Open a camera device. 
@@ -162,6 +163,9 @@ int main(int argc, char* argv)
 	}
 	
 	renderer->updateInPlace();
+
+	std::cout << "-----------------------------" << endl;
+	std::cout << "Use the W and D keys to cycle through the stages of the assembly process." << endl;
 	
 	window->start();
 
