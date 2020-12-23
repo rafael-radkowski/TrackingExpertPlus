@@ -50,4 +50,6 @@ public:
 	@param vm - the view matrix
 	*/
 	void draw(glm::mat4 proj, glm::mat4 vm);
+
+	void setSteps();
 };

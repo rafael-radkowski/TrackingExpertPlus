@@ -40,6 +40,8 @@
 #include "GearBoxRenderer.h"
 #include "PartDatabase.h"
 
+#define PI 3.1415926535
+
 // instance of a structure core camera 
 KinectAzureCaptureDevice* camera;
 
@@ -148,6 +150,26 @@ int main(int argc, char* argv)
 	database->setNumDuplicates("N3-002_pc_gfx.obj", 1);
 
 	/*
+	Set part model positions
+	*/
+	database->setModelPos("N1-001_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(0.5f, -0.3f, -0.12f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+	database->setModelPos("N1-002_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(0.5f, -0.3f, -0.24f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+	database->setModelPos("N1-002_pc_gfx.obj-1", glm::rotate(glm::translate(glm::vec3(0.2f, -0.3f, -0.24f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+	database->setModelPos("N1-003_pc_gfx.obj", glm::translate(glm::vec3(0.6f, -0.3f, -0.24f)));
+
+	database->setModelPos("N4-001_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.4f, -0.3f, -0.26f)), (float)-PI / 2, glm::vec3(0, 0, 1)));
+	database->setModelPos("N4-002_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.15f, -0.3f, -0.26f)), (float)-PI / 2, glm::vec3(0, 0, 1)));
+	database->setModelPos("N3-002_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.65f, -0.3f, -0.26f)), (float)-PI, glm::vec3(0, 0, 1)));
+	database->setModelPos("N4-003_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.45f, -0.3f, -0.26f)), (float)-PI / 2, glm::vec3(0, 0, 1)));
+	database->setModelPos("N4-004_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.3f, -0.3f, -0.26f)), (float)-PI / 2, glm::vec3(0, 0, 1)));
+
+	database->setModelPos("N2-001_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.25f, -0.3f, 0.43f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+	database->setModelPos("N3-001_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.55f, -0.3f, 0.25f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+	database->setModelPos("N3-002_pc_gfx.obj-1", glm::rotate(glm::translate(glm::vec3(-0.65f, -0.3f, 0.25f)), (float)PI, glm::vec3(0, 0, 1)));
+	database->setModelPos("N2-002_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(0.33f, -0.3f, 0.25f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+	database->setModelPos("N2-003_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(0.48f, -0.3f, 0.25f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+
+	/*
 	Load models into the GearBoxRenderer sequence
 	*/
 	renderer = new GearBoxRenderer();
@@ -161,6 +183,8 @@ int main(int argc, char* argv)
 			idx++;
 		}
 	}
+
+	renderer->setSteps();
 	
 	renderer->updateInPlace();
 
