@@ -92,6 +92,8 @@ include_directories(${TRACKINGX_ROOT_DIR}/examples/demo_common)
 
 set(Demo_SRC
 	demo_main.cpp
+	AntennaRenderer.cpp
+	AntennaRenderer.h
 	../../demo_common/AssemblySequence.cpp
 	../../demo_common/PartDatabase.cpp
 	../../demo_common/AssemblySequence.h

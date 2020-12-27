@@ -10,6 +10,8 @@ CMakeFiles/
 *.vcxproj
 *.filters
 CMakeCache.txt
+CMakeDoxyfile.in
+CMakeDoxygenDefaults.cmake
 bin/
 lib/
 *.pdb
@@ -42,3 +44,4 @@ examples/trackingexpertdemo/src/TrackingExpertDemo.dir/
 data/Part_A_reduced_pc.ply
 data/Part_A_reduced_pc.obj
 data/Antenna_Coupler_model.obj
+examples/antenna_demo/src/AntennaDemo.dir
