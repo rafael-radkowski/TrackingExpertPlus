@@ -1,0 +1,62 @@
+{
+    "name" : "AntennaDemo",
+    "models": [
+        {
+            "name": "base",
+            "path": "..\\models\\PartA_pc_gfx.obj"
+        },
+        {
+            "name": "mims_sensor",
+            "path": "..\\models\\PartB_pc_gfx.obj"
+        },
+        {
+            "name": "power_supply",
+            "path": "..\\models\\PartC_pc_gfx.obj"
+        },
+        {
+            "name": "harmonic_filter",
+            "path": "..\\models\\PartD_pc_gfx.obj"
+        },
+        {
+            "name": "ac_filter",
+            "path": "..\\models\\PartE_pc_gfx.obj"
+        }
+    ],
+    "instructions": [
+        {
+            "id": "Step0",
+            "prerequisites": [],
+            "model": "base",
+            "trans": [0.0, 0.0, 0.0],
+            "rot": [0, 0, 0]
+        },
+        {
+            "id": "Step1",
+            "prerequisites": ["Step0"],
+            "model": "mims_sensor",
+            "trans": [0.34, 0.1, 0.0],
+            "rot": [180, 0, 0]
+        },
+        {
+            "id": "Step2",
+            "prerequisites": ["Step0", "Step1"],
+            "model": "power_supply",
+            "trans": [0.34, 0.1, 0.0],
+            "rot": [180, 0, 0]
+        },
+        {
+            "id": "Step3",
+            "prerequisites": ["Step0", "Step1", "Step2"],
+            "model": "harmonic_filter",
+            "trans": [0.34, 0.1, 0.0],
+            "rot": [180, 0, 0]
+        },
+        {
+            "id": "Step4",
+            "prerequisites": ["Step0", "Step1", "Step2", "Step3"],
+            "model": "ac_filter",
+            "trans": [0.34, 0.1, 0.0],
+            "rot": [180, 0, 0]
+        }
+    ]
+}

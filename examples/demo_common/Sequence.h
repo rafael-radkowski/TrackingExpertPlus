@@ -19,6 +19,14 @@ typedef struct Model
 		model = new cs557::OBJModel();
 		duplicates = 0;
 	}
+	Model(std::string _name, std::string path)
+	{
+		name = _name;
+		visible = false;
+		model = new cs557::OBJModel();
+		model->create(path);
+		duplicates = 0;
+	}
 };
 
 struct Sequence
