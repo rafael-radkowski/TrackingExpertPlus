@@ -139,7 +139,7 @@ int main(int argc, char* argv)
 	Load part models
 	*/
 	database = new PartDatabase();
-	database->loadObjsFromFile("D:/WorkRepos/TrackingExpertPlus/examples/antenna_demo/models/load_models.txt");
+	database->loadObjsFromFile("../models/load_models.txt");
 
 	/*
 	Load models into the GearBoxRenderer sequence
