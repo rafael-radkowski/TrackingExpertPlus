@@ -10,10 +10,10 @@
 
 #include <opencv2/core.hpp>
 
-#include "Sequence.h"
+#include "Procedure.h"
 
 class ProcedureLoader 
 {
 public:
-	static bool loadProcedure(const std::string& path, Sequence& _sequence);
+	static bool loadProcedure(const std::string& path, Procedure& _procedure);
 };

@@ -24,6 +24,7 @@
     ],
     "instructions": [
         {
+            "subprocedure": "false",
             "id": "Step0",
             "prerequisites": [],
             "model": "base",
@@ -31,6 +32,7 @@
             "rot": [0, 0, 0]
         },
         {
+            "subprocedure": "false",
             "id": "Step1",
             "prerequisites": ["Step0"],
             "model": "mims_sensor",
@@ -38,22 +40,25 @@
             "rot": [180, 0, 0]
         },
         {
+            "subprocedure": "false",
             "id": "Step2",
-            "prerequisites": ["Step0", "Step1"],
+            "prerequisites": ["Step1"],
             "model": "power_supply",
             "trans": [0.34, 0.1, 0.0],
             "rot": [180, 0, 0]
         },
         {
+            "subprocedure": "false",
             "id": "Step3",
-            "prerequisites": ["Step0", "Step1", "Step2"],
+            "prerequisites": ["Step2"],
             "model": "harmonic_filter",
             "trans": [0.34, 0.1, 0.0],
             "rot": [180, 0, 0]
         },
         {
+            "subprocedure": "false",
             "id": "Step4",
-            "prerequisites": ["Step0", "Step1", "Step2", "Step3"],
+            "prerequisites": ["Step3"],
             "model": "ac_filter",
             "trans": [0.34, 0.1, 0.0],
             "rot": [180, 0, 0]
