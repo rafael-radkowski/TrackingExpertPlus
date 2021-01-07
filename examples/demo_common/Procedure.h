@@ -37,13 +37,13 @@ typedef struct Procedure
 	std::string name;
 	std::unordered_map<std::string, cs557::OBJModel>* _models;
 	std::unordered_map<std::string, Step> _steps;
-	std::vector<Procedure> _subprocs;
+	std::unordered_map<std::string, Procedure>* _subprocs;
 
 	Procedure()
 	{
 		name = "null";
 		_models = new std::unordered_map<std::string, cs557::OBJModel>();
 		_steps = std::unordered_map<std::string, Step>();
-		_subprocs = std::vector<Procedure>();
+		_subprocs = new std::unordered_map<std::string, Procedure>();
 	}
 };

@@ -22,46 +22,51 @@
             "path": "..\\models\\PartE_pc_gfx.obj"
         }
     ],
-    "instructions": [
+    "procedures": [
         {
-            "subprocedure": "false",
-            "id": "Step0",
-            "prerequisites": [],
-            "model": "base",
-            "trans": [0.0, 0.0, 0.0],
-            "rot": [0, 0, 0]
-        },
-        {
-            "subprocedure": "false",
-            "id": "Step1",
-            "prerequisites": ["Step0"],
-            "model": "mims_sensor",
-            "trans": [0.34, 0.1, 0.0],
-            "rot": [180, 0, 0]
-        },
-        {
-            "subprocedure": "false",
-            "id": "Step2",
-            "prerequisites": ["Step1"],
-            "model": "power_supply",
-            "trans": [0.01, 0.135, 0.0],
-            "rot": [0, 90, 90]
-        },
-        {
-            "subprocedure": "false",
-            "id": "Step3",
-            "prerequisites": ["Step2"],
-            "model": "harmonic_filter",
-            "trans": [-0.3, 0.1, -0.125],
-            "rot": [0, -60, 0]
-        },
-        {
-            "subprocedure": "false",
-            "id": "Step4",
-            "prerequisites": ["Step3"],
-            "model": "ac_filter",
-            "trans": [-0.3, 0.1, 0.03],
-            "rot": [-90, -90, 0]
+            "id": "main",
+            "instructions": [
+                {
+                    "subprocedure": "false",
+                    "id": "Step0",
+                    "prerequisites": [],
+                    "model": "base",
+                    "trans": [0.0, 0.0, 0.0],
+                    "rot": [0, 0, 0]
+                },
+                {
+                    "subprocedure": "false",
+                    "id": "Step1",
+                    "prerequisites": ["Step0"],
+                    "model": "mims_sensor",
+                    "trans": [0.34, 0.1, 0.0],
+                    "rot": [180, 0, 0]
+                },
+                {
+                    "subprocedure": "false",
+                    "id": "Step2",
+                    "prerequisites": ["Step1"],
+                    "model": "power_supply",
+                    "trans": [0.01, 0.135, 0.0],
+                    "rot": [0, 90, 90]
+                },
+                {
+                    "subprocedure": "false",
+                    "id": "Step3",
+                    "prerequisites": ["Step2"],
+                    "model": "harmonic_filter",
+                    "trans": [-0.3, 0.1, -0.125],
+                    "rot": [0, -60, 0]
+                },
+                {
+                    "subprocedure": "false",
+                    "id": "Step4",
+                    "prerequisites": ["Step3"],
+                    "model": "ac_filter",
+                    "trans": [-0.3, 0.1, 0.03],
+                    "rot": [-90, -90, 0]
+                }
+            ]
         }
     ]
 }
