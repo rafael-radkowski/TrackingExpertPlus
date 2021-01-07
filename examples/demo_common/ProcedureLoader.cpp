@@ -52,6 +52,10 @@ bool ProcedureLoader::loadProcedure(const std::string& path, Procedure& _procedu
 
 				_procedure._steps.insert(std::make_pair(s["id"].string(), Step(prereqs, s["model"].string(), trans, rot)));
 			}
+			else if (s["subprocedure"].string().compare("true") == 0)
+			{
+
+			}
 		}
 	}
 	else 

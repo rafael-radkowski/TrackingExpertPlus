@@ -5,23 +5,7 @@
 
 #include "ModelOBJ.h"
 
-struct Procedure
-{
-	std::string name;
-	std::unordered_map<std::string, cs557::OBJModel>* _models;
-	std::unordered_map<std::string, Step> _steps;
-	std::vector<Procedure> _subprocs;
-
-	Procedure()
-	{
-		name = "null";
-		_models = new std::unordered_map<std::string, cs557::OBJModel>();
-		_steps = std::unordered_map<std::string, Step>();
-		_subprocs = std::vector<Procedure>();
-	}
-};
-
-struct Step
+typedef struct Step
 {
 	std::vector<std::string> prereqs;
 	std::string model_name;
@@ -48,23 +32,18 @@ struct Step
 	}
 };
 
-struct ProcSeq
+typedef struct Procedure
 {
-	int _current_state = 0;
-	std::vector<std::string> _steps;
-	Procedure _procedure;
+	std::string name;
+	std::unordered_map<std::string, cs557::OBJModel>* _models;
+	std::unordered_map<std::string, Step> _steps;
+	std::vector<Procedure> _subprocs;
 
-	ProcSeq()
+	Procedure()
 	{
-		_current_state = 0;
-		_steps = std::vector<std::string>();
-		_procedure = Procedure();
-	}
-
-	ProcSeq(Procedure proc, std::vector<std::string>& steps)
-	{
-		_current_state = 0;
-		_steps = steps;
-		_procedure = proc;
+		name = "null";
+		_models = new std::unordered_map<std::string, cs557::OBJModel>();
+		_steps = std::unordered_map<std::string, Step>();
+		_subprocs = std::vector<Procedure>();
 	}
 };

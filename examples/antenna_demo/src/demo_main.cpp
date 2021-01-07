@@ -38,6 +38,7 @@
 // local
 #include "AntennaRenderer.h"
 #include "PartDatabase.h"
+#include "ProcedureRenderer.h"
 
 // instance of a structure core camera 
 KinectAzureCaptureDevice* camera;
@@ -49,6 +50,7 @@ isu_ar::GLViewer* window;
 // demo content 
 PartDatabase* database;
 AntennaRenderer* renderer;
+ProcedureRenderer* proc_renderer;
 
 // The Video Background
 isu_gfx::GLVideoCanvas*	video_bg;
@@ -68,7 +70,8 @@ void render_loop(glm::mat4 pm, glm::mat4 vm) {
 
 	video_bg->draw(pm, vm, glm::mat4());
 
-	renderer->draw(pm, vm);
+	//renderer->draw(pm, vm);
+	proc_renderer->draw(pm, vm);
 
 }
 
@@ -83,10 +86,12 @@ void getKey(int key, int action)
 		switch (key)
 		{
 		case 68: //d
-			renderer->progress(true);
+			//renderer->progress(true);
+			proc_renderer->progress(true);
 			break;
 		case 65: //a
-			renderer->progress(false);
+			//renderer->progress(false);
+			proc_renderer->progress(false);
 			break;
 		}
 		break;
@@ -136,29 +141,42 @@ int main(int argc, char* argv)
 	video_bg->create(img_color.rows, img_color.cols, img_color.ptr(), true);
 
 	/*
-	Load part models
+	Create the procedure
 	*/
-	database = new PartDatabase();
-	database->loadObjsFromFile("../models/load_models.txt");
-
-	/*
-	Load models into the GearBoxRenderer sequence
-	*/
-	renderer = new AntennaRenderer();
-	int idx = 0;
-	for (int i = 0; i < database->getNumModels(); i++)
-	{
-		Model* curModel = database->getObj(i);
-		if (!curModel->name.compare("null") == 0)
-		{
-			renderer->addModel(curModel, curModel->name);
-			idx++;
-		}
-	}
-
-	renderer->setSteps();
+	std::vector<std::string> steps = std::vector<std::string>(5);
+	steps.at(0) = "Step0";
+	steps.at(1) = "Step1";
+	steps.at(2) = "Step2";
+	steps.at(3) = "Step3";
+	steps.at(4) = "Step4";
 	
-	renderer->updateInPlace();
+	proc_renderer = new ProcedureRenderer();
+	proc_renderer->init("ExAntennaProc.json", steps);
+
+	///*
+	//Load part models
+	//*/
+	//database = new PartDatabase();
+	//database->loadObjsFromFile("../models/load_models.txt");
+
+	///*
+	//Load models into the GearBoxRenderer sequence
+	//*/
+	//renderer = new AntennaRenderer();
+	//int idx = 0;
+	//for (int i = 0; i < database->getNumModels(); i++)
+	//{
+	//	Model* curModel = database->getObj(i);
+	//	if (!curModel->name.compare("null") == 0)
+	//	{
+	//		renderer->addModel(curModel, curModel->name);
+	//		idx++;
+	//	}
+	//}
+
+	//renderer->setSteps();
+	//
+	//renderer->updateInPlace();
 
 	std::cout << "-----------------------------" << endl;
 	std::cout << "Use the W and D keys to cycle through the stages of the assembly process." << endl;
