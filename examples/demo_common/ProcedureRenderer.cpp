@@ -14,46 +14,87 @@ void ProcedureRenderer::init(const std::string path_and_name, std::vector<std::s
 	_current_state = 0;
 	_steps = order;
 
-	_procedure._steps.at(_steps.at(0)).completed = true;
+	Step firstStep = _procedure._steps.at(_steps.at(0));
+
+	if (firstStep.is_subproc)
+	{
+		_procedure._subprocs->at(firstStep.model_name)._steps.at(_steps.at(1)).completed = true;
+		_current_subproc = firstStep.model_name;
+	}
+	else
+	{
+		firstStep.completed = true;
+		_current_subproc = "NULL";
+	}
 }
 
 void ProcedureRenderer::progress(bool forward)
 {
-	if (forward)
-	{
-		_current_state++;
-
-		//If the sequence wraps
-		if (_current_state >= _steps.size())
+		if (forward)
 		{
-			_current_state = 0;
+			_current_state++;
 
-			for (std::string step_name : _steps)
+			//If the sequence wraps
+			if (_current_state >= _steps.size())
 			{
-				_procedure._steps.at(step_name).completed = false;
+				_current_state = 0;
+
+				for (std::string step_name : _steps)
+				{
+					_procedure._steps.at(step_name).completed = false;
+				}
 			}
+
+			Step curStep = _procedure._steps.at(_steps.at(_current_state));
+
+			//If switching to a subprocedure
+			if (curStep.is_subproc)
+			{
+				for (int i = 0; i < _current_state; i++)
+				{
+					_procedure._steps.at(_steps.at(i)).completed = false;
+				}
+
+				_current_subproc = curStep.model_name;
+
+				_current_state++;
+				curStep = _procedure._steps.at(_steps.at(_current_state));
+			}
+
+			//If switching back to main
+			if (_current_subproc.compare("NULL") != 0 && !curStep.is_subproc)
+			{
+				for (int i = 0; i < _current_state; i++)
+				{
+					_procedure._steps.at(_steps.at(i)).completed = true;
+				}
+			}
+
+			curStep.completed = true;
 		}
-		
-		_procedure._steps.at(_steps.at(_current_state)).completed = true;
-		
-	}
-	else
-	{
-		_procedure._steps.at(_steps.at(_current_state)).completed = false;
-
-		_current_state--;
-
-		//If the sequence wraps
-		if (_current_state < 0)
+		else
 		{
-			_current_state = _steps.size() - 1;
+			_procedure._steps.at(_steps.at(_current_state)).completed = false;
 
-			for (std::string step_name : _steps)
+			_current_state--;
+
+			//If the sequence wraps
+			if (_current_state < 0)
 			{
-				_procedure._steps.at(step_name).completed = true;
+				_current_state = _steps.size() - 1;
+
+				for (std::string step_name : _steps)
+				{
+					_procedure._steps.at(step_name).completed = true;
+				}
 			}
+
+			Step curStep = _procedure._steps.at(_steps.at(_current_state));
+
+			//If going back into a subprocedure
+
+			//TODO: Finish subprocedure conditions
 		}
-	}
 }
 
 

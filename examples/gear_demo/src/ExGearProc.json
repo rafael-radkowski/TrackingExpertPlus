@@ -1,0 +1,223 @@
+{
+    "name" : "GearTransmissionDemo",
+    "models": [
+        {
+            "name": "N0-000",
+            "path": "..\\models\\N0-000_pc_gfx.obj"
+        },
+        {
+            "name": "N1-001",
+            "path": "..\\models\\N1-001_pc_gfx.obj"
+        },
+        {
+            "name": "N1-002",
+            "path": "..\\models\\N1-002_pc_gfx.obj"
+        },
+        {
+            "name": "N1-003",
+            "path": "..\\models\\N1-003_pc_gfx.obj"
+        },
+        {
+            "name": "N2-001",
+            "path": "..\\models\\N2-001_pc_gfx.obj"
+        },
+        {
+            "name": "N2-002",
+            "path": "..\\models\\N2-002_pc_gfx.obj"
+        },
+        {
+            "name": "N2-003",
+            "path": "..\\models\\N2-003_pc_gfx.obj"
+        },
+        {
+            "name": "N3-001",
+            "path": "..\\models\\N3-001_pc_gfx.obj"
+        },
+        {
+            "name": "N3-002",
+            "path": "..\\models\\N3-002_pc_gfx.obj"
+        },
+        {
+            "name": "N4-001",
+            "path": "..\\models\\N4-001_pc_gfx.obj"
+        },
+        {
+            "name": "N4-002",
+            "path": "..\\models\\N4-002_pc_gfx.obj"
+        },
+        {
+            "name": "N4-003",
+            "path": "..\\models\\N4-003_pc_gfx.obj"
+        },
+        {
+            "name": "N4-004",
+            "path": "..\\models\\N4-004_pc_gfx.obj"
+        }
+    ],
+    "procedures": [
+        {
+            "id": "main",
+            "instructions": [
+                {
+                    "subprocedure": "true",
+                    "id": "Base",
+                    "prerequisites": [],
+                    "model": "subproc_P1",
+                    "trans": [0.0, 0.0, 0.0],
+                    "rot": [0, 0, 0]
+                },
+                {
+                    "subprocedure": "true",
+                    "id": "Part1",
+                    "prerequisites": ["Base"],
+                    "model": "subproc_P1",
+                    "trans": [0.0, 0.0, 0.0],
+                    "rot": [0, 0, 0]
+                },
+                {
+                    "subprocedure": "true",
+                    "id": "Part2",
+                    "prerequisites": ["Base"],
+                    "model": "subproc_P2",
+                    "trans": [0.0, 0.0, 0.0],
+                    "rot": [0, 0, 0]
+                },
+                {
+                    "subprocedure": "true",
+                    "id": "Part3",
+                    "prerequisites": ["Base"],
+                    "model": "subproc_P3",
+                    "trans": [-0.3, 0.1, 0.03],
+                    "rot": [0, 0, 0]
+                }
+            ]
+        },
+        {
+            "id": "subproc_P1",
+            "instructions": [
+                {
+                    "subprocedure": "false",
+                    "id": "P1Base",
+                    "prerequisites": [],
+                    "model": "N1-001",
+                    "trans": [0.5, -0.3, -0.12],
+                    "rot": [0, 0, 90]
+                },
+                {
+                    "subprocedure": "false",
+                    "id": "P1Bearing1",
+                    "prerequisites": ["P1Base"],
+                    "model": "N1-002",
+                    "trans": [0.5, -0.3, -0.24],
+                    "rot": [0, 0, 90]
+                },
+                {
+                    "subprocedure": "false",
+                    "id": "P1Bearing2",
+                    "prerequisites": ["P1Base"],
+                    "model": "N1-002",
+                    "trans": [0.2, -0.3, -0.24],
+                    "rot": [0, 0, 90]
+                },
+                {
+                    "subprocedure": "false",
+                    "id": "P1Cap",
+                    "prerequisites": ["Bearing2"],
+                    "model": "N1-003",
+                    "trans": [0.6, -0.3, -0.24],
+                    "rot": [0, 0, 0]
+                }
+            ]
+        },
+        {
+            "id": "subproc_P2",
+            "instructions": [
+                {
+                    "subprocedure": "false",
+                    "id": "P2Base",
+                    "prerequisites": [],
+                    "model": "N4-001",
+                    "trans": [0.0, 0.0, 0.0],
+                    "rot": [0, 0, 0]
+                },
+                {
+                    "subprocedure": "false",
+                    "id": "P2Bearing1",
+                    "prerequisites": ["P2Base"],
+                    "model": "N4-002",
+                    "trans": [0.0, 0.0, 0.0],
+                    "rot": [0, 0, 0]
+                },
+                {
+                    "subprocedure": "false",
+                    "id": "P2Cap",
+                    "prerequisites": ["Bearing1"],
+                    "model": "N3-002",
+                    "trans": [0.01, 0.135, 0.0],
+                    "rot": [0, 90, 90]
+                },
+                {
+                    "subprocedure": "false",
+                    "id": "P2Gear",
+                    "prerequisites": ["P2Base"],
+                    "model": "N4-004",
+                    "trans": [-0.3, 0.1, -0.125],
+                    "rot": [0, -60, 0]
+                },
+                {
+                    "subprocedure": "false",
+                    "id": "P2Bearing2",
+                    "prerequisites": ["Gear"],
+                    "model": "N4-003",
+                    "trans": [-0.3, 0.1, -0.125],
+                    "rot": [0, -60, 0]
+                }
+            ]
+        },
+        {
+            "id": "subproc_P3",
+            "instructions": [
+                {
+                    "subprocedure": "false",
+                    "id": "P3Base",
+                    "prerequisites": [],
+                    "model": "N2-001",
+                    "trans": [0.0, 0.0, 0.0],
+                    "rot": [0, 0, 0]
+                },
+                {
+                    "subprocedure": "false",
+                    "id": "P3Bearing1",
+                    "prerequisites": ["P3Base"],
+                    "model": "N3-001",
+                    "trans": [0.0, 0.0, 0.0],
+                    "rot": [0, 0, 0]
+                },
+                {
+                    "subprocedure": "false",
+                    "id": "P3Cap",
+                    "prerequisites": ["Bearing1"],
+                    "model": "N3-002",
+                    "trans": [0.01, 0.135, 0.0],
+                    "rot": [0, 90, 90]
+                },
+                {
+                    "subprocedure": "false",
+                    "id": "P3BigGear",
+                    "prerequisites": ["P3Base"],
+                    "model": "N2-002",
+                    "trans": [-0.3, 0.1, -0.125],
+                    "rot": [0, -60, 0]
+                },
+                {
+                    "subprocedure": "false",
+                    "id": "P3Bearing2",
+                    "prerequisites": ["BigGear"],
+                    "model": "N2-003",
+                    "trans": [-0.3, 0.1, -0.125],
+                    "rot": [0, -60, 0]
+                }
+            ]
+        }
+    ]
+}

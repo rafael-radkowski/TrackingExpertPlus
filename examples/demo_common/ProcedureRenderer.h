@@ -12,6 +12,7 @@ class ProcedureRenderer
 {
 private:
 	int _current_state;
+	std::string _current_subproc;
 	std::vector<std::string> _steps;
 	Procedure _procedure;
 
