@@ -10,7 +10,8 @@ typedef struct Step
 	std::vector<std::string> prereqs;
 	std::string model_name;
 	glm::vec3 trans, rot;
-	bool completed, is_subproc;
+	bool completed;
+	std::string _subproc;
 
 	Step()
 	{
@@ -19,17 +20,17 @@ typedef struct Step
 		trans = glm::vec3(0.0, 0.0, 0.0);
 		rot = glm::vec3(0.0, 0.0, 0.0);
 		completed = false;
-		is_subproc = false;
+		_subproc = "main";
 	}
 
 	Step(std::vector<std::string> _prereqs, std::string _model,
-		glm::vec3 _trans, glm::vec3 _rot, bool subproc)
+		glm::vec3 _trans, glm::vec3 _rot, std::string subproc)
 	{
 		prereqs = _prereqs;
 		model_name = _model;
 		trans = _trans;
 		rot = _rot;
-		is_subproc = subproc;
+		_subproc = subproc;
 		completed = false;
 	}
 };

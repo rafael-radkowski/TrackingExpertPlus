@@ -63,7 +63,7 @@ bool ProcedureLoader::loadProcedure(const std::string& path, Procedure& _procedu
 				else
 					subproc = false;
 
-				temp_proc._steps.insert(std::make_pair(s["id"].string(), Step(prereqs, s["model"].string(), trans, rot, subproc)));
+				temp_proc._steps.insert(std::make_pair(s["id"].string(), Step(prereqs, s["model"].string(), trans, rot, temp_proc.name)));
 			}
 
 			//Handle main process and subprocesses
