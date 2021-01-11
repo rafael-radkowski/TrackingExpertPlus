@@ -101,6 +101,8 @@ set(Demo_SRC
 	../../demo_common/AssemblySequence.h
 	../../demo_common/ProcedureLoader.h
 	../../demo_common/ProcedureLoader.cpp
+	../../demo_common/ProcedureRenderer.h
+	../../demo_common/ProcedureRenderer.cpp
 	../../demo_common/PartDatabase.h
 	../../demo_common/Sequence.h
 )

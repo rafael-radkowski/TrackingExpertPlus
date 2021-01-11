@@ -39,6 +39,7 @@
 #include "DemoScene.h"
 #include "GearBoxRenderer.h"
 #include "PartDatabase.h"
+#include "ProcedureRenderer.h"
 
 #define PI 3.1415926535
 
@@ -54,6 +55,8 @@ DemoScene* gear;
 
 PartDatabase* database;
 GearBoxRenderer* renderer;
+
+ProcedureRenderer* proc_renderer;
 
 // The Video Background
 isu_gfx::GLVideoCanvas*	video_bg;
@@ -73,8 +76,8 @@ void render_loop(glm::mat4 pm, glm::mat4 vm) {
 
 	video_bg->draw(pm, vm, glm::mat4());
 
-	renderer->draw(pm, vm);
-
+	//renderer->draw(pm, vm);
+	proc_renderer->draw(pm, vm);
 }
 
 void getKey(int key, int action)
@@ -88,10 +91,12 @@ void getKey(int key, int action)
 		switch (key)
 		{
 		case 68: //d
-			renderer->progress(true);
+			//renderer->progress(true);
+			proc_renderer->progress(true);
 			break;
 		case 65: //a
-			renderer->progress(false);
+			//renderer->progress(false);
+			proc_renderer->progress(false);
 			break;
 		}
 		break;
@@ -141,52 +146,79 @@ int main(int argc, char* argv)
 	video_bg->create(img_color.rows, img_color.cols, img_color.ptr(), true);
 
 	/*
-	Load part models
+	Init procedure renderer
 	*/
-	database = new PartDatabase();
-	database->loadObjsFromFile("D:/WorkRepos/TrackingExpertPlus/examples/gear_demo/models/load_models.txt");
+	std::vector<std::string> steps = std::vector<std::string>(18);
 
-	database->setNumDuplicates("N1-002_pc_gfx.obj", 1);
-	database->setNumDuplicates("N3-002_pc_gfx.obj", 1);
+	steps.at(0) = "Base";
+	steps.at(1) = "P1Base";
+	steps.at(2) = "P1Bearing1";
+	steps.at(3) = "P1Bearing2";
+	steps.at(4) = "P1Cap";
+	steps.at(5) = "Part1";
+	steps.at(6) = "P2Base";
+	steps.at(7) = "P2Bearing1";
+	steps.at(8) = "P2Cap";
+	steps.at(9) = "P2Gear";
+	steps.at(10) = "P2Bearing2";
+	steps.at(11) = "Part2";
+	steps.at(12) = "P3Base";
+	steps.at(13) = "P3Bearing1";
+	steps.at(14) = "P3Cap";
+	steps.at(15) = "P3BigGear";
+	steps.at(16) = "P3Bearing2";
+	steps.at(17) = "Part3";
 
-	/*
-	Set part model positions
-	*/
-	database->setModelPos("N1-001_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(0.5f, -0.3f, -0.12f)), (float)PI / 2, glm::vec3(0, 0, 1)));
-	database->setModelPos("N1-002_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(0.5f, -0.3f, -0.24f)), (float)PI / 2, glm::vec3(0, 0, 1)));
-	database->setModelPos("N1-002_pc_gfx.obj-1", glm::rotate(glm::translate(glm::vec3(0.2f, -0.3f, -0.24f)), (float)PI / 2, glm::vec3(0, 0, 1)));
-	database->setModelPos("N1-003_pc_gfx.obj", glm::translate(glm::vec3(0.6f, -0.3f, -0.24f)));
+	proc_renderer = new ProcedureRenderer();
+	proc_renderer->init("ExGearProc.json", steps);
 
-	database->setModelPos("N4-001_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.4f, -0.3f, -0.26f)), (float)-PI / 2, glm::vec3(0, 0, 1)));
-	database->setModelPos("N4-002_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.15f, -0.3f, -0.26f)), (float)-PI / 2, glm::vec3(0, 0, 1)));
-	database->setModelPos("N3-002_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.65f, -0.3f, -0.26f)), (float)-PI, glm::vec3(0, 0, 1)));
-	database->setModelPos("N4-003_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.45f, -0.3f, -0.26f)), (float)-PI / 2, glm::vec3(0, 0, 1)));
-	database->setModelPos("N4-004_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.3f, -0.3f, -0.26f)), (float)-PI / 2, glm::vec3(0, 0, 1)));
+	///*
+	//Load part models
+	//*/
+	//database = new PartDatabase();
+	//database->loadObjsFromFile("D:/WorkRepos/TrackingExpertPlus/examples/gear_demo/models/load_models.txt");
 
-	database->setModelPos("N2-001_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.25f, -0.3f, 0.43f)), (float)PI / 2, glm::vec3(0, 0, 1)));
-	database->setModelPos("N3-001_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.55f, -0.3f, 0.25f)), (float)PI / 2, glm::vec3(0, 0, 1)));
-	database->setModelPos("N3-002_pc_gfx.obj-1", glm::rotate(glm::translate(glm::vec3(-0.65f, -0.3f, 0.25f)), (float)PI, glm::vec3(0, 0, 1)));
-	database->setModelPos("N2-002_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(0.33f, -0.3f, 0.25f)), (float)PI / 2, glm::vec3(0, 0, 1)));
-	database->setModelPos("N2-003_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(0.48f, -0.3f, 0.25f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+	//database->setNumDuplicates("N1-002_pc_gfx.obj", 1);
+	//database->setNumDuplicates("N3-002_pc_gfx.obj", 1);
 
-	/*
-	Load models into the GearBoxRenderer sequence
-	*/
-	renderer = new GearBoxRenderer();
-	int idx = 0;
-	for (int i = 0; i < database->getNumModels(); i++)
-	{
-		Model* curModel = database->getObj(i);
-		if (!curModel->name.compare("null") == 0)
-		{
-			renderer->addModel(curModel, curModel->name);
-			idx++;
-		}
-	}
+	///*
+	//Set part model positions
+	//*/
+	//database->setModelPos("N1-001_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(0.5f, -0.3f, -0.12f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+	//database->setModelPos("N1-002_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(0.5f, -0.3f, -0.24f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+	//database->setModelPos("N1-002_pc_gfx.obj-1", glm::rotate(glm::translate(glm::vec3(0.2f, -0.3f, -0.24f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+	//database->setModelPos("N1-003_pc_gfx.obj", glm::translate(glm::vec3(0.6f, -0.3f, -0.24f)));
 
-	renderer->setSteps();
-	
-	renderer->updateInPlace();
+	//database->setModelPos("N4-001_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.4f, -0.3f, -0.26f)), (float)-PI / 2, glm::vec3(0, 0, 1)));
+	//database->setModelPos("N4-002_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.15f, -0.3f, -0.26f)), (float)-PI / 2, glm::vec3(0, 0, 1)));
+	//database->setModelPos("N3-002_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.65f, -0.3f, -0.26f)), (float)-PI, glm::vec3(0, 0, 1)));
+	//database->setModelPos("N4-003_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.45f, -0.3f, -0.26f)), (float)-PI / 2, glm::vec3(0, 0, 1)));
+	//database->setModelPos("N4-004_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.3f, -0.3f, -0.26f)), (float)-PI / 2, glm::vec3(0, 0, 1)));
+
+	//database->setModelPos("N2-001_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.25f, -0.3f, 0.43f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+	//database->setModelPos("N3-001_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.55f, -0.3f, 0.25f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+	//database->setModelPos("N3-002_pc_gfx.obj-1", glm::rotate(glm::translate(glm::vec3(-0.65f, -0.3f, 0.25f)), (float)PI, glm::vec3(0, 0, 1)));
+	//database->setModelPos("N2-002_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(0.33f, -0.3f, 0.25f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+	//database->setModelPos("N2-003_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(0.48f, -0.3f, 0.25f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+
+	///*
+	//Load models into the GearBoxRenderer sequence
+	//*/
+	//renderer = new GearBoxRenderer();
+	//int idx = 0;
+	//for (int i = 0; i < database->getNumModels(); i++)
+	//{
+	//	Model* curModel = database->getObj(i);
+	//	if (!curModel->name.compare("null") == 0)
+	//	{
+	//		renderer->addModel(curModel, curModel->name);
+	//		idx++;
+	//	}
+	//}
+
+	//renderer->setSteps();
+	//
+	//renderer->updateInPlace();
 
 	std::cout << "-----------------------------" << endl;
 	std::cout << "Use the W and D keys to cycle through the stages of the assembly process." << endl;
