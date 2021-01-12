@@ -8,13 +8,18 @@
 
 #include "ProcedureLoader.h"
 
+#include <stack>
+
 class ProcedureRenderer
 {
 private:
 	int _current_state;
 	std::string _current_subproc;
+	std::stack<std::string> _subproc_stack;
 	std::vector<std::string> _steps;
 	Procedure _procedure;
+
+	void handleSubproc(Step curStep);
 
 public:
 	ProcedureRenderer();

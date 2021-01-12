@@ -16,19 +16,56 @@ void ProcedureRenderer::init(const std::string path_and_name, std::vector<std::s
 
 	Step firstStep = _procedure.steps.at(_steps.at(0));
 
-	//if (firstStep.subproc.compare("main") != 0)
-	//{
-	//	_procedure.subprocs->at(firstStep.model_name).steps.at(_steps.at(1)).completed = true;
-	//	_current_subproc = firstStep.model_name;
-	//}
-	//else
-	//{
-	//	firstStep.completed = true;
-	//	_current_subproc = "NULL";
-	//}
+	_subproc_stack = std::stack<std::string>();
 
 	_current_subproc = firstStep.subproc;
 	_procedure.steps.at(_steps.at(0)).completed = true;
+}
+
+void ProcedureRenderer::handleSubproc(Step curStep)
+{
+	//If entering a subprocess
+	if (_subproc_stack.size() != 0 && curStep.subproc.compare(_subproc_stack.top()) == 0)
+	{
+		_current_subproc = curStep.subproc;
+		_subproc_stack.pop();
+
+		for (int i = 0; i <= _current_state; i++)
+		{
+			if (_procedure.steps.at(_steps.at(i)).subproc.compare(_current_subproc) != 0)
+			{
+				_procedure.steps.at(_steps.at(i)).completed = false;
+			}
+			else
+			{
+				for (; i <= _current_state; i++)
+				{
+					_procedure.steps.at(_steps.at(i)).completed = true;
+				}
+			}
+		}
+	}
+	//If exiting a subprocess
+	else
+	{
+		_current_subproc = curStep.subproc;
+		_subproc_stack.push(curStep.subproc);
+
+		for (int i = 0; i <= _current_state; i++)
+		{
+			if (_procedure.steps.at(_steps.at(i)).subproc.compare(_current_subproc) != 0)
+			{
+				_procedure.steps.at(_steps.at(i)).completed = false;
+			}
+			else
+			{
+				for (; i <= _current_state; i++)
+				{
+					_procedure.steps.at(_steps.at(i)).completed = true;
+				}
+			}
+		}
+	}
 }
 
 void ProcedureRenderer::progress(bool forward)
@@ -48,28 +85,18 @@ void ProcedureRenderer::progress(bool forward)
 			{
 				_procedure.steps.at(step_name).completed = false;
 			}
+
+			_procedure.steps.at(_steps.at(_current_state)).completed = true;
 		}
 
 		Step curStep = _procedure.steps.at(_steps.at(_current_state));
 
-		//If switching to a subprocedure
-		if (curStep.subproc.compare("main") != 0 && _current_subproc.compare("main") == 0)
+		//If changing subprocedures
+		if (curStep.subproc.compare(_current_subproc) != 0)
 		{
-			for (int i = 0; i < _current_state; i++)
-			{
-				_procedure.steps.at(_steps.at(i)).completed = false;
-			}
-		}
-		//If switching back to main
-		else if (_current_subproc.compare("main") != 0 && curStep.subproc.compare("main") == 0)
-		{
-			for (int i = 0; i < _current_state; i++)
-			{
-				_procedure.steps.at(_steps.at(i)).completed = true;
-			}
+			handleSubproc(curStep);
 		}
 
-		_current_subproc = curStep.subproc;
 		_procedure.steps.at(_steps.at(_current_state)).completed = true;
 	}
 	else
@@ -91,29 +118,10 @@ void ProcedureRenderer::progress(bool forward)
 
 		Step curStep = _procedure.steps.at(_steps.at(_current_state));
 
-		//If changing subprocedures or going back into main
+		//If changing subprocedures
 		if (curStep.subproc.compare(_current_subproc) != 0)
 		{
-			if (curStep.subproc.compare("main") != 0)
-			{
-				_current_subproc = curStep.subproc;
-				for (int i = 0; i < _current_state; i++)
-				{
-					if (_procedure.steps.at(_steps.at(i)).subproc.compare(_current_subproc) != 0)
-					{
-						_procedure.steps.at(_steps.at(i)).completed = false;
-					}
-				}
-			}
-
-			else if (curStep.subproc.compare("main") == 0)
-			{
-				_current_subproc = curStep.subproc;
-				for (int i = 0; i <= _current_state; i++)
-				{
-					_procedure.steps.at(_steps.at(i)).completed = true;
-				}
-			}
+			handleSubproc(curStep);
 		}
 	}
 }
