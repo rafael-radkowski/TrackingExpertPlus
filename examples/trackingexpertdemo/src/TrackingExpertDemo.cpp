@@ -91,15 +91,27 @@ bool TrackingExpertDemo::setCamera(CaptureDeviceType type)
 		case CaptureDeviceType::KinectAzure:
 		{
 #ifdef _WITH_AZURE_KINECT
-			Eigen::Matrix4f identityPose = Eigen::Matrix4f::Identity(4, 4);
+			//set up pose based on given file
+			CamPose poseFile = CamPose(2, 4, 7, 0.028f);
+			poseFile.readFile("C:/Users/Tyler/Documents/TrackingExpertPlus/pose2.txt"); //Hard coded for pose file TODO -Tyler
+
 			for (int i = KinectAzureCaptureDevice::getNumberConnectedCameras()-1; i >= 0; i--)
-			{ //todo pose
+			{ 
 				m_cameras.emplace(m_cameras.begin(), new KinectAzureCaptureDevice(i, KinectAzureCaptureDevice::Mode::RGBIRD, false));
 				m_pc_camerasIndividual.push_back(new PointCloud());
 			}
 
-			for (int i = 0; i < KinectAzureCaptureDevice::getNumberConnectedCameras(); i++)
-				m_pc_camerasIndividual[i]->pose = identityPose;
+			//set pose for each PC
+			for (int i = 0; i < m_cameras.size(); i++)
+			{
+				vector<vector<float>> pose = poseFile.getPose(i);
+				m_pc_camerasIndividual[i]->pose = Eigen::Matrix4f();
+				m_pc_camerasIndividual[i]->pose << // Eigen is column major be default
+					pose.at(0).at(0), pose.at(1).at(0), pose.at(2).at(0), pose.at(3).at(0),
+					pose.at(0).at(1), pose.at(1).at(1), pose.at(2).at(1), pose.at(3).at(1),
+					pose.at(0).at(2), pose.at(1).at(2), pose.at(2).at(2), pose.at(3).at(2),
+					pose.at(0).at(3), pose.at(1).at(3), pose.at(2).at(3), pose.at(3).at(3);
+			}
 
 #else
 			std::cout << "[ERROR] - Camera Azure Kinect selected but no such camera is present." << std::endl;
