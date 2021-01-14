@@ -131,6 +131,9 @@ int N = 0;
 string date = "";
 
 
+int sequence_test_case = 0;
+
+
 //--------------------------------------------------------------------
 // Function prototypes.
 void runTest(void);
@@ -138,14 +141,15 @@ void runTestManual(void);
 void startTestManual(void);
 float startAutoICP(void);
 void loadNewObject(void);
-
+void runSequenceTest(void);
+void startAutoICP2(void);
 /*
 Keyboard callback for keyboard interaction. 
 */
 void keyboard_callback( int key, int action) {
 
 
-	//cout << key << " : " << action << endl;
+	cout << key << " : " << action << endl;
 	switch (action) {
 	case 0:  // key up
 	
@@ -203,6 +207,21 @@ void keyboard_callback( int key, int action) {
 				runTestManual();
 				break;
 			}
+		case 79: // o
+		{
+			sequence_test_case = 0;
+			break;
+		}
+		case 80: // p
+		{
+			sequence_test_case++;
+			break;
+		}
+		case 91: // [
+		{
+			startAutoICP2();
+			break;
+		}
 		case 61: // =
 			{
 				run_test++;
@@ -425,10 +444,133 @@ void render_loop(glm::mat4 pm, glm::mat4 vm) {
 
 	gl_knn_lines->draw(pm, vm);
 
+
+	runSequenceTest();
+
 	
 	Sleep(25);
 }
 
+
+
+void runSequenceTest(void) {
+
+
+	switch(sequence_test_case)
+	{
+		case 0:
+		{
+			icp->setMaxIterations(1);
+			icp->setVerbose(true, 0);
+			icp->setRejectMaxAngle(25.0);
+			icp->setRejectMaxDistance(0.5);
+			icp->setRejectionMethod(ICPReject::DIST);
+
+
+			pc_ref = pc_ref_as_loaded;
+			pc_eval = pc_ref;
+			pc_camera = pc_camera_as_loaded;
+			Eigen::Vector3f t(0.1, -0.0, 0.600);
+			Eigen::Vector3f R(45.0, 0.0, 180.0);
+			PointCloudTransform::Transform(&pc_ref, t, R);
+			PointCloudTransform::Transform(&pc_eval, t, R);
+
+
+
+			icp->setCameraData(pc_camera);
+
+			gl_camera_point_cloud->updatePoints();
+			gl_reference_eval->updatePoints();
+			gl_reference_point_cloud->updatePoints();
+			gl_reference_eval->setModelmatrix(glm::mat4(1));
+			gl_reference_point_cloud->setModelmatrix(glm::mat4(1));
+
+			pose_result = Eigen::Matrix4f::Identity();
+			sequence_test_case = 1;
+			break;
+		}
+		case 1:
+
+			break;
+		case 2:
+		{
+			icp->setRejectionMethod(ICPReject::DIST_ANG);
+			PointCloudTransform::Transform(&pc_ref, icp->Rt2());
+			PointCloudTransform::Transform(&pc_eval, icp->Rt2());
+			gl_reference_eval->updatePoints();
+			gl_reference_point_cloud->updatePoints();
+
+			gl_reference_eval->setModelmatrix(glm::mat4(1));
+			gl_reference_point_cloud->setModelmatrix(glm::mat4(1));
+
+			Eigen::Vector3f t(0.05, 0.0, -0.0);
+			Eigen::Vector3f R(0.05, 0.0, -0.0);
+			PointCloudTransform::Transform(&pc_camera, t, R);
+			icp->setCameraData(pc_camera);
+			gl_camera_point_cloud->updatePoints();
+			sequence_test_case = 3;
+			break;	
+		}
+		case 3: // idle
+
+
+
+			break;
+		case 4:
+		{
+			icp->setRejectionMethod(ICPReject::DIST_ANG);
+			PointCloudTransform::Transform(&pc_ref, icp->Rt2());
+			PointCloudTransform::Transform(&pc_eval, icp->Rt2());
+			gl_reference_eval->updatePoints();
+			gl_reference_point_cloud->updatePoints();
+
+			gl_reference_eval->setModelmatrix(glm::mat4(1));
+			gl_reference_point_cloud->setModelmatrix(glm::mat4(1));
+
+			Eigen::Vector3f t(0.02, 0.01, -0.0);
+			Eigen::Vector3f R(0.02, 0.00, -0.0);
+			PointCloudTransform::Transform(&pc_camera, t, R);
+			icp->setCameraData(pc_camera);
+			gl_camera_point_cloud->updatePoints();
+			sequence_test_case = 5;
+			break;
+		}
+		case 5: // idle
+			break;
+	}
+
+}
+
+
+void startAutoICP2(void)
+{
+
+	icp->setMaxIterations(200);
+
+	Pose pose;
+	pose.t = Eigen::Matrix4f::Identity();
+	icp->compute(pc_ref, pose, pose_result, rms);
+
+
+	// Update teh graphic reference model
+
+	gl_reference_eval->setModelmatrix(MatrixUtils::ICPRt3Mat4(icp->Rt()));
+	gl_reference_point_cloud->setModelmatrix(MatrixUtils::ICPRt3Mat4(icp->Rt()));
+
+	// Update the lines between the point clouds showing the nearest neighbors
+
+	gl_knn_lines->updatePoints(pc_ref.points, pc_camera.points, icp->getNN());
+
+	
+
+
+
+	// Output the pose
+
+	std::cout << "[INFO] - Pose\n";
+	std::cout << pose_result << std::endl;
+
+}
 
 
 
@@ -498,9 +640,9 @@ int main(int argc, char** argv)
 	Load the first object for the test
 	*/
 	sampling_method = SamplingMethod::UNIFORM;
-	sampling_param.grid_x = 0.005;
-	sampling_param.grid_y = 0.005;
-	sampling_param.grid_z = 0.005;
+	sampling_param.grid_x = 0.01;
+	sampling_param.grid_y = 0.01;
+	sampling_param.grid_z = 0.01;
 	Sampling::SetMethod(sampling_method, sampling_param);
 
 	ReaderWriterOBJ::Read(ref_file, pc_ref_as_loaded.points, pc_ref_as_loaded.normals, false, false);
@@ -516,15 +658,22 @@ int main(int argc, char** argv)
 	ReaderWriterOBJ::Read(ref_file, pc_eval_as_loaded.points, pc_eval_as_loaded.normals, false, false);
 	Sampling::Run(pc_eval_as_loaded, pc_eval_as_loaded);
 	pc_eval = pc_eval_as_loaded;
-
+	 
 	PointCloudTransform::Transform(&pc_eval, initial_pos[run_test], initial_rot[run_test], false);
 	
 	/*------------------------------------------------------------------------
 	Load the second object for the test. 
 	*/
 	std:string camera_file = files[run_test];
+
+	camera_file = "../data/test/Azure_Kinect_model_1_2020-06-18_05-09-00_pc.ply";
 	ReaderWriterUtil::Read(camera_file, pc_camera_as_loaded.points, pc_camera_as_loaded.normals, true, false);
-	//Sampling::Run(pc_camera_as_loaded, pc_camera_as_loaded);
+	
+	sampling_param.grid_x = 0.01;
+	sampling_param.grid_y = 0.01;
+	sampling_param.grid_z = 0.01;
+	Sampling::SetMethod(sampling_method, sampling_param);
+	Sampling::Run(pc_camera_as_loaded, pc_camera_as_loaded);
 	pc_camera = pc_camera_as_loaded;
 
 
@@ -594,7 +743,7 @@ int main(int argc, char** argv)
 
 
 	//thread_1.lock(); // block the start until the render window is up
-	std::thread test_run_static(runTest);  
+	//std::thread test_run_static(runTest);  
 	
 
 	//Sleep(100);
@@ -604,7 +753,7 @@ int main(int argc, char** argv)
 
 
 	// delete all instances. 
-	test_run_static.detach();
+	//test_run_static.detach();
 	delete window;
 	
 

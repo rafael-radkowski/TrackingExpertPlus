@@ -53,6 +53,7 @@ void displayKeyboard(void) {
 
 // -scene ../data/test/Azure_Kinect_model_1_test.ply -model ../data/stanford_bunny_pc.obj -verbose
 // -cam AzureKinect -model ../data/stanford_bunny_pc.obj -verbose
+//  -cam AzureKinect -model ../data/stanford_bunny_pc.obj -verbose -with_filter  -fdang 12.0 -bf_si 16.0 -bf_ss 12.0 -grid 0.02 -cam_offset 8  -fdrad 0.2
 
 int main(int argc, char** argv) {
 
