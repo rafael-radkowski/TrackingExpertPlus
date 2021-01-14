@@ -86,6 +86,7 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 
 	_R_all = Eigen::Matrix3f::Identity();
 	_t_all = Eigen::Vector3f(0.0, 0.0, 0.0);
+	_Rt_final = Eigen::Matrix4f::Identity();
 
 	// TODO: Remove teh manual copy since the code in line 70 already copies the points. 
 	// copy test points into a new struct
@@ -218,7 +219,7 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 
 		
 	}
-	
+	_Rt_final = overall;
 	result_pose =  overall;
 
 	if(_verbose && _verbose_level == 2)
@@ -292,6 +293,12 @@ Matrix4f ICP::Rt(void){
 	//_testPoint_centroid
 
 	return finalRt;
+}
+
+
+Eigen::Matrix4f ICP::Rt2(void)
+{
+	return _Rt_final;
 }
 
 

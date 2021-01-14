@@ -198,6 +198,9 @@ public:
 	Matrix4f Rt(void);
 
 
+	Matrix4f Rt2(void);
+
+
 	//-------------------------------------------------------------------------------
 
 	/* DEBUG FUNCTION
@@ -244,6 +247,8 @@ private:
 	Vector3f				_t_all; 
 	Matrix4f				_Rt_initial;//inintial pose
 	Affine3f				_Rt_affine; // initial pose
+
+	Matrix4f				_Rt_final;
 
 	std::vector<Matches>	_local_matches;
 
