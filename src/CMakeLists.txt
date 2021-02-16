@@ -171,6 +171,7 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/camera/ICaptureDeviceTypes.h
 	${PROJECT_SOURCE_DIR}/include/camera/PointCloudProducer.h
 	${PROJECT_SOURCE_DIR}/include/camera/CameraParameters.h
+	${PROJECT_SOURCE_DIR}/include/camera/MatrixConv.h
 
 	
 
@@ -303,6 +304,7 @@ set( Utils_SRC
 	utils/LogReaderWriter.cpp
 	utils/ArgParser.cpp
 	utils/FileUtilsX.cpp
+	utils/MatrixConv.cpp
 )
 
 
