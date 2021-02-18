@@ -157,6 +157,7 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/utils/ArgParser.h
 	${PROJECT_SOURCE_DIR}/include/utils/FileUtilsX.h
 	${PROJECT_SOURCE_DIR}/include/utils/MSVerCheck.h
+	${PROJECT_SOURCE_DIR}/include/utils/MatrixConv.h
 	${PROJECT_SOURCE_DIR}/include/loader/ReaderWriter.h
 	${PROJECT_SOURCE_DIR}/include/loader/ReaderWriterOBJ.h
 	${PROJECT_SOURCE_DIR}/include/loader/ReaderWriterPLY.h
@@ -171,7 +172,6 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/camera/ICaptureDeviceTypes.h
 	${PROJECT_SOURCE_DIR}/include/camera/PointCloudProducer.h
 	${PROJECT_SOURCE_DIR}/include/camera/CameraParameters.h
-	${PROJECT_SOURCE_DIR}/include/camera/MatrixConv.h
 
 	
 
