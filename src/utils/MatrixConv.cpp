@@ -132,3 +132,41 @@ void MatrixConv::Mat42Affine3fRot(glm::mat4& glm_in, Eigen::Affine3f& eigen_out)
 		}
 	}
 }
+
+
+////static
+//Eigen::Vector3d PointCloudTransform::Transform(Eigen::Affine3f& Rt, Eigen::Vector3d& point)
+//{
+//	Eigen::Vector3d translation = Eigen::Vector3d(Rt.data()[12], Rt.data()[13], Rt.data()[14]);
+//
+//	return translation + point;
+//}
+//
+////static
+//vector<Eigen::Vector3d> PointCloudTransform::Transform(Eigen::Affine3f& Rt, vector<Eigen::Vector3d>& points)
+//{
+//	vector<Eigen::Vector3d> results = vector<Eigen::Vector3d>();
+//
+//	for (int i = 0; i < points.size(); i++)
+//	{
+//		results.push_back(Transform(Rt, points.at(i)));
+//	}
+//
+//	return results;
+//}
+//
+////static
+//void PointCloudTransform::TransformInPlace(Eigen::Affine3f& Rt, Eigen::Vector3d& point)
+//{
+//	Eigen::Vector3d translation = Eigen::Vector3d(Rt.data()[12], Rt.data()[13], Rt.data()[14]);
+//	point = translation + point;
+//}
+//
+////static
+//void PointCloudTransform::TransformInPlace(Eigen::Affine3f& Rt, vector<Eigen::Vector3d>& points)
+//{
+//	for (int i = 0; i < points.size(); i++)
+//	{
+//		TransformInPlace(Rt, points.at(i));
+//	}
+//}

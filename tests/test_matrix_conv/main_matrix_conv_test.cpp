@@ -4,6 +4,8 @@
 
 #include "glm/gtc/matrix_transform.hpp"
 
+MatrixConv* conv;
+
 void print_mat4(glm::mat4 mat_in)
 {
 	std::cout << "[" << mat_in[0][0] << ", " << mat_in[1][0] << ", " << mat_in[2][0] << ", " << mat_in[3][0] << "]" << std::endl;
@@ -22,6 +24,11 @@ void print_matrix4f(Eigen::Matrix4f matrix_in)
 	std::cout << matrix_in.matrix() << std::endl << std::endl;
 }
 
+
+
+
+
+//This is done in column-major order, as per glm/Eigen standard
 void print_matrix_general(float* mat)
 {
 	for (int i = 0; i < 4; i++)
@@ -60,12 +67,12 @@ bool check_rot_error(float* comp0, float* comp1, static char* func_name)
 
 	for (int i = 0; i < 16; i ++)
 	{
-		float val0 = comp0[i ];
+		float val0 = comp0[i];
 		float val1 = comp1[i];
 
 		if (i <= 11 && (val0 < val1 - 0.000001 || val0 > val1 + 0.000001))
 		{
-			std::cout << "Error in function " << func_name << ":" << std::endl;
+			std::cout << "Error in function " << func_name << " (" << i << "):" << std::endl;
 			std::cout << "Input matrix: " << std::endl;
 			print_matrix_general(comp0);
 
@@ -77,7 +84,7 @@ bool check_rot_error(float* comp0, float* comp1, static char* func_name)
 		}
 		else if (i > 11 && (val1 < ref.data()[i] - 0.000001 || val1 > ref.data()[i] + 0.000001))
 		{
-			std::cout << "Error in function " << func_name << ":" << std::endl;
+			std::cout << "Error in function " << func_name << " (" << i << "):" << std::endl;
 			std::cout << "Input matrix: " << std::endl;
 			print_matrix_general(comp0);
 
@@ -147,39 +154,33 @@ bool check_trans_vec_error(float* comp0, float* comp1, static char* func_name)
 	return true;
 }
 
-int main(int argc, char* argv[])
+
+
+
+
+void doTest(std::vector<float> rand_trans, std::vector<float> rand_rot, int* numErrors)
 {
 	/*
-		Initialize test
+		Initialize comparison matrices and test their validity
 	*/
-	MatrixConv* conv = MatrixConv::getInstance();
-
-
-	std::vector<float> rand_trans, rand_rot;
-
-	rand_trans = texpert::RandomGenerator::FloatPosition(-1, 1);
-	rand_rot = texpert::RandomGenerator::FloatPosition(-179.99f, 179.99f);
-
-	//Test if matrix to mat works
 	glm::mat4 mat_in = glm::mat4();
 	mat_in = glm::rotate(mat_in, rand_rot.at(0) * 3.14152f / 180.0f, glm::vec3(1, 0, 0));
 	mat_in = glm::rotate(mat_in, rand_rot.at(1) * 3.14152f / 180.0f, glm::vec3(0, 1, 0));
 	mat_in = glm::rotate(mat_in, rand_rot.at(2) * 3.14152f / 180.0f, glm::vec3(0, 0, 1));
 	mat_in = glm::translate(mat_in, glm::vec3(rand_trans.at(0), rand_trans.at(1), rand_trans.at(2)));
 
-	print_mat4(mat_in);
-
-
 	Eigen::Affine3f aff_in = Eigen::Affine3f::Identity();
 	conv->Mat42Affine3f(mat_in, aff_in);
 
-	check_error(glm::value_ptr(mat_in), aff_in.data(), "Mat42Affine3f");
+	if(!check_error(glm::value_ptr(mat_in), aff_in.data(), "Mat42Affine3f"))
+		numErrors[0]++;
 
 	//Test if affine to matrix4f works
 	Eigen::Matrix4f matrix_in;
 	conv->Mat42Matrix4f(mat_in, matrix_in);
 
-	check_error(glm::value_ptr(mat_in), matrix_in.data(), "Mat42Matrix4f");
+	if(!check_error(glm::value_ptr(mat_in), matrix_in.data(), "Mat42Matrix4f"))
+		numErrors[1]++;
 
 
 
@@ -198,41 +199,100 @@ int main(int argc, char* argv[])
 	*/
 
 	conv->Matrix4f2Mat4(matrix_in, mat_out);
-	check_error(matrix_in.data(), glm::value_ptr(mat_out), "Matrix4f2Mat4");
+	if(!check_error(matrix_in.data(), glm::value_ptr(mat_out), "Matrix4f2Mat4"))
+		numErrors[2]++;
 
 	conv->Matrix4f2Vec3Trans(matrix_in, vec_out);
-	check_trans_vec_error(matrix_in.data(), glm::value_ptr(vec_out), "Matrix4f2Vec3Trans");
+	if(!check_trans_vec_error(matrix_in.data(), glm::value_ptr(vec_out), "Matrix4f2Vec3Trans"))
+		numErrors[3]++;
 
 	conv->Matrix4f2Mat4Rot(matrix_in, mat_out);
-	check_rot_error(matrix_in.data(), glm::value_ptr(mat_out), "Matrix4f2Mat4Rot");
+	if(!check_rot_error(matrix_in.data(), glm::value_ptr(mat_out), "Matrix4f2Mat4Rot"))
+		numErrors[4]++;
 
 	conv->Affine3f2Mat4(aff_in, mat_out);
-	check_error(aff_in.data(), glm::value_ptr(mat_out), "Affine3f2Mat4");
+	if(!check_error(aff_in.data(), glm::value_ptr(mat_out), "Affine3f2Mat4"))
+		numErrors[5]++;
 
 	conv->Affine3f2Mat4Rot(aff_in, mat_out);
-	check_rot_error(aff_in.data(), glm::value_ptr(mat_out), "Affine3f2Mat4Rot");
+	if(!check_rot_error(aff_in.data(), glm::value_ptr(mat_out), "Affine3f2Mat4Rot"))
+		numErrors[6]++;
 
 	conv->Affine3f2Mat4Trans(aff_in, mat_out);
-	check_trans_error(aff_in.data(), glm::value_ptr(mat_out), "Affine3f2Mat4Trans");
+	if(!check_trans_error(aff_in.data(), glm::value_ptr(mat_out), "Affine3f2Mat4Trans"))
+		numErrors[7]++;
 
 	conv->Affine3f2Vec3Trans(aff_in, vec_out);
-	check_trans_vec_error(matrix_in.data(), glm::value_ptr(vec_out), "Affine3f2Vec3Trans");
+	if(!check_trans_vec_error(matrix_in.data(), glm::value_ptr(vec_out), "Affine3f2Vec3Trans"))
+		numErrors[8]++;
 
 	conv->Mat42Affine3fRot(mat_in, aff_out);
-	check_rot_error(glm::value_ptr(mat_in), aff_out.data(), "Mat42Affine3fRot");
+	if(!check_rot_error(glm::value_ptr(mat_in), aff_out.data(), "Mat42Affine3fRot"))
+		numErrors[9]++;
 
 	conv->Mat42Affine3fTrans(mat_in, aff_out);
-	check_trans_error(glm::value_ptr(mat_in), aff_out.data(), "Mat42Affine3fTrans");
+	if(!check_trans_error(glm::value_ptr(mat_in), aff_out.data(), "Mat42Affine3fTrans"))
+		numErrors[10]++;
 
 	conv->Mat42Matrix4fRot(mat_in, matrix_out);
-	check_rot_error(glm::value_ptr(mat_in), matrix_out.data(), "Mat42Matrix4fRot");
+	if(!check_rot_error(glm::value_ptr(mat_in), matrix_out.data(), "Mat42Matrix4fRot"))
+		numErrors[11]++;
 
 	conv->Mat42Matrix4fTrans(mat_in, matrix_out);
-	check_rot_error(glm::value_ptr(mat_in), matrix_out.data(), "Mat42Matrix4fTrans");
+	if(!check_trans_error(glm::value_ptr(mat_in), matrix_out.data(), "Mat42Matrix4fTrans"))
+		numErrors[12]++;
 
 	conv->Matrix4f2Affine3f(matrix_in, aff_out);
-	check_error(matrix_in.data(), aff_out.data(), "Matrix4f2Affine3f");
+	if(!check_error(matrix_in.data(), aff_out.data(), "Matrix4f2Affine3f"))
+		numErrors[13]++;
 
 	conv->Affine3f2Matrix4f(aff_in, matrix_out);
-	check_error(aff_in.data(), matrix_out.data(), "Affine3f2Matrix4f");
+	if(!check_error(aff_in.data(), matrix_out.data(), "Affine3f2Matrix4f"))
+		numErrors[14]++;
+}
+
+int main(int argc, char* argv[])
+{
+	/*
+		Initialize test
+	*/
+	conv = MatrixConv::getInstance();
+	int numIters = 1000000;
+
+	std::vector<float> rand_trans, rand_rot;
+
+	int* err = (int*)malloc(15 * sizeof(int));
+
+	for (int i = 0; i < 15; i++)
+	{
+		err[i] = 0;
+	}
+
+
+	/*
+		Run tests
+	*/
+	for(int i = 0; i < numIters; i++)
+	{
+		rand_trans = texpert::RandomGenerator::FloatPosition(-1, 1);
+		rand_rot = texpert::RandomGenerator::FloatPosition(-179.99f, 179.99f);
+		doTest(rand_trans, rand_rot, err);
+	}
+
+	std::cout << "Mat42Affine3f Err: " << ((float)err[0] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Mat42Matrix4f Err: " << ((float)err[1] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Matrix4f2Mat4 Err: " << ((float)err[2] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Matrix4f2Vec3Trans Err: " << ((float)err[3] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Matrix4f2Mat4Rot Err: " << ((float)err[4] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Affine3f2Mat4 Err: " << ((float)err[5] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Affine3f2Mat4Rot Err: " << ((float)err[6] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Affine3f2Mat4Trans Err: " << ((float)err[7] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Affine3f2Vec3Trans Err: " << ((float)err[8] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Mat42Affine3fRot Err: " << ((float)err[9] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Mat42Affine3fTrans Err: " << ((float)err[10] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Mat42Matrix4fRot Err: " << ((float)err[11] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Mat42Matrix4fTrans Err: " << ((float)err[12] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Matrix4f2Affine3f Err: " << ((float)err[13] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Affine3f2Matrix4f Err: " << ((float)err[14] / (float)numIters) * 100.0f << "%" << std::endl;
+
 }
