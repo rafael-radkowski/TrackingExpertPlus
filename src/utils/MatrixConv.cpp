@@ -38,12 +38,11 @@ void MatrixConv::Affine3f2Mat4Trans(Eigen::Affine3f& eigen_in, glm::mat4& glm_ou
 void MatrixConv::Affine3f2Mat4Rot(Eigen::Affine3f& eigen_in, glm::mat4& glm_out)
 {
 	glm_out = glm::mat4(1.0f);
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 9; i++)
 	{
-		for (int j = 0; j < 3; j++)
-		{
-			glm_out[i][j] = eigen_in(j, i);
-		}
+		int row = i / 3;
+		int col = i % 3;
+		glm_out[col][row] = eigen_in(row, col);
 	}
 }
 
@@ -60,12 +59,11 @@ void MatrixConv::Matrix4f2Vec3Trans(Eigen::Matrix4f& eigen_in, glm::vec3& glm_ou
 void MatrixConv::Matrix4f2Mat4Rot(Eigen::Matrix4f& eigen_in, glm::mat4& glm_out)
 {
 	glm_out = glm::mat4(1.0f);
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 9; i++)
 	{
-		for (int j = 0; j < 3; j++)
-		{
-			glm_out[i][j] = eigen_in(j, i);
-		}
+		int row = i / 3;
+		int col = i % 3;
+		glm_out[col][row] = eigen_in(row, col);
 	}
 }
 
@@ -99,16 +97,18 @@ void MatrixConv::Mat42Matrix4fTrans(glm::mat4& glm_in, Eigen::Matrix4f& eigen_ou
 	eigen_out(2, 3) = glm_in[3][2];
 }
 
+/*
+	Can be simplified to O(n) time by using modulo
+*/
 void MatrixConv::Mat42Matrix4fRot(glm::mat4& glm_in, Eigen::Matrix4f& eigen_out)
 {
 	eigen_out = Eigen::Matrix4f::Identity();
 
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 9; i++)
 	{
-		for (int j = 0; j < 3; j++)
-		{
-			eigen_out(j, i) = glm_in[i][j];
-		}
+		int row = i / 3;
+		int col = i % 3;
+		eigen_out(row, col) = glm_in[col][row];
 	}
 }
 
@@ -124,49 +124,10 @@ void MatrixConv::Mat42Affine3fRot(glm::mat4& glm_in, Eigen::Affine3f& eigen_out)
 {
 	eigen_out = Eigen::Affine3f::Identity();
 
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 9; i++)
 	{
-		for (int j = 0; j < 3; j++)
-		{
-			eigen_out(j, i) = glm_in[i][j];
-		}
+		int row = i / 3;
+		int col = i % 3;
+		eigen_out(row, col) = glm_in[col][row];
 	}
 }
-
-
-////static
-//Eigen::Vector3d PointCloudTransform::Transform(Eigen::Affine3f& Rt, Eigen::Vector3d& point)
-//{
-//	Eigen::Vector3d translation = Eigen::Vector3d(Rt.data()[12], Rt.data()[13], Rt.data()[14]);
-//
-//	return translation + point;
-//}
-//
-////static
-//vector<Eigen::Vector3d> PointCloudTransform::Transform(Eigen::Affine3f& Rt, vector<Eigen::Vector3d>& points)
-//{
-//	vector<Eigen::Vector3d> results = vector<Eigen::Vector3d>();
-//
-//	for (int i = 0; i < points.size(); i++)
-//	{
-//		results.push_back(Transform(Rt, points.at(i)));
-//	}
-//
-//	return results;
-//}
-//
-////static
-//void PointCloudTransform::TransformInPlace(Eigen::Affine3f& Rt, Eigen::Vector3d& point)
-//{
-//	Eigen::Vector3d translation = Eigen::Vector3d(Rt.data()[12], Rt.data()[13], Rt.data()[14]);
-//	point = translation + point;
-//}
-//
-////static
-//void PointCloudTransform::TransformInPlace(Eigen::Affine3f& Rt, vector<Eigen::Vector3d>& points)
-//{
-//	for (int i = 0; i < points.size(); i++)
-//	{
-//		TransformInPlace(Rt, points.at(i));
-//	}
-//}

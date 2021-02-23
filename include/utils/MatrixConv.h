@@ -11,9 +11,8 @@ MIT License
 ---------------------------------------------------------------
 Last edited:
 
-Feb 17, 2021, WB
-- Renamed functions to match convention
-- Date correction
+Feb 23, 2021, WB
+- Simplified Rot functions
 */
 
 #include <Eigen/Dense>
@@ -138,14 +137,4 @@ public:
 		@param eigen_out - the output eigen matrix
 	*/
 	void Mat42Affine3fRot(glm::mat4& glm_in, Eigen::Affine3f& eigen_out);
-
-
-
-	//static Eigen::Vector3d Transform(Eigen::Affine3f& Rt, Eigen::Vector3d& point);
-
-	//static vector<Eigen::Vector3d> Transform(Eigen::Affine3f& Rt, vector<Eigen::Vector3d>& points);
-
-	//static void TransformInPlace(Eigen::Affine3f& Rt, Eigen::Vector3d& point);
-
-	//static void TransformInPlace(Eigen::Affine3f& Rt, vector<Eigen::Vector3d>& points);
 };

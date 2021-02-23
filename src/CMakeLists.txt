@@ -150,6 +150,7 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/pointcloud/PointCloudEval.h
 	${PROJECT_SOURCE_DIR}/include/pointcloud/MatrixUtils.h
 	${PROJECT_SOURCE_DIR}/include/pointcloud/Utils.h
+	${PROJECT_SOURCE_DIR}/include/pointcloud/PointCloudTrans.h
 	${PROJECT_SOURCE_DIR}/include/utils/TimeUtils.h
 	${PROJECT_SOURCE_DIR}/include/utils/RandomGenerator.h
 	${PROJECT_SOURCE_DIR}/include/utils/LogTypes.h
@@ -271,6 +272,7 @@ set( PointCloud_SRC
 	point_cloud/PointCloudTransform.cpp
 	point_cloud/PointCloudEval.cpp
 	point_cloud/MatrixUtils.cpp
+	point_cloud/PointCloudTrans.cpp
 	cam/KinectAzureCaptureDevice.cpp
 	cam/StructureCoreCaptureDevice.cpp
 	cam/PointCloudProducer.cpp
