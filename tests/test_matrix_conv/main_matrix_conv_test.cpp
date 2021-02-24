@@ -10,28 +10,9 @@
 
 MatrixConv* conv;
 
-void print_mat4(glm::mat4 mat_in)
-{
-	std::cout << "[" << mat_in[0][0] << ", " << mat_in[1][0] << ", " << mat_in[2][0] << ", " << mat_in[3][0] << "]" << std::endl;
-	std::cout << "[" << mat_in[0][1] << ", " << mat_in[1][1] << ", " << mat_in[2][1] << ", " << mat_in[3][1] << "]" << std::endl;
-	std::cout << "[" << mat_in[0][2] << ", " << mat_in[1][2] << ", " << mat_in[2][2] << ", " << mat_in[3][2] << "]" << std::endl;
-	std::cout << "[" << mat_in[0][3] << ", " << mat_in[1][3] << ", " << mat_in[2][3] << ", " << mat_in[3][3] << "]" << std::endl << std::endl;
-}
-
-void print_affine3f(Eigen::Affine3f aff_in)
-{
-	std::cout << aff_in.matrix() << std::endl << std::endl;
-}
-
-void print_matrix4f(Eigen::Matrix4f matrix_in)
-{
-	std::cout << matrix_in.matrix() << std::endl << std::endl;
-}
-
-
-
-
-
+/*
+	--------------------------- MatrixConv class test helpers ---------------------------
+*/
 //This is done in column-major order, as per glm/Eigen standard
 void print_matrix_general(float* mat)
 {
@@ -158,6 +139,34 @@ bool check_trans_vec_error(float* comp0, float* comp1, static char* func_name)
 	return true;
 }
 
+/*
+	--------------------------- PointCloudTrans class test helpers ---------------------------
+*/
+void makeRandCloudTransforms(int numIters, std::vector<Eigen::Vector3d>& eigen_pts, std::vector<Eigen::Affine3f>& eigen_trans, std::vector<cv::Vec3f>& cv_pts, std::vector<cv::Affine3f>& cv_trans)
+{
+	for (int i = 0; i < numIters; i++)
+	{
+		//Create CV affine matrices, then Eigen affine matrices
+		std::vector<float> cur_translation = texpert::RandomGenerator::FloatPosition(-1, 1);
+		std::vector<float> cur_rotation = texpert::RandomGenerator::FloatPosition(-PI, PI);
+
+		cv::Matx33f R;
+		cv::Rodrigues(cv::Vec3f(cur_rotation.at(0), cur_rotation.at(1), cur_rotation.at(2)), R);
+		cv_trans.push_back(cv::Affine3f(R, cv::Vec3f(cur_translation.at(0), cur_translation.at(1), cur_translation.at(2))));
+
+		Eigen::Affine3f transformation = Eigen::Affine3f();
+		transformation.matrix() << R(0, 0), R(0, 1), R(0, 2), cur_translation.at(0),
+			R(1, 0), R(1, 1), R(1, 2), cur_translation.at(1),
+			R(2, 0), R(2, 1), R(2, 2), cur_translation.at(2),
+			0, 0, 0, 1;
+		eigen_trans.push_back(transformation);
+
+		//Create points
+		cur_translation = texpert::RandomGenerator::FloatPosition(-1, 1);
+		cv_pts.push_back(cv::Vec3f(cur_translation.at(0), cur_translation.at(1), cur_translation.at(2)));
+		eigen_pts.push_back(Eigen::Vector3d(cur_translation.at(0), cur_translation.at(1), cur_translation.at(2)));
+	}
+}
 
 
 
@@ -166,9 +175,14 @@ bool check_trans_vec_error(float* comp0, float* comp1, static char* func_name)
 */
 void doConvTest(std::vector<float> rand_trans, std::vector<float> rand_rot, int* numErrors)
 {
-	/*
-		Initialize comparison matrices and test their validity
-	*/
+
+	//Initialize error array
+	for (int i = 0; i < 15; i++)
+	{
+		numErrors[i] = 0;
+	}
+
+	//Initialize comparison matrices and test their validity
 	glm::mat4 mat_in = glm::mat4();
 	mat_in = glm::rotate(mat_in, rand_rot.at(0) * 3.14152f / 180.0f, glm::vec3(1, 0, 0));
 	mat_in = glm::rotate(mat_in, rand_rot.at(1) * 3.14152f / 180.0f, glm::vec3(0, 1, 0));
@@ -191,19 +205,14 @@ void doConvTest(std::vector<float> rand_trans, std::vector<float> rand_rot, int*
 
 
 
-	/*
-		Declare output objects
-	*/
+	// Declare output objects
 	glm::mat4 mat_out;
 	glm::vec3 vec_out;
 	Eigen::Affine3f aff_out;
 	Eigen::Matrix4f matrix_out;
 
 
-	/*
-		Test functions
-	*/
-
+	// Test functions
 	conv->Matrix4f2Mat4(matrix_in, mat_out);
 	if(!check_error(matrix_in.data(), glm::value_ptr(mat_out), "Matrix4f2Mat4"))
 		numErrors[2]++;
@@ -260,61 +269,16 @@ void doConvTest(std::vector<float> rand_trans, std::vector<float> rand_rot, int*
 /*
 	PointCloudTrans Test Function
 */
-void doTransTest()
+void doPointTransTest(int numIters, int* numErrors)
 {
 
-}
+	// Initialize error array
+	for (int i = 0; i < 4; i++)
+	{
+		numErrors[i] = 0;
+	}
 
-int main(int argc, char* argv[])
-{
-	//std::cout << std::endl << "<----------------------Begin MatrixConv tests----------------------->" << std::endl;
-	///*
-	//	Initialize test
-	//*/
-	//conv = MatrixConv::getInstance();
-	//int numIters = 1000;
-
-	//std::vector<float> rand_trans, rand_rot;
-
-	//int* err = (int*)malloc(15 * sizeof(int));
-
-	//for (int i = 0; i < 15; i++)
-	//{
-	//	err[i] = 0;
-	//}
-
-
-	///*
-	//	Run tests
-	//*/
-	//for(int i = 0; i < numIters; i++)
-	//{
-	//	rand_trans = texpert::RandomGenerator::FloatPosition(-1, 1);
-	//	rand_rot = texpert::RandomGenerator::FloatPosition(-179.99f, 179.99f);
-	//	doConvTest(rand_trans, rand_rot, err);
-	//}
-
-	//std::cout << "Mat42Affine3f Err: " << ((float)err[0] / (float)numIters) * 100.0f << "%" << std::endl;
-	//std::cout << "Mat42Matrix4f Err: " << ((float)err[1] / (float)numIters) * 100.0f << "%" << std::endl;
-	//std::cout << "Matrix4f2Mat4 Err: " << ((float)err[2] / (float)numIters) * 100.0f << "%" << std::endl;
-	//std::cout << "Matrix4f2Vec3Trans Err: " << ((float)err[3] / (float)numIters) * 100.0f << "%" << std::endl;
-	//std::cout << "Matrix4f2Mat4Rot Err: " << ((float)err[4] / (float)numIters) * 100.0f << "%" << std::endl;
-	//std::cout << "Affine3f2Mat4 Err: " << ((float)err[5] / (float)numIters) * 100.0f << "%" << std::endl;
-	//std::cout << "Affine3f2Mat4Rot Err: " << ((float)err[6] / (float)numIters) * 100.0f << "%" << std::endl;
-	//std::cout << "Affine3f2Mat4Trans Err: " << ((float)err[7] / (float)numIters) * 100.0f << "%" << std::endl;
-	//std::cout << "Affine3f2Vec3Trans Err: " << ((float)err[8] / (float)numIters) * 100.0f << "%" << std::endl;
-	//std::cout << "Mat42Affine3fRot Err: " << ((float)err[9] / (float)numIters) * 100.0f << "%" << std::endl;
-	//std::cout << "Mat42Affine3fTrans Err: " << ((float)err[10] / (float)numIters) * 100.0f << "%" << std::endl;
-	//std::cout << "Mat42Matrix4fRot Err: " << ((float)err[11] / (float)numIters) * 100.0f << "%" << std::endl;
-	//std::cout << "Mat42Matrix4fTrans Err: " << ((float)err[12] / (float)numIters) * 100.0f << "%" << std::endl;
-	//std::cout << "Matrix4f2Affine3f Err: " << ((float)err[13] / (float)numIters) * 100.0f << "%" << std::endl;
-	//std::cout << "Affine3f2Matrix4f Err: " << ((float)err[14] / (float)numIters) * 100.0f << "%" << std::endl;
-
-	/*
-	End MatrixConv tests
-	Begin PointCloudTrans tests
-	*/
-	std::cout << std::endl << "<----------------------Begin PointCloudTrans tests----------------------->" << std::endl;
+	// Initialize transform matrix/point arrays
 	std::vector<cv::Affine3f> cv_trans = std::vector<cv::Affine3f>();
 	std::vector<cv::Vec3f> cv_pts = std::vector<cv::Vec3f>();
 
@@ -322,38 +286,175 @@ int main(int argc, char* argv[])
 	std::vector<Eigen::Vector3d> eigen_pts = std::vector<Eigen::Vector3d>();
 
 	//Initialize random values
-	for (int i = 0; i < 10; i++)
-	{
-		//Create CV affine matrices, then Eigen affine matrices
-		std::vector<float> cur_translation = texpert::RandomGenerator::FloatPosition(-1, 1);
-		std::vector<float> cur_rotation = texpert::RandomGenerator::FloatPosition(-PI, PI);
+	makeRandCloudTransforms(numIters, eigen_pts, eigen_trans, cv_pts, cv_trans);
 
-		cv::Matx33f R;
-		cv::Rodrigues(cv::Vec3f(cur_rotation.at(0), cur_rotation.at(1), cur_rotation.at(2)), R);
-		cv_trans.push_back(cv::Affine3f(R, cv::Vec3f(cur_translation.at(0), cur_translation.at(1), cur_translation.at(2))));
+	bool err_occurred = false;
 
-		Eigen::Affine3f transformation = Eigen::Affine3f();
-		transformation.matrix() << R(0, 0), R(0, 1), R(0, 2), cur_translation.at(0),
-			R(1, 0),	R(1, 1),	R(1, 2),	cur_translation.at(1),
-			R(2, 0),	R(2, 1),	R(2, 2),	cur_translation.at(2),
-			0,			0,			0,			1;
-		eigen_trans.push_back(transformation);
-
-		//Create points
-		cur_translation = texpert::RandomGenerator::FloatPosition(-1, 1);
-		cv_pts.push_back(cv::Vec3f(cur_translation.at(0), cur_translation.at(1), cur_translation.at(2)));
-		eigen_pts.push_back(Eigen::Vector3d(cur_translation.at(0), cur_translation.at(1), cur_translation.at(2)));
-	}
-
-	for (int mat = 0; mat < 10; mat++)
+	//Iterate through each matrix
+	for (int mat = 0; mat < numIters; mat++)
 	{
 		cv::Affine3f cur_cv = cv_trans.at(mat);
 		Eigen::Affine3f cur_eig = eigen_trans.at(mat);
-		for (int pt = 0; pt < 10; pt++)
+
+		//Iterate through each point
+		for (int pt = 0; pt < numIters; pt++)
 		{
 			cv::Vec3f cv_res = cur_cv * cv_pts.at(pt);
 			Eigen::Vector3d eigen_res = PointCloudTrans::Transform(cur_eig, eigen_pts.at(pt));
+
+			//Compare the results from each transform
+			for (int idx = 0; idx < 3; idx++)
+			{
+				if (cv_res(idx) < eigen_res(idx) - 0.00001 || cv_res(idx) > eigen_res(idx) + 0.00001)
+				{
+					err_occurred = true;
+					break;
+				}
+			}
+			if (err_occurred)
+			{
+				numErrors[0]++;
+				err_occurred = false;
+			}
+		}
+
+		//Test point cloud transform
+		std::vector<Eigen::Vector3d> eigen_pts_transformed = PointCloudTrans::Transform(eigen_trans.at(mat), eigen_pts);
+
+		for (int i = 0; i < numIters; i++)
+		{
+			cv::Vec3f res = cv_trans.at(mat) * cv_pts.at(i);
+
+			for (int idx = 0; idx < 3; idx++)
+			{
+				if (res(idx) < eigen_pts_transformed.at(i)(idx) - 0.00001 || res(idx) > eigen_pts_transformed.at(i)(idx) + 0.00001)
+				{
+					err_occurred = true;
+					break;
+				}
+			}
+		}
+		if (err_occurred)
+		{
+			numErrors[1]++;
+			err_occurred = false;
 		}
 	}
 
+	//Iterate through each matrix
+	for (int mat = 0; mat < numIters; mat++)
+	{
+		cv::Affine3f cur_cv = cv_trans.at(mat);
+		Eigen::Affine3f cur_eig = eigen_trans.at(mat);
+
+
+		//Iterate through each point
+		for (int pt = 0; pt < numIters; pt++)
+		{
+			cv_pts.at(pt) = cur_cv * cv_pts.at(pt);
+
+			PointCloudTrans::TransformInPlace(cur_eig, eigen_pts.at(pt));
+
+			//Compare the results from each transform
+			for (int idx = 0; idx < 3; idx++)
+			{
+				if (cv_pts.at(pt)(idx) < eigen_pts.at(pt)(idx) - 0.00001 || cv_pts.at(pt)(idx) > eigen_pts.at(pt)(idx) + 0.00001)
+				{
+					err_occurred = true;
+					break;
+				}
+			}
+			if (err_occurred)
+			{
+				numErrors[2]++;
+				err_occurred = false;
+			}
+		}
+
+		//Test point cloud transform
+		PointCloudTrans::TransformInPlace(cur_eig, eigen_pts);
+
+		for (int i = 0; i < numIters; i++)
+		{
+			cv_pts.at(i) = cur_cv * cv_pts.at(i);
+
+			for (int idx = 0; idx < 3; idx++)
+			{
+				if (cv_pts.at(i)(idx) < eigen_pts.at(i)(idx) - 0.00001 || cv_pts.at(i)(idx) > eigen_pts.at(i)(idx) + 0.00001)
+				{
+					err_occurred = true;
+					break;
+				}
+			}
+		}
+		if (err_occurred)
+		{
+			numErrors[3]++;
+			err_occurred = false;
+		}
+	}
+}
+
+
+/*
+	Main test function
+*/
+int main(int argc, char* argv[])
+{
+	std::cout << std::endl << "<----------------------Begin MatrixConv tests----------------------->" << std::endl;
+
+	/*
+		Initialize test
+	*/
+	conv = MatrixConv::getInstance();
+	int numIters = 10;
+
+	std::vector<float> rand_trans, rand_rot;
+
+	int* err = (int*)malloc(15 * sizeof(int));
+
+
+	/*
+		Run tests
+	*/
+	for(int i = 0; i < numIters; i++)
+	{
+		rand_trans = texpert::RandomGenerator::FloatPosition(-1, 1);
+		rand_rot = texpert::RandomGenerator::FloatPosition(-179.99f, 179.99f);
+		doConvTest(rand_trans, rand_rot, err);
+	}
+
+	/*
+		Output MatrixConv test results
+	*/
+	std::cout << "Mat42Affine3f Err: " << ((float)err[0] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Mat42Matrix4f Err: " << ((float)err[1] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Matrix4f2Mat4 Err: " << ((float)err[2] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Matrix4f2Vec3Trans Err: " << ((float)err[3] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Matrix4f2Mat4Rot Err: " << ((float)err[4] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Affine3f2Mat4 Err: " << ((float)err[5] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Affine3f2Mat4Rot Err: " << ((float)err[6] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Affine3f2Mat4Trans Err: " << ((float)err[7] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Affine3f2Vec3Trans Err: " << ((float)err[8] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Mat42Affine3fRot Err: " << ((float)err[9] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Mat42Affine3fTrans Err: " << ((float)err[10] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Mat42Matrix4fRot Err: " << ((float)err[11] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Mat42Matrix4fTrans Err: " << ((float)err[12] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Matrix4f2Affine3f Err: " << ((float)err[13] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "Affine3f2Matrix4f Err: " << ((float)err[14] / (float)numIters) * 100.0f << "%" << std::endl;
+
+	/*
+	End MatrixConv tests
+	Begin PointCloudTrans tests
+	*/
+	std::cout << std::endl << "<----------------------Begin PointCloudTrans tests----------------------->" << std::endl;
+	doPointTransTest(numIters, err);
+
+	/*
+		Output PointCloudTrans test results
+	*/
+	std::cout << "Transform (Point) Err: " << ((float)err[0] / (float)(numIters * numIters)) * 100.0f << "%" << std::endl;
+	std::cout << "Transform (Cloud) Err: " << ((float)err[1] / (float)numIters) * 100.0f << "%" << std::endl;
+	std::cout << "TransformInPlace (Point) Err: " << ((float)err[2] / (float)(numIters * numIters)) * 100.0f << "%" << std::endl;
+	std::cout << "TransformInPlace (Cloud) Err: " << ((float)err[3] / (float)numIters) * 100.0f << "%" << std::endl;
 }
