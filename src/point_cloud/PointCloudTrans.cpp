@@ -50,3 +50,32 @@ void PointCloudTrans::TransformInPlace(Eigen::Affine3f& Rt, vector<Eigen::Vector
 		TransformInPlace(Rt, points.at(i));
 	}
 }
+
+//static
+void PointCloudTrans::TransformICP(Eigen::Vector3f& accum_t, Eigen::Matrix3f& accum_R, Eigen::Vector3f& centroid, Eigen::Affine3f& init_affine, Eigen::Matrix4f& result)
+{
+	result = Eigen::Matrix4f::Identity();
+
+	Eigen::Affine3f transform(Eigen::Translation3f(-centroid.x(), -centroid.y(), -centroid.z()));
+	Eigen::Matrix4f centInv = transform.matrix().transpose();
+
+	Eigen::Affine3f transform2(Eigen::Translation3f(centroid.x(), centroid.y(), centroid.z()));
+	Eigen::Matrix4f cent = transform2.matrix().transpose();
+
+	Eigen::Affine3f transform3(Eigen::Translation3f(accum_t.x(), accum_t.y(), accum_t.z()));
+	Eigen::Matrix4f t2 = transform3.matrix().transpose();
+
+	Eigen::Matrix4f R2 = Eigen::Matrix4f::Identity();
+	R2.block<3, 3>(0, 0) = accum_R;
+
+	Eigen::Affine3f m;
+	m = Eigen::Translation3f(init_affine.translation());
+	Eigen::Matrix4f ti;
+	ti = m.matrix();
+
+	Eigen::Matrix4f Ri;
+	Ri = Eigen::Matrix4f::Identity();
+	Ri.block(0, 0, 3, 3) = init_affine.rotation().matrix();
+
+	result = Ri.transpose() * (centInv * R2 * cent * t2) * ti.transpose();
+}

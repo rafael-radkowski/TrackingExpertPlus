@@ -14,8 +14,8 @@ MIT License
 ---------------------------------------------------------------
 Last edited:
 
-Feb 23, 2021, WB
-- Initial commit
+March 1, 2021, WB
+- Added TransformICP function (to replicate Rt function in ICP)
 */
 
 #include <Eigen/Dense>
@@ -35,4 +35,6 @@ public:
 	static void TransformInPlace(Eigen::Affine3f& Rt, Eigen::Vector3d& point);
 
 	static void TransformInPlace(Eigen::Affine3f& Rt, vector<Eigen::Vector3d>& points);
+
+	static void TransformICP(Eigen::Vector3f& accum_t, Eigen::Matrix3f& accum_R, Eigen::Vector3f& centroid, Eigen::Affine3f& init_affine, Eigen::Matrix4f& result);
 };
