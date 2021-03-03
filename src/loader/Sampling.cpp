@@ -25,11 +25,7 @@ This filter is voxel based and will put one point into a vocel
 */
 //static 
 void Sampling::Uniform( PointCloud& src, PointCloud& dst, SamplingParam param)
-{
-	// make a local copy in case src and dst point to the same memory
-	PointCloud temp_src = src;
-
-    int size = src.size();
+{	
     //--------------
     // find min and max values 
     float maxX =  std::numeric_limits<float>::min();
@@ -69,9 +65,9 @@ void Sampling::Uniform( PointCloud& src, PointCloud& dst, SamplingParam param)
     if(voxZ  > dimZ ) voxZ = dimZ;
 
     // number of cells
-    int vx = (int)std::ceil ( dimX / voxX );
-    int vy = (int)std::ceil ( dimY / voxY );
-    int vz = (int)std::ceil ( dimZ / voxZ );
+    int vx = std::ceil ( dimX / voxX );
+    int vy = std::ceil ( dimY / voxY );
+    int vz = std::ceil ( dimZ / voxZ );
 
     if(g_verbose  && g_verbose_level == 2){
         cout << "[INFO] Sampling - Num cells Vx: " << vx << endl;
@@ -79,10 +75,8 @@ void Sampling::Uniform( PointCloud& src, PointCloud& dst, SamplingParam param)
         cout << "[INFO] Sampling - Num cells Vz: " << vz << endl;
     }
 
-
-    //--------------
-    // Create the cube. It stores indices of points. -1 means no point (empty)
-    vector<vector<vector<int>>> cube(vx+1, vector<vector<int> > (vy+1, vector<int> (vz+1, -1)));
+	//hashmap, each index correlates to a bool. 0 means empty voxel, 1 = filled. This is pretty fast and space efficient
+	unordered_map<int, bool> hashTable = unordered_map<int, bool>();
 
 	// for min is negative
     float offset_x = dimX - maxX;
@@ -90,55 +84,31 @@ void Sampling::Uniform( PointCloud& src, PointCloud& dst, SamplingParam param)
     float offset_z = dimZ - maxZ ;
 
 
-    int count = 0;
-    vector<Eigen::Vector3f> p_ = src.points;
-    for( int i=0; i<size; i++){
-		float v = std::max((p_[i].x() + offset_x), 0.0f);
-        int idx = (int)ceil((p_[i].x() + offset_x) / voxX );
-        int idy = (int)ceil((p_[i].y() + offset_y) / voxY );
-        int idz = (int)ceil((p_[i].z() + offset_z) / voxZ );
-
-        if(cube[idx][idy][idz] == -1)
+	PointCloud ret = PointCloud();
+    for( int i=0; i<src.points.size(); i++){
+        int idx = ceil((src.points[i].x() + offset_x) / voxX );
+        int idy = ceil((src.points[i].y() + offset_y) / voxY );
+        int idz = ceil((src.points[i].z() + offset_z) / voxZ );
+		int index = idz * (vy * vx) + idy * (vx)+idx;
+        if(hashTable[index] == false)
         {
-            cube[idx][idy][idz] = i;
-            count++;
+			//check if index already in hash table
+			hashTable[index] == true;
+			//if not, mark it in hashtable adn add to final PC
+			ret.points.push_back(src.points[i]);
+			ret.normals.push_back(src.normals[i]);
         }
     }
 
     if(g_verbose && g_verbose_level == 2){
-        cout << "[INFO] - Downsampled fr0m " << src.N << " to " << count << " points. " << endl;
+        cout << "[INFO] - Downsampled fr0m " << src.N << " to " << ret.points.size() << " points. " << endl;
     }
-	dst.points.clear();
-	dst.normals.clear();
-    dst.points.resize(count);
-    dst.normals.resize(count);
-
-    int i = 0;
-    vector<vector<vector<int>>>::iterator itr_x;
-    vector<vector<int>>::iterator itr_y;
-    vector<int>::iterator itr_z;
-
-    // Copy back.
-    // ToDo: That is computational expensive. Is there a better way?
-    for(itr_x = cube.begin(); itr_x != cube.end(); itr_x++ ){
-        for(itr_y = itr_x->begin(); itr_y != itr_x->end(); itr_y++ ){
-            for(itr_z = itr_y->begin(); itr_z != itr_y->end(); itr_z++ ){
-                int idx = (*itr_z);
-                if( idx != -1 ){
-                    dst.points[i] =  temp_src.points[idx];
-                    dst.normals[i] =  temp_src.normals[idx];
-                    i++;
-                }
-            }
-        }
-    }
-
-	// to reset the variable N
-	dst.size();
 
     if(g_verbose && g_verbose_level == 1){ 
-        cout << "[INFO] Sampling - Sampling successfull; output contains " << i << " points and normals. "  << endl;
+        cout << "[INFO] Sampling - Sampling successfull; output contains " << ret.points.size() << " points and normals. "  << endl;
     }
+	dst = ret;
+	
 }
 
 
