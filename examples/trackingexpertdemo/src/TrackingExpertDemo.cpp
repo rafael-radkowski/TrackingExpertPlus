@@ -93,7 +93,7 @@ bool TrackingExpertDemo::setCamera(CaptureDeviceType type)
 #ifdef _WITH_AZURE_KINECT
 			//set up pose based on given file
 			CamPose poseFile = CamPose(2, 4, 7, 0.028f);
-			poseFile.readFile("C:/Users/Tyler/Documents/TrackingExpertPlus/pose2.txt"); //Hard coded for pose file TODO -Tyler
+			poseFile.readFile("../pose.txt"); 
 
 			for (int i = KinectAzureCaptureDevice::getNumberConnectedCameras()-1; i >= 0; i--)
 			{ 
