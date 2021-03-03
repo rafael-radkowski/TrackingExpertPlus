@@ -20,6 +20,8 @@ ICP::ICP() {
 	_outlier_reject.setMaxNormalVectorAngle(45.0f);
 	_outlier_reject.setMaxThreshold(0.1f);
 
+	_conv = MatrixConv::getInstance();
+
 }
 
 ICP::~ICP(){
@@ -265,6 +267,11 @@ Matrix4f ICP::Rt(void){
 	Eigen::Matrix4f R2 = Eigen::Matrix4f::Identity();
 	R2.block<3,3>(0,0) = Rall;
 
+	//cout << centInv << endl;
+	//cout << cent << endl;
+	//cout << t2 << endl;
+	//cout << R2 << endl;
+
 	Affine3f m;     
 	m  = Translation3f(_Rt_affine.translation());
 	Matrix4f ti;
@@ -276,6 +283,8 @@ Matrix4f ICP::Rt(void){
 
 	//finalRt = t2 * cent * R2 * centInv;
 	finalRt = Ri.transpose()  *  (  centInv  * R2 * cent * t2 ) * ti.transpose();
+
+	//cout << finalRt << endl;
 
 	//MatrixUtils::PrintMatrix4f(Ri);
 	//MatrixUtils::PrintMatrix4f(finalRt);

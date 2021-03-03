@@ -52,7 +52,7 @@ void PointCloudTrans::TransformInPlace(Eigen::Affine3f& Rt, vector<Eigen::Vector
 }
 
 //static
-void PointCloudTrans::TransformICP(Eigen::Vector3f& accum_t, Eigen::Matrix3f& accum_R, Eigen::Vector3f& centroid, Eigen::Affine3f& init_affine, Eigen::Matrix4f& result)
+void PointCloudTrans::TransformAboutCentroid(Eigen::Vector3f& accum_t, Eigen::Matrix3f& accum_R, Eigen::Vector3f& centroid, Eigen::Affine3f& init_affine, Eigen::Matrix4f& result)
 {
 	result = Eigen::Matrix4f::Identity();
 

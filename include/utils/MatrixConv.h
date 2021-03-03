@@ -11,10 +11,11 @@ MIT License
 ---------------------------------------------------------------
 Last edited:
 
-Feb 23, 2021, WB
-- Simplified Rot functions
+March 2, 2021, WB
+- Added documentation
 */
 
+//sdk
 #include <Eigen/Dense>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>

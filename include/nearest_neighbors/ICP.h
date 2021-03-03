@@ -96,6 +96,7 @@ Aug 07, 2020, RR
 #include "Types.h"
 #include "MatrixUtils.h"
 #include "PointCloudUtils.h"
+#include "MatrixConv.h"
 
 namespace texpert{
 
@@ -271,6 +272,9 @@ private:
 
 	// helper to debug knn hits
 	std::vector<std::pair<int, int>> _verbose_matches;
+
+	// Matrix conversion singleton class
+	MatrixConv* _conv;
 };
 
 
