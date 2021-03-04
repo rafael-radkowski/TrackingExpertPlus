@@ -17,6 +17,19 @@ MatrixConv* MatrixConv::getInstance()
 	}
 }
 
+void MatrixConv::printColMjr(float* mat, int row, int col)
+{
+	for (int j = 0; j < row; j++)
+	{
+		std::printf("[ ");
+		for (int i = 0; i < row * col; i += row)
+		{
+			std::printf("%f ", mat[j + i]);
+		}
+		std::printf("]\n");
+	}
+}
+
 void MatrixConv::Matrix4f2Mat4(Eigen::Matrix4f& eigen_in, glm::mat4& glm_out)
 {
 	memcpy(glm::value_ptr(glm_out), eigen_in.data(), 16 * sizeof(float));

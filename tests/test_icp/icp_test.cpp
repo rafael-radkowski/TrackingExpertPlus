@@ -231,23 +231,11 @@ float runTest(void)
 	Eigen::Affine3f a_mat;
 	a_mat = pose_result;
 
-	//Matrix4f icprt = icp->Rt();
-
 	glm::mat4 r_mat;
-	//for (int i = 0; i < 16; i++)
-	//	cout << icprt.data()[i] << ", ";
-	//cout << endl;
-
-	_conv->Matrix4f2Mat4(icp->Rt(), r_mat);
-
-	//float* r_matptr = glm::value_ptr(r_mat);
-	//for (int i = 0; i < 16; i++)
-	//	cout << r_matptr[i] << ", ";
-	//cout << endl << endl;
-
-	//MatrixUtils::PrintMatrix4f(icp->Rt());
-	//MatrixUtils::PrintGlm4(r_mat);
-
+	Eigen::Matrix4f s_mat = icp->Rt().transpose();
+	_conv->Matrix4f2Mat4(s_mat, r_mat);
+	//_conv->printColMjr(glm::value_ptr(r_mat), 4, 4);
+	//_conv->printColMjr(icp->Rt().data(), 4, 4);
 	gl_reference_eval->setModelmatrix(r_mat);
 
 	current_set++;

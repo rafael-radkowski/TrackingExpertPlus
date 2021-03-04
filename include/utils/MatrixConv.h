@@ -15,6 +15,9 @@ March 2, 2021, WB
 - Added documentation
 */
 
+//std
+#include <iostream>
+
 //sdk
 #include <Eigen/Dense>
 #include <glm/glm.hpp>
@@ -33,6 +36,15 @@ public:
 		Gets an instance of this MatrixConv
 	*/
 	static MatrixConv* getInstance();
+
+	/*
+		Prints a matrix organized in column major
+
+		@param mat - a pointer to the matrix data
+		@param row - the number of rows in the matrix
+		@param col - the number of columns in the matrix
+	*/
+	void printColMjr(float* mat, int row, int col);
 
 	/*
 		Converts an Eigen::Matrix4f into a glm::mat4

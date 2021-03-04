@@ -81,6 +81,10 @@ public:
 	*/
 	static void TransformInPlace(Eigen::Affine3f& Rt, vector<Eigen::Vector3d>& points);
 
+	static void TransformInPlace(Eigen::Affine3f& Rt, Eigen::Vector3f& point);
+
+	static void TransformInPlace(Eigen::Affine3f& Rt, vector<Eigen::Vector3f>& points);
+
 	/*
 		A transformation specific to the ICP algorithm.  
 	*/

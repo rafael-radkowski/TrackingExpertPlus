@@ -52,6 +52,26 @@ void PointCloudTrans::TransformInPlace(Eigen::Affine3f& Rt, vector<Eigen::Vector
 }
 
 //static
+void PointCloudTrans::TransformInPlace(Eigen::Affine3f& Rt, Eigen::Vector3f& point)
+{
+	Eigen::Vector4f pt = Eigen::Vector4f(point.x(), point.y(), point.z(), 1);
+	Eigen::Matrix4f mat;
+	mat_conv->Affine3f2Matrix4f(Rt, mat);
+
+	pt = mat * pt;
+	point = Eigen::Vector3f(pt.x(), pt.y(), pt.z());
+}
+
+//static
+void PointCloudTrans::TransformInPlace(Eigen::Affine3f& Rt, vector<Eigen::Vector3f>& points)
+{
+	for (int i = 0; i < points.size(); i++)
+	{
+		TransformInPlace(Rt, points.at(i));
+	}
+}
+
+//static
 void PointCloudTrans::TransformAboutCentroid(Eigen::Vector3f& accum_t, Eigen::Matrix3f& accum_R, Eigen::Vector3f& centroid, Eigen::Affine3f& init_affine, Eigen::Matrix4f& result)
 {
 	result = Eigen::Matrix4f::Identity();
