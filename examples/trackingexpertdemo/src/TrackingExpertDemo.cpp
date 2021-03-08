@@ -497,7 +497,9 @@ void TrackingExpertDemo::upderRenderPose(void) {
 		m[i/4][i%4] =  mat.data()[i];
 	}
 
-	gl_reference_eval->setModelmatrix(MatrixUtils::ICPRt3Mat4(m_reg->getICPPose()));
+	glm::mat4 icpmat;
+	m_conv->Matrix4f2Mat4(m_reg->getICPPose(), icpmat);
+	gl_reference_eval->setModelmatrix(icpmat);
 	//gl_reference_eval->setModelmatrix(m);
 
 	gl_reference_eval->enablePointRendering(true);

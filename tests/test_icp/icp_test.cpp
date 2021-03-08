@@ -208,7 +208,7 @@ float runTest(void)
 	//---------------------------------------------------------------------------
 	// Apply the ICP pose to the initial point cloud
 	Eigen::Vector3f t = icp->t();
-	Eigen::Matrix3f R = icp->R().inverse();
+	Eigen::Matrix3f R = icp->R();
 
 
 	PointCloud test_cloud = pc_ref;
@@ -232,7 +232,7 @@ float runTest(void)
 	a_mat = pose_result;
 
 	glm::mat4 r_mat;
-	Eigen::Matrix4f s_mat = icp->Rt().transpose();
+	Eigen::Matrix4f s_mat = icp->Rt();
 	_conv->Matrix4f2Mat4(s_mat, r_mat);
 	//_conv->printColMjr(glm::value_ptr(r_mat), 4, 4);
 	//_conv->printColMjr(icp->Rt().data(), 4, 4);

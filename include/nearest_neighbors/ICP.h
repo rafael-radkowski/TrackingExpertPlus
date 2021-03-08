@@ -75,6 +75,10 @@ Aug 06, 2020, RR
 Aug 07, 2020, RR
 - Added code to check the parameters ranges. 
 
+Mar 08, 2020, WB
+- Fixed ICP Rt to return a non-transposed matrix
+- Transferred most Rt calculations to the PointCloudTrans class
+
 */
 
 
@@ -97,6 +101,7 @@ Aug 07, 2020, RR
 #include "MatrixUtils.h"
 #include "PointCloudUtils.h"
 #include "MatrixConv.h"
+#include "PointCloudTrans.h"
 
 namespace texpert{
 
@@ -178,7 +183,7 @@ public:
 	Return the overall rotation after ICP terminates. 
 	@return a 3x3 matrix with the last rotation. 
 	*/
-	Matrix3f R(void) {return _R_all.inverse();}		
+	Matrix3f R(void) {return _R_all;}		
 
 	/*!
 	Return the overall translation after ICP terminates. 

@@ -10,8 +10,8 @@ This static class allows the user to transform a point or point cloud in various
 ways depending on their situation.  The Transform and TransformInPlace functions
 simply transform a given point or point cloud by a transform matrix.  Transform
 returns the result of this transformation while TransformInPlace changes the 
-point passed into the function itself.  TransformAboutCentroid takes an existing
-transformation matrix and 
+point passed into the function itself.  GetTransformFromPosition takes an existing
+transformation matrix and transforms it around a given centroid.
 
 William Blanchard
 Iowa State University
@@ -21,8 +21,8 @@ MIT License
 ---------------------------------------------------------------
 Last edited:
 
-March 2, 2021, WB
-- Added documentation
+March 8, 2021, WB
+- Fixed GetTransformFromPosition for ICP algorithm
 */
 
 //std
@@ -86,7 +86,13 @@ public:
 	static void TransformInPlace(Eigen::Affine3f& Rt, vector<Eigen::Vector3f>& points);
 
 	/*
-		A transformation specific to the ICP algorithm.  
+		Transform a position of a point cloud from one position to another about a centroid.
+
+		@param accum_t - The translation from the initial position to the final position
+		@param accum_R - The rotation from the initial position to the final position
+		@param centroid - The centroid of the reference point cloud
+		@param init_affine - The initial position of the point cloud
+		@param result - The Matrix4f that the final transformation matrix will be placed in
 	*/
-	static void TransformAboutCentroid(Eigen::Vector3f& accum_t, Eigen::Matrix3f& accum_R, Eigen::Vector3f& centroid, Eigen::Affine3f& init_affine, Eigen::Matrix4f& result);
+	static void getTransformFromPosition(Eigen::Vector3f& accum_t, Eigen::Matrix3f& accum_R, Eigen::Vector3f& centroid, Eigen::Affine3f& init_affine, Eigen::Matrix4f& result);
 };

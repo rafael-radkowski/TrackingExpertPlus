@@ -110,9 +110,6 @@ void MatrixConv::Mat42Matrix4fTrans(glm::mat4& glm_in, Eigen::Matrix4f& eigen_ou
 	eigen_out(2, 3) = glm_in[3][2];
 }
 
-/*
-	Can be simplified to O(n) time by using modulo
-*/
 void MatrixConv::Mat42Matrix4fRot(glm::mat4& glm_in, Eigen::Matrix4f& eigen_out)
 {
 	eigen_out = Eigen::Matrix4f::Identity();

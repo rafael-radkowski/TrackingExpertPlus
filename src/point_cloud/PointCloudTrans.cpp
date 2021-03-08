@@ -77,13 +77,13 @@ void PointCloudTrans::TransformAboutCentroid(Eigen::Vector3f& accum_t, Eigen::Ma
 	result = Eigen::Matrix4f::Identity();
 
 	Eigen::Affine3f transform(Eigen::Translation3f(-centroid.x(), -centroid.y(), -centroid.z()));
-	Eigen::Matrix4f centInv = transform.matrix().transpose();
+	Eigen::Matrix4f centInv = transform.matrix();
 
 	Eigen::Affine3f transform2(Eigen::Translation3f(centroid.x(), centroid.y(), centroid.z()));
-	Eigen::Matrix4f cent = transform2.matrix().transpose();
+	Eigen::Matrix4f cent = transform2.matrix();
 
 	Eigen::Affine3f transform3(Eigen::Translation3f(accum_t.x(), accum_t.y(), accum_t.z()));
-	Eigen::Matrix4f t2 = transform3.matrix().transpose();
+	Eigen::Matrix4f t2 = transform3.matrix();
 
 	Eigen::Matrix4f R2 = Eigen::Matrix4f::Identity();
 	R2.block<3, 3>(0, 0) = accum_R;
@@ -97,5 +97,5 @@ void PointCloudTrans::TransformAboutCentroid(Eigen::Vector3f& accum_t, Eigen::Ma
 	Ri = Eigen::Matrix4f::Identity();
 	Ri.block(0, 0, 3, 3) = init_affine.rotation().matrix();
 
-	result = Ri.transpose() * (centInv * R2 * cent * t2) * ti.transpose();
+	result = t2 * cent * R2 * centInv;
 }

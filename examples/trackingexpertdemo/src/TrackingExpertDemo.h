@@ -4,8 +4,8 @@
 --------------------------------------------------------------------------------
 Last edits:
 
-Aug 06, 2020, RR
-- Changed the final pose source. It comes from ICP instead of the descriptor.
+Mar 08, 2021, WB
+- Fixed conversion of ICP matrix from Matrix4f to Mat4
 */
 
 // STL
@@ -35,6 +35,7 @@ Aug 06, 2020, RR
 #include "ColorCoder.h"
 #include "TrackingExpertParams.h"
 #include "FilterTypes.h"
+#include "MatrixConv.h"
 
 #ifdef _WITH_AZURE_KINECT // set via cmake
 #include "KinectAzureCaptureDevice.h"  // the camera
@@ -248,6 +249,9 @@ private:
 
 	// object detection and registration 
 	TrackingExpertRegistration*	m_reg;
+
+	// Matrix conversion helper
+	MatrixConv*			m_conv;
 
 	bool				m_new_scene;
 	bool				m_enable_tracking;
