@@ -10,6 +10,8 @@ CMakeFiles/
 *.vcxproj
 *.filters
 CMakeCache.txt
+CMakeDoxyfile.in
+CMakeDoxygenDefaults.cmake
 bin/
 lib/
 *.pdb
@@ -45,3 +47,4 @@ data/Antenna_Coupler_model.obj
 *.obj
 *.ply
 *.txt
+examples/antenna_demo/src/AntennaDemo.dir

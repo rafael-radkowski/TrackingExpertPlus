@@ -31,6 +31,7 @@ Aug 6, 2020, RR
 
 // TrackingExpert
 #include "CPFMatchingExp.h"
+#include "CPFMatchingExpGPU.h"
 #include "ICP.h"
 #include "TrackingExpertParams.h"
 
@@ -154,7 +155,7 @@ private:
 	// Params
 
 	// feature detector and matching
-	CPFMatchingExp*		m_fd;
+	CPFMatchingWrapper*	m_fd;
 	CPFParams			m_fd_params;
 	bool				m_working;
 

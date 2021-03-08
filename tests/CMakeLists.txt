@@ -24,6 +24,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # Build the tracking test
 option( TRAKINGX_BUILD_TEST_TRACKING "TrackingX Build Tracking Test" OFF)
 option( TRAKINGX_BUILD_TEST_ICP "TrackingX Build ICP Test" OFF)
+option( TRAKINGX_BUILD_TEST_CPF "TrackingX Build CPF Test" OFF)
 
 add_subdirectory(test_detection)
 
@@ -46,5 +47,10 @@ if(TRAKINGX_BUILD_TEST_ICP)
 add_subdirectory(test_knn)
 add_subdirectory(test_icp)
 add_subdirectory(test_icp_camera)
+endif()
+
+# Build the CPF test class
+if(TRAKINGX_BUILD_TEST_CPF)
+add_subdirectory(test_cpf)
 endif()
 #add_subdirectory(dev_detection)

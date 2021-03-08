@@ -29,12 +29,21 @@
 // TrackingExpert
 #include "trackingx.h"
 #include "graphicsx.h"
+#include "ICaptureDevice.h"
+
+#include "KinectAzureCaptureDevice.h"  // the camera
+#include "PointCloudProducer.h"
+#define _WITH_PRODUCER
 
 // local
 #include "DemoScene.h"
+#include "GearBoxRenderer.h"
+#include "PartDatabase.h"
+
+#define PI 3.1415926535
 
 // instance of a structure core camera 
-texpert::StructureCoreCaptureDevice* camera;
+KinectAzureCaptureDevice* camera;
 
 // The OpenGL window
 isu_ar::GLViewer* window;
@@ -43,10 +52,13 @@ isu_ar::GLViewer* window;
 // demo content 
 DemoScene* gear;
 
+PartDatabase* database;
+GearBoxRenderer* renderer;
 
 // The Video Background
 isu_gfx::GLVideoCanvas*	video_bg;
 cv::Mat img_color;
+cv::Mat img_ref;
 
 /*
 The main render and processing loop. 
@@ -56,12 +68,34 @@ The main render and processing loop.
 void render_loop(glm::mat4 pm, glm::mat4 vm) {
 
 	// fetch a new frame	
-	camera->getRGBFrame(img_color);
-
-
+	camera->getRGBFrame(img_ref);
+	memcpy(img_color.ptr(), img_ref.ptr(), img_ref.rows * img_ref.cols * sizeof(CV_8UC4));
 
 	video_bg->draw(pm, vm, glm::mat4());
-	gear->draw(pm, vm);
+
+	renderer->draw(pm, vm);
+
+}
+
+void getKey(int key, int action)
+{
+	switch (action)
+	{
+	case 0: //Key up
+		break;
+
+	case 1: //Key down
+		switch (key)
+		{
+		case 68: //d
+			renderer->progress(true);
+			break;
+		case 65: //a
+			renderer->progress(false);
+			break;
+		}
+		break;
+	}
 }
 
 
@@ -69,12 +103,12 @@ int main(int argc, char* argv)
 {
 	std::cout << "TrackingExpert+ Gear Box Demo" << endl;
 	std::cout << "Version 0.9" << endl;
-
+	std::cout << "-----------------------------" << endl;
 
 	/*
 	Open a camera device. 
 	*/
-	camera =  new texpert::StructureCoreCaptureDevice();
+	camera =  new KinectAzureCaptureDevice();
 
 	/*
 	Test if the camera is ready to run. 
@@ -84,38 +118,85 @@ int main(int argc, char* argv)
 		return -1;
 	}
 
-
-	
 	/*
 	create the renderer.
 	The renderer executes the main loop in this demo. 
 	*/
 	window = new isu_ar::GLViewer();
-	window->create(1280, 960, "Gear Box Demo");
+	window->create(camera->getCols(texpert::CaptureDeviceComponent::COLOR), camera->getRows(texpert::CaptureDeviceComponent::COLOR), "Gear Box Demo");
 	window->addRenderFcn(render_loop);
-	//window->addKeyboardCallback(std::bind(&FMEvalApp::keyboard_callback, this, _1, _2));
+	window->addKeyboardCallback(getKey);
 	window->setViewMatrix(glm::lookAt(glm::vec3(1.0f, 0.0, -0.5f), glm::vec3(0.0f, 0.0f, 0.f), glm::vec3(0.0f, 1.0f, 0.0f)));
 	window->setClearColor(glm::vec4(1, 1, 1, 1));
 	window->enableCameraControl(true);
+
+
 	
 	/*
 	Create the video background
 	*/
 	camera->getRGBFrame(img_color);
-	video_bg = new isu_gfx::GLVideoCanvas();
-	video_bg->create(img_color.rows,  img_color.cols, (unsigned char*)img_color.data, true);
 
+	video_bg = new isu_gfx::GLVideoCanvas();
+	video_bg->create(img_color.rows, img_color.cols, img_color.ptr(), true);
+
+	/*
+	Load part models
+	*/
+	database = new PartDatabase();
+	database->loadObjsFromFile("D:/WorkRepos/TrackingExpertPlus/examples/gear_demo/models/load_models.txt");
+
+	database->setNumDuplicates("N1-002_pc_gfx.obj", 1);
+	database->setNumDuplicates("N3-002_pc_gfx.obj", 1);
+
+	/*
+	Set part model positions
+	*/
+	database->setModelPos("N1-001_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(0.5f, -0.3f, -0.12f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+	database->setModelPos("N1-002_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(0.5f, -0.3f, -0.24f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+	database->setModelPos("N1-002_pc_gfx.obj-1", glm::rotate(glm::translate(glm::vec3(0.2f, -0.3f, -0.24f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+	database->setModelPos("N1-003_pc_gfx.obj", glm::translate(glm::vec3(0.6f, -0.3f, -0.24f)));
+
+	database->setModelPos("N4-001_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.4f, -0.3f, -0.26f)), (float)-PI / 2, glm::vec3(0, 0, 1)));
+	database->setModelPos("N4-002_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.15f, -0.3f, -0.26f)), (float)-PI / 2, glm::vec3(0, 0, 1)));
+	database->setModelPos("N3-002_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.65f, -0.3f, -0.26f)), (float)-PI, glm::vec3(0, 0, 1)));
+	database->setModelPos("N4-003_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.45f, -0.3f, -0.26f)), (float)-PI / 2, glm::vec3(0, 0, 1)));
+	database->setModelPos("N4-004_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.3f, -0.3f, -0.26f)), (float)-PI / 2, glm::vec3(0, 0, 1)));
+
+	database->setModelPos("N2-001_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.25f, -0.3f, 0.43f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+	database->setModelPos("N3-001_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(-0.55f, -0.3f, 0.25f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+	database->setModelPos("N3-002_pc_gfx.obj-1", glm::rotate(glm::translate(glm::vec3(-0.65f, -0.3f, 0.25f)), (float)PI, glm::vec3(0, 0, 1)));
+	database->setModelPos("N2-002_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(0.33f, -0.3f, 0.25f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+	database->setModelPos("N2-003_pc_gfx.obj", glm::rotate(glm::translate(glm::vec3(0.48f, -0.3f, 0.25f)), (float)PI / 2, glm::vec3(0, 0, 1)));
+
+	/*
+	Load models into the GearBoxRenderer sequence
+	*/
+	renderer = new GearBoxRenderer();
+	int idx = 0;
+	for (int i = 0; i < database->getNumModels(); i++)
+	{
+		Model* curModel = database->getObj(i);
+		if (!curModel->name.compare("null") == 0)
+		{
+			renderer->addModel(curModel, curModel->name);
+			idx++;
+		}
+	}
+
+	renderer->setSteps();
 	
-	gear = new DemoScene();
-	gear->create();
-	
-	
+	renderer->updateInPlace();
+
+	std::cout << "-----------------------------" << endl;
+	std::cout << "Use the W and D keys to cycle through the stages of the assembly process." << endl;
 	
 	window->start();
 
 	// cleanup
 	delete camera;
 	delete video_bg;
+	delete database;
 	delete window;
 
 	return 1;

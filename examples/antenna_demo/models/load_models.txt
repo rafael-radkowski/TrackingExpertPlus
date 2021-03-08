@@ -1,0 +1,8 @@
+..\models\PartA_pc_gfx.obj
+..\models\PartB_pc_gfx.obj
+..\models\PartC_pc_gfx.obj
+..\models\PartD_pc_gfx.obj
+..\models\PartE_pc_gfx.obj
+..\models\PartA_ref_2_gfx.obj
+..\models\PartB_ref_1_gfx.obj
+..\models\PartC_ref_2_gfx.obj
