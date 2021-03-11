@@ -58,8 +58,9 @@ Last edited:
 #include "ReaderWriterUtil.h"
 #include "ReadFiles.h"
 #include "ICP.h"  // the ICP class to test
-#include "MatrixTransform.h"
+//#include "MatrixTransform.h"
 #include "GLLineRenderer.h"
+#include "MatrixConv.h"
 
 using namespace texpert;
 
@@ -109,6 +110,8 @@ PointCloud			pc_eval_as_loaded;
 std::string			ref_file = "../data/stanford_bunny_pc.obj";
 std::vector<std::string> files;
 
+MatrixConv* conv = MatrixConv::getInstance();
+
 
 //--------------------------------------------------------
 // ICP
@@ -156,7 +159,7 @@ void keyboard_callback( int key, int action) {
 		switch (key) {
 		case 87: // w
 		{
-			
+			runTest();
 			break;
 			} 
 		case 78: // n
@@ -268,8 +271,8 @@ void startTestManual(void)
 
 	// Move the point cloud to it initial position position. 
 
-	PointCloudTransform::Transform(&pc_ref, initial_pos[current_set], initial_rot[current_set] );
-	PointCloudTransform::Transform(&pc_eval, initial_pos[current_set], initial_rot[current_set]);
+	PointCloudTransform::Transform(&pc_ref, pose_result );
+	PointCloudTransform::Transform(&pc_eval, pose_result);
 
 	pose_result = Eigen::Matrix4f::Identity();
 
@@ -303,8 +306,9 @@ void runTestManual(void)
 	
 	
 	// Update teh graphic reference model
-
-	gl_reference_eval->setModelmatrix(MatrixUtils::ICPRt3Mat4( icp->Rt()));
+	glm::mat4 ref_mat;
+	conv->Matrix4f2Mat4(icp->Rt(), ref_mat);
+	gl_reference_eval->setModelmatrix(ref_mat);
 	
 
 	// Update the lines between the point clouds showing the nearest neighbors
@@ -344,9 +348,14 @@ float startAutoICP(void)
 
 	// Move the point cloud to its start position and orientation
 
-	PointCloudTransform::Transform(&pc_ref, initial_pos[current_set], initial_rot[current_set] );
+	/*PointCloudTransform::Transform(&pc_ref, pose_result );
+	PointCloudTransform::Transform(&pc_eval, pose_result);*/
+
+	PointCloudTransform::Transform(&pc_ref, initial_pos[current_set], initial_rot[current_set]);
 	PointCloudTransform::Transform(&pc_eval, initial_pos[current_set], initial_rot[current_set]);
 
+	/*Pose pose;
+	pose.t = pose_result;*/
 
 	// Reset the graphics object. 
 
@@ -355,15 +364,19 @@ float startAutoICP(void)
 
 
 	// run ICP
-
 	Pose pose;
-	pose.t =  Eigen::Matrix4f::Identity();
+	pose.t = Eigen::Matrix4f::Identity();
 	icp->compute(pc_ref, pose, pose_result, rms);
 	
 
 	// Update the graphics model matrix and the lines between the nearest neighbors. 
 
-	gl_reference_eval->setModelmatrix( MatrixUtils::ICPRt3Mat4(icp->Rt()));
+	glm::mat4 ref_mat;
+	conv->Matrix4f2Mat4(icp->Rt(), ref_mat);
+
+	conv->printColMjr(glm::value_ptr(ref_mat), 4, 4);
+
+	gl_reference_eval->setModelmatrix(ref_mat);
 	gl_knn_lines->updatePoints(pc_ref.points, pc_camera.points , icp->getNN());
 
 	if(current_set >= initial_pos.size()) current_set = 0;
@@ -381,6 +394,8 @@ void runTest(void)
 	int error_count = 0;
 
 	Sleep(100);
+
+
 
 	while(run_test<5 ){
 
@@ -554,8 +569,11 @@ void startAutoICP2(void)
 
 	// Update teh graphic reference model
 
-	gl_reference_eval->setModelmatrix(MatrixUtils::ICPRt3Mat4(icp->Rt()));
-	gl_reference_point_cloud->setModelmatrix(MatrixUtils::ICPRt3Mat4(icp->Rt()));
+	glm::mat4 ref_mat;
+	conv->Matrix4f2Mat4(icp->Rt(), ref_mat);
+
+	gl_reference_eval->setModelmatrix(ref_mat);
+	gl_reference_point_cloud->setModelmatrix(ref_mat);
 
 	// Update the lines between the point clouds showing the nearest neighbors
 
