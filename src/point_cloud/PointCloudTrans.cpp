@@ -97,5 +97,7 @@ void PointCloudTrans::getTransformFromPosition(Eigen::Vector3f& accum_t, Eigen::
 	Ri = Eigen::Matrix4f::Identity();
 	Ri.block(0, 0, 3, 3) = init_affine.rotation().matrix();
 
-	result = t2 * cent * R2 * centInv;
+	//result = t2 * cent * R2 * centInv;
+
+	result = Ri.transpose() * (t2 * cent * R2 * centInv) * ti.transpose();
 }

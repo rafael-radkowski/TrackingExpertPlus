@@ -21,7 +21,7 @@ MIT License
 ---------------------------------------------------------------
 Last edited:
 
-March 8, 2021, WB
+March 17, 2021, WB
 - Fixed GetTransformFromPosition for ICP algorithm
 */
 

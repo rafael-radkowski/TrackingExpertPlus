@@ -331,55 +331,41 @@ This function runs the complete ICP process until it terminates for the currentl
 */
 float startAutoICP(void)
 { 
-	current_set = run_test;
-	if(current_set >= initial_pos.size()) current_set = 0;
+	//current_set = run_test;
+	//if(current_set >= initial_pos.size()) current_set = 0;
 	std::cout << "[INFO] - START AUTO ICP " << std::endl; 
 
 	// set the max iteration to 100. 
 
 	icp->setMaxIterations(200);
 
-
-	// Set the new model
-
-	pc_ref = pc_ref_as_loaded;
-	pc_eval = pc_ref_as_loaded;
-
-
 	// Move the point cloud to its start position and orientation
 
-	/*PointCloudTransform::Transform(&pc_ref, pose_result );
-	PointCloudTransform::Transform(&pc_eval, pose_result);*/
+	PointCloudTransform::Transform(&pc_ref, pose_result);
+	pc_eval = pc_ref;
 
-	PointCloudTransform::Transform(&pc_ref, initial_pos[current_set], initial_rot[current_set]);
-	PointCloudTransform::Transform(&pc_eval, initial_pos[current_set], initial_rot[current_set]);
+	//PointCloudTransform::Transform(&pc_ref, initial_pos[current_set], initial_rot[current_set]);
+	//PointCloudTransform::Transform(&pc_eval, initial_pos[current_set], initial_rot[current_set]);
 
-	/*Pose pose;
-	pose.t = pose_result;*/
-
-	// Reset the graphics object. 
-
-	gl_reference_eval->setModelmatrix(glm::mat4(1.0));
-	pose_result = Eigen::Matrix4f::Identity();
-
-
-	// run ICP
 	Pose pose;
 	pose.t = Eigen::Matrix4f::Identity();
+
+	// Reset the graphics object.
+	//glm::mat4 refpc;
+	//conv->Matrix4f2Mat4(pc_ref.pose, refpc);
+	//gl_reference_point_cloud->setModelmatrix(refpc);
+
+	// run ICP
 	icp->compute(pc_ref, pose, pose_result, rms);
-	
 
 	// Update the graphics model matrix and the lines between the nearest neighbors. 
-
 	glm::mat4 ref_mat;
 	conv->Matrix4f2Mat4(icp->Rt(), ref_mat);
-
-	conv->printColMjr(glm::value_ptr(ref_mat), 4, 4);
 
 	gl_reference_eval->setModelmatrix(ref_mat);
 	gl_knn_lines->updatePoints(pc_ref.points, pc_camera.points , icp->getNN());
 
-	if(current_set >= initial_pos.size()) current_set = 0;
+	//if(current_set >= initial_pos.size()) current_set = 0;
 
 	return rms;
 }
@@ -732,6 +718,8 @@ int main(int argc, char** argv)
 	*/
 	Eigen::Affine3f a_mat;
 	a_mat = pose_result;
+	glm::mat4 a_glmat;
+	conv->Affine3f2Mat4(a_mat, a_glmat);
 
 	// Point cloud showing the reference model.
 	gl_reference_point_cloud = new	isu_ar::GLPointCloudRenderer(pc_ref.points, pc_ref.normals);
@@ -745,7 +733,7 @@ int main(int argc, char** argv)
 	gl_reference_eval->setNormalColor(glm::vec3(0.5,0.8,0.8));
 	gl_reference_eval->setNormalGfxLength(0.02f);
 	gl_reference_eval->enablePointRendering(true);
-	gl_reference_eval->setModelmatrix(MatrixUtils::Affine3f2Mat4(a_mat));
+	gl_reference_eval->setModelmatrix(a_glmat);
 
 	// Point cloud showing the camera data. 
 	gl_camera_point_cloud = new	isu_ar::GLPointCloudRenderer(pc_camera.points, pc_camera.normals);
