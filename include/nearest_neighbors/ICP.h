@@ -75,7 +75,7 @@ Aug 06, 2020, RR
 Aug 07, 2020, RR
 - Added code to check the parameters ranges. 
 
-Mar 08, 2020, WB
+Mar 08, 2021, WB
 - Fixed ICP Rt to return a non-transposed matrix
 - Transferred most Rt calculations to the PointCloudTrans class
 

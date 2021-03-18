@@ -21,8 +21,8 @@ MIT License
 ---------------------------------------------------------------
 Last edited:
 
-March 17, 2021, WB
-- Fixed GetTransformFromPosition for ICP algorithm
+March 18, 2021, WB
+- Header file organization
 */
 
 //std
@@ -71,6 +71,7 @@ public:
 		@param point - The point that will be transformed by the transformation matrix
 	*/
 	static void TransformInPlace(Eigen::Affine3f& Rt, Eigen::Vector3d& point);
+	static void TransformInPlace(Eigen::Affine3f& Rt, Eigen::Vector3f& point);
 
 	/*
 		Transforms the given point cloud according to a transformation matrix
@@ -80,9 +81,6 @@ public:
 			matrix
 	*/
 	static void TransformInPlace(Eigen::Affine3f& Rt, vector<Eigen::Vector3d>& points);
-
-	static void TransformInPlace(Eigen::Affine3f& Rt, Eigen::Vector3f& point);
-
 	static void TransformInPlace(Eigen::Affine3f& Rt, vector<Eigen::Vector3f>& points);
 
 	/*
