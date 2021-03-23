@@ -30,7 +30,8 @@ int KinectAzureCaptureDevice::getNumberConnectedCameras()
 		config.color_resolution = K4A_COLOR_RESOLUTION_720P;
 		config.synchronized_images_only = true;
 		config.depth_mode = K4A_DEPTH_MODE_WFOV_UNBINNED;
-		config.depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;//640x576.
+		config.wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
+
 
 		color_width = 1280;
 		color_height = 720;
@@ -48,44 +49,54 @@ int KinectAzureCaptureDevice::getNumberConnectedCameras()
 		connectToDevice();
 	}
 	
-	KinectAzureCaptureDevice::KinectAzureCaptureDevice(uint32_t cameraNumber, KinectAzureCaptureDevice::Mode cameras)
+	KinectAzureCaptureDevice::KinectAzureCaptureDevice(uint32_t cameraNumber, KinectAzureCaptureDevice::Mode cameras, bool syncMode)
 	{
+		//config that does not vary
 		index = cameraNumber;
+		config.camera_fps = K4A_FRAMES_PER_SECOND_15; //for color and depth
+		config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32; //default K4A_IMAGE_FORMAT_COLOR_BGRA32, trying mjpg
+		config.color_resolution = K4A_COLOR_RESOLUTION_720P;
+
+		//color default size
+		color_width = 1280;
+		color_height = 720;
+
+		//if we are wired togehotr for sync,
+		if (syncMode == true)
+		{
+
+			if (index == 0)
+			{
+				std::cout << "Sync mode: Master camera is at index 0.\n";
+				config.wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER; //0 is always master
+			}
+			else
+			{
+				config.wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE; // all others are subordinate
+				config.subordinate_delay_off_master_usec = index * 160; //need some delay for lasers on depth camera to not interfere with each other.
+			}
+		}
+		else  config.wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
+
 		switch (cameras)
 		{
 			//RGB camera defaults to 15 FPS, BGRA32, and 720 P
 			//captures are syncronized, meaning every capture has all image types. This may reduce framerate, but it is a lot easier to use in code because captures behave uniformly
 		case KinectAzureCaptureDevice::Mode::RGB:
-			config.camera_fps = K4A_FRAMES_PER_SECOND_15; //for color and depth
-			config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32; //default K4A_IMAGE_FORMAT_COLOR_BGRA32, trying mjpg
-			config.color_resolution = K4A_COLOR_RESOLUTION_720P;
 			config.depth_mode = K4A_DEPTH_MODE_OFF;
-			color_width = 1280;
-			color_height = 720;
 			break;
 
 		case KinectAzureCaptureDevice::Mode::RGBIRD:
-			config.camera_fps = K4A_FRAMES_PER_SECOND_15;
-			config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
-			config.color_resolution = K4A_COLOR_RESOLUTION_720P;
 			config.synchronized_images_only = true;
 			config.depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
-
-			color_width = 1280;
-			color_height = 720;
 			depth_width = 640; // 1024 x 1024 is WFOV unbinned
 			depth_height = 576;
 			break;
 
 		default:
 			printf("Invalid configuration. Defaulting to RGB, IR, and Depth cameras active. \n");
-			config.camera_fps = K4A_FRAMES_PER_SECOND_15;
-			config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
-			config.color_resolution = K4A_COLOR_RESOLUTION_720P;
 			config.synchronized_images_only = true;
-			config.depth_mode = K4A_DEPTH_MODE_WFOV_UNBINNED;
-			color_width = 1280;
-			color_height = 720;
+			config.depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
 			depth_width = 1024; // 1024 x 1024 is WFOV unbinned
 			depth_height = 1024;
 			break;
@@ -99,9 +110,42 @@ int KinectAzureCaptureDevice::getNumberConnectedCameras()
 		connectToDevice();
 	}
 
+	std::vector<float> KinectAzureCaptureDevice::getCalibration(texpert::CaptureDeviceComponent c)
+	{
+		k4a_calibration_t calib;
+		k4a_result_t result = k4a_device_get_calibration(*device, config.depth_mode, config.color_resolution, &calib);
+		if (result == K4A_RESULT_FAILED)
+		{
+			return std::vector<float>(1, 0.0); // bad value
+		}
+		_k4a_calibration_camera_t cameraCalib;
+		switch (c)
+		{
+		case texpert::DEPTH:
+			cameraCalib = calib.depth_camera_calibration;
+			break;
+		case texpert::COLOR:
+			cameraCalib = calib.color_camera_calibration;
+			break;
+		}
 
+		k4a_calibration_intrinsics_t intrinsics = cameraCalib.intrinsics;
+		k4a_calibration_intrinsic_parameters_t params = intrinsics.parameters;
+		//copy data over
+		std::vector<float> ret(14, 0.0);
+		for (int i = 0; i < 14; i++)
+		{
+			ret[i] = params.v[i];
+		}
+
+
+		return ret;
+
+
+	}
 	KinectAzureCaptureDevice::~KinectAzureCaptureDevice()
 	{
+		stopCamera();
 		//free(record);
 		//free(device);
 		//free(capture_handle);
@@ -148,35 +192,60 @@ int KinectAzureCaptureDevice::getNumberConnectedCameras()
 			_camera_param.at<float>(1,2) = calibration.depth_camera_calibration.intrinsics.parameters.param.cy;
 		}
 
-		startCamera();
+		return startCamera();
 	}
 
 
 	
 	bool KinectAzureCaptureDevice::startCamera()
 	{
-		//printf("Starting Camera...\n");
+		bool in, out;
+		if (config.wired_sync_mode == K4A_WIRED_SYNC_MODE_MASTER)
+		{
+			k4a_device_get_sync_jack(*device, &in, &out);
+			if (out == false)
+			{
+				std::cout << "Sync not possible, cable not connected to out on master device " << serial << "\n";
+				return false;
+			}
+		}
+		else if (config.wired_sync_mode == K4A_WIRED_SYNC_MODE_SUBORDINATE)
+		{
+			k4a_device_get_sync_jack(*device, &in, &out);
 
-
+			if (in == false)
+			{
+				std::cout << "Sync not possible, cable not connected to input on device " << serial << "\n";
+				return false;
+			}
+		}
 		//start camera with given settings
 		if (K4A_FAILED(k4a_device_start_cameras(*device, &config)))
 		{
-			printf("Failed to start cameras!\nPotential solutions:\n\tMake sure no other application is using it.\n\t");
-			printf("Check it is plugged in(there should be a solid white light on the back of the camera).\n\tFollow Azure Kinect API error trace.\n");
+			std::cout << "Failed to start cameras!\n";
+			std::cout << "Solutions : \n";
+			std::cout << "\tMake sure no other application is using it.\n";
+			std::cout << "\tCheck it is plugged in(there should be a solid white light on the back of the camera).\n";
+			std::cout << "\tIf you are syncronizing via external cables, make sure the audio cables are connected.\n";
+			std::cout << "\tFollow Azure Kinect API error trace.\n";
 			return false;
 		}
 
 		//printf("Camera started.\n");
 		cameraRunning = true;
-		//get first frame so capture is not null
-		while (cv::waitKey(10))
-		{
-			k4a_wait_result_t result = k4a_device_get_capture(*device, capture_handle, 30);
-			if (result == K4A_WAIT_RESULT_SUCCEEDED)
-			{
-				return true;
-			}
-		}
+		//need to add frame so it is not null
+		k4a_capture_create(capture_handle);
+		//adding images to frame
+		k4a_image_t image;
+		k4a_image_create(K4A_IMAGE_FORMAT_COLOR_BGRA32, color_width, color_height, 4 * color_width, &image);
+		k4a_capture_set_color_image(*capture_handle, image);
+
+		k4a_image_create(K4A_IMAGE_FORMAT_DEPTH16, depth_width, depth_height, 2 * depth_width, &image);
+		k4a_capture_set_depth_image(*capture_handle, image);
+
+		k4a_image_create(K4A_IMAGE_FORMAT_IR16, depth_width, depth_height, 2 * depth_width, &image);
+		k4a_capture_set_ir_image(*capture_handle, image);
+	
 
 		return true;
 	}
@@ -347,44 +416,44 @@ int KinectAzureCaptureDevice::getNumberConnectedCameras()
 
 	}
 
-	
-	void KinectAzureCaptureDevice::createRecording(char* title)
-	{
-		//create file, will overwrite probably
-		k4a_record_create(title, *device, config, record);
-		//add tags for necesary variables in icapture device
-		char * COLOR_WIDTH = (char*)malloc(8);
-		char * COLOR_HEIGHT = (char*)malloc(8);
-		char * DEPTH_HEIGHT = (char*)malloc(8);
-		char * DEPTH_WIDTH = (char*)malloc(8);
-		sprintf(COLOR_WIDTH, "%d", color_width);
-		sprintf(COLOR_HEIGHT, "%d", color_height);
-		sprintf(DEPTH_HEIGHT, "%d", depth_height);
-		sprintf(DEPTH_WIDTH, "%d", depth_width);
+	//no recording in this project so commented out
+	//void KinectAzureCaptureDevice::createRecording(char* title)
+	//{
+	//	//create file, will overwrite probably
+	//	k4a_record_create(title, *device, config, record);
+	//	//add tags for necesary variables in icapture device
+	//	char * COLOR_WIDTH = (char*)malloc(8);
+	//	char * COLOR_HEIGHT = (char*)malloc(8);
+	//	char * DEPTH_HEIGHT = (char*)malloc(8);
+	//	char * DEPTH_WIDTH = (char*)malloc(8);
+	//	sprintf_s(COLOR_WIDTH, "%d", color_width);
+	//	sprintf(COLOR_HEIGHT, "%d", color_height);
+	//	sprintf(DEPTH_HEIGHT, "%d", depth_height);
+	//	sprintf(DEPTH_WIDTH, "%d", depth_width);
 
-		k4a_record_add_tag(*record, "COLOR_WIDTH", COLOR_WIDTH);
-		k4a_record_add_tag(*record, "COLOR_HEIGHT", COLOR_HEIGHT);
-		k4a_record_add_tag(*record, "DEPTH_HEIGHT", DEPTH_HEIGHT);
-		k4a_record_add_tag(*record, "DEPTH_WIDTH", DEPTH_WIDTH);
-		k4a_record_add_tag(*record, "SERIAL", serial);
+	//	k4a_record_add_tag(*record, "COLOR_WIDTH", COLOR_WIDTH);
+	//	k4a_record_add_tag(*record, "COLOR_HEIGHT", COLOR_HEIGHT);
+	//	k4a_record_add_tag(*record, "DEPTH_HEIGHT", DEPTH_HEIGHT);
+	//	k4a_record_add_tag(*record, "DEPTH_WIDTH", DEPTH_WIDTH);
+	//	k4a_record_add_tag(*record, "SERIAL", serial);
 
-		//write header, done before writing captures and after tags
-		k4a_record_write_header(*record);
-	}
+	//	//write header, done before writing captures and after tags
+	//	k4a_record_write_header(*record);
+	//}
 
-	
-	void KinectAzureCaptureDevice::saveCapture()
-	{
-		this->getCapture();
-		k4a_record_write_capture(*record, *capture_handle);
-	}
-	
-	void KinectAzureCaptureDevice::endRecording()
-	{
-		//k4a_record_flush(*record);
-		k4a_record_close(*record);
+	//
+	//void KinectAzureCaptureDevice::saveCapture()
+	//{
+	//	this->getCapture();
+	//	k4a_record_write_capture(*record, *capture_handle);
+	//}
+	//
+	//void KinectAzureCaptureDevice::endRecording()
+	//{
+	//	//k4a_record_flush(*record);
+	//	k4a_record_close(*record);
 
-	}
+	//}
 
 
 	
@@ -453,6 +522,7 @@ int KinectAzureCaptureDevice::getNumberConnectedCameras()
 			return depth_height;
 
 		}
+		return -1; //bad value
 	}
 
 	
@@ -465,7 +535,7 @@ int KinectAzureCaptureDevice::getNumberConnectedCameras()
 		case texpert::CaptureDeviceComponent::DEPTH:
 			return depth_width;
 		}
-
+		return -1; //bad value
 	}
 
 

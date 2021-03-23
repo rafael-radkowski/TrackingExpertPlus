@@ -51,7 +51,7 @@ typedef struct PointCloud
     }
 
     int size(void){
-        N = points.size();
+        N = (int)points.size();
         return N;
     }
 

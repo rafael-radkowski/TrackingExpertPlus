@@ -89,6 +89,7 @@ public:
 	/*!
    Constructor. Assumes camera index 0, RGB, IR, and Depth images. 15 FPS. 
    */
+	//does not automaticaly connect to device. Call conectToDevice to use;
 	KinectAzureCaptureDevice();
 	//records index and initial config
 	
@@ -101,7 +102,7 @@ public:
 	@param the index of the camera you want to access. 0 is the default index you should use if you are unsure.
 	@param The mode you want to set the camera to. You can choose to only take RGB, IR, or Depth pictures, or a combonation of them. See the enum Mode for available options.
 	*/
-	KinectAzureCaptureDevice(uint32_t cameraNumber, KinectAzureCaptureDevice::Mode cameras);
+	KinectAzureCaptureDevice(uint32_t cameraNumber, KinectAzureCaptureDevice::Mode cameras, bool syncMode);
 	
 	/*
 	*/
@@ -157,8 +158,33 @@ public:
 	*/
 	void updateDimensions(KinectAzureCaptureDevice::ImageType type, int *width, int *height);
 	
-	
-	
+	/*
+	This method returns a float pointer that points to an array of calibration values. The values at a given index represent the intrinsic params below.
+	Calibration model is Brown Conrady (compatible with OpenCV)
+
+	float 0;            < Principal point in image, x
+	float 1;            < Principal point in image, y
+	float 2;            < Focal length x
+	float 3;            < Focal length y
+	float 4;            < k1 radial distortion coefficient
+	float 5;            < k2 radial distortion coefficient
+	float 6;            < k3 radial distortion coefficient
+	float 7;            < k4 radial distortion coefficient
+	float 8;            < k5 radial distortion coefficient
+	float 9;            < k6 radial distortion coefficient
+	float 10;			< Center of distortion in Z=1 plane, x (only used for Rational6KT)
+	float 11;			< Center of distortion in Z=1 plane, y (only used for Rational6KT)
+	float 12;           < Tangential distortion coefficient 2
+	float 13;           < Tangential distortion coefficient 1
+	(there is a float 14 that is supposed to be metric radius, but it does not work currently. Use getMetricRadius instead)
+
+	@param c  - The image type, depth or color, that you want intrinsics for
+	@return The array of floats (14 floats)
+
+	*/
+	std::vector<float> getCalibration(texpert::CaptureDeviceComponent c);
+
+
 	/*
 	@brief returns the buffer for the desired image type. You must connect to and start camera before calling.
 	@param The desired image type, either RGB, IR, or Depth
@@ -197,20 +223,20 @@ public:
 	*/
 	void changeColorType(KinectAzureCaptureDevice::ColorType type);
 
-	/*!
-	Creates a recording file at the filepath given. See savecapture() and EndRecording(). 
-	@param title - the total file path and file name of the video that will be created
-	*/
-	void createRecording(char* title);
+	///*!
+	//Creates a recording file at the filepath given. See savecapture() and EndRecording(). 
+	//@param title - the total file path and file name of the video that will be created
+	//*/
+	//void createRecording(char* title);
 
-	/*!
-	Saves a capture(frame) to the recording created. 
-	*/
-	void saveCapture();
-	/*!
-	Flushes all data to recording file, saves recording file. You must call this after you are done recording
-	*/
-	void endRecording();
+	///*!
+	//Saves a capture(frame) to the recording created. 
+	//*/
+	//void saveCapture();
+	///*!
+	//Flushes all data to recording file, saves recording file. You must call this after you are done recording
+	//*/
+	//void endRecording();
 
 
 	/*
