@@ -61,6 +61,7 @@ Last edited:
 //#include "MatrixTransform.h"
 #include "GLLineRenderer.h"
 #include "MatrixConv.h"
+#include "KinectAzureCaptureDevice.h"
 
 using namespace texpert;
 
@@ -112,6 +113,10 @@ std::vector<std::string> files;
 
 MatrixConv* conv = MatrixConv::getInstance();
 
+PointCloudProducer* cam_cloud;
+KinectAzureCaptureDevice* cam;
+bool usingCam = false;
+
 
 //--------------------------------------------------------
 // ICP
@@ -146,6 +151,7 @@ float startAutoICP(void);
 void loadNewObject(void);
 void runSequenceTest(void);
 void startAutoICP2(void);
+void findModel(void);
 /*
 Keyboard callback for keyboard interaction. 
 */
@@ -157,6 +163,12 @@ void keyboard_callback( int key, int action) {
 	case 0:  // key up
 	
 		switch (key) {
+		case 44: //,
+		{
+			usingCam = !usingCam;
+			icp->setVerbose(!usingCam, 0);
+			break;
+		}
 		case 87: // w
 		{
 			runTest();
@@ -331,8 +343,7 @@ This function runs the complete ICP process until it terminates for the currentl
 */
 float startAutoICP(void)
 { 
-	//current_set = run_test;
-	//if(current_set >= initial_pos.size()) current_set = 0;
+
 	std::cout << "[INFO] - START AUTO ICP " << std::endl; 
 
 	// set the max iteration to 100. 
@@ -344,16 +355,8 @@ float startAutoICP(void)
 	PointCloudTransform::Transform(&pc_ref, pose_result);
 	pc_eval = pc_ref;
 
-	//PointCloudTransform::Transform(&pc_ref, initial_pos[current_set], initial_rot[current_set]);
-	//PointCloudTransform::Transform(&pc_eval, initial_pos[current_set], initial_rot[current_set]);
-
 	Pose pose;
 	pose.t = Eigen::Matrix4f::Identity();
-
-	// Reset the graphics object.
-	//glm::mat4 refpc;
-	//conv->Matrix4f2Mat4(pc_ref.pose, refpc);
-	//gl_reference_point_cloud->setModelmatrix(refpc);
 
 	// run ICP
 	icp->compute(pc_ref, pose, pose_result, rms);
@@ -365,7 +368,8 @@ float startAutoICP(void)
 	gl_reference_eval->setModelmatrix(ref_mat);
 	gl_knn_lines->updatePoints(pc_ref.points, pc_camera.points , icp->getNN());
 
-	//if(current_set >= initial_pos.size()) current_set = 0;
+	//std::cout << "[INFO] - Pose delta\n";
+	//std::cout << icp->Rt() << std::endl;
 
 	return rms;
 }
@@ -425,6 +429,35 @@ void loadNewObject(void) {
 	icp->setCameraData(pc_camera_as_loaded);
 }
 
+/*
+
+*/
+void findModel(void) {
+	cam_cloud->process();
+	pc_camera = pc_camera_as_loaded;
+	icp->setCameraData(pc_camera_as_loaded);
+
+	icp->setMaxIterations(200);
+
+	// Move the point cloud to its start position and orientation
+
+	PointCloudTransform::Transform(&pc_ref, pose_result);
+	pc_eval = pc_ref;
+
+	Pose pose;
+	pose.t = Eigen::Matrix4f::Identity();
+
+	// run ICP
+	icp->compute(pc_ref, pose, pose_result, rms);
+
+	// Update the graphics model matrix and the lines between the nearest neighbors. 
+	glm::mat4 ref_mat;
+	conv->Matrix4f2Mat4(icp->Rt(), ref_mat);
+
+	gl_reference_eval->setModelmatrix(ref_mat);
+	gl_knn_lines->updatePoints(pc_ref.points, pc_camera.points, icp->getNN());
+}
+
 
 /*
 The main render and processing loop. 
@@ -447,6 +480,12 @@ void render_loop(glm::mat4 pm, glm::mat4 vm) {
 
 
 	runSequenceTest();
+
+	//The camera point cloud loop
+	if (usingCam)
+	{
+		findModel();
+	}
 
 	
 	Sleep(25);
@@ -599,6 +638,7 @@ int main(int argc, char** argv)
 	std::cout << "n \tenable or disable normal vector rendering." << std::endl;
 	std::cout << "r \tenable or disable the reference model rendering." << std::endl;
 	std::cout << "c \tshow the nearest neighbors between both point clouds. " << std::endl;
+	std::cout << ", \ttoggle running ICP off of the live camera point cloud feed. " << std::endl;
 
 	std::cout << "\n\n" << std::endl;
 
@@ -747,9 +787,11 @@ int main(int argc, char** argv)
 	gl_knn_lines = new isu_ar::GLLineRenderer(pc_ref.points, pc_camera.points, icp->getNN());
 	gl_knn_lines->updatePoints();
 
+	cam = new KinectAzureCaptureDevice();
+	cam_cloud = new PointCloudProducer(*cam, pc_camera_as_loaded);
 
 	//thread_1.lock(); // block the start until the render window is up
-	//std::thread test_run_static(runTest);  
+	//std::thread test_run_static(runTest);
 	
 
 	//Sleep(100);
