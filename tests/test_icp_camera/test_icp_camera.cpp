@@ -430,14 +430,15 @@ void loadNewObject(void) {
 }
 
 /*
-
+	Use the camera point cloud to estimate model pose.
 */
 void findModel(void) {
 	cam_cloud->process();
 	pc_camera = pc_camera_as_loaded;
 	icp->setCameraData(pc_camera_as_loaded);
 
-	icp->setMaxIterations(200);
+	//Low iteration count to make viewport framerate more bearable
+	icp->setMaxIterations(20);
 
 	// Move the point cloud to its start position and orientation
 
@@ -447,7 +448,7 @@ void findModel(void) {
 	Pose pose;
 	pose.t = Eigen::Matrix4f::Identity();
 
-	// run ICP
+	// run ICP (slow framerate at high iteration count.  Pointcloud size problem?)
 	icp->compute(pc_ref, pose, pose_result, rms);
 
 	// Update the graphics model matrix and the lines between the nearest neighbors. 
@@ -455,7 +456,7 @@ void findModel(void) {
 	conv->Matrix4f2Mat4(icp->Rt(), ref_mat);
 
 	gl_reference_eval->setModelmatrix(ref_mat);
-	gl_knn_lines->updatePoints(pc_ref.points, pc_camera.points, icp->getNN());
+	//gl_knn_lines->updatePoints(pc_ref.points, pc_camera.points, icp->getNN());
 }
 
 
@@ -787,7 +788,8 @@ int main(int argc, char** argv)
 	gl_knn_lines = new isu_ar::GLLineRenderer(pc_ref.points, pc_camera.points, icp->getNN());
 	gl_knn_lines->updatePoints();
 
-	cam = new KinectAzureCaptureDevice();
+	// Camera point cloud producer
+	cam = new KinectAzureCaptureDevice(0, KinectAzureCaptureDevice::Mode::RGBIRD, false);
 	cam_cloud = new PointCloudProducer(*cam, pc_camera_as_loaded);
 
 	//thread_1.lock(); // block the start until the render window is up
