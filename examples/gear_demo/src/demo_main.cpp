@@ -113,7 +113,7 @@ int main(int argc, char* argv)
 	/*
 	Open a camera device. 
 	*/
-	camera =  new KinectAzureCaptureDevice();
+	camera = new KinectAzureCaptureDevice(0, KinectAzureCaptureDevice::Mode::RGBIRD, false);
 
 	/*
 	Test if the camera is ready to run. 

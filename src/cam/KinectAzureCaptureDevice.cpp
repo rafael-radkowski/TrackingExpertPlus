@@ -25,11 +25,11 @@ int KinectAzureCaptureDevice::getNumberConnectedCameras()
 	KinectAzureCaptureDevice::KinectAzureCaptureDevice()
 	{
 		index = 0;
-		config.camera_fps = K4A_FRAMES_PER_SECOND_30;
+		config.camera_fps = K4A_FRAMES_PER_SECOND_15;
 		config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
 		config.color_resolution = K4A_COLOR_RESOLUTION_720P;
 		config.synchronized_images_only = true;
-		config.depth_mode = K4A_DEPTH_MODE_WFOV_UNBINNED;
+		config.depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
 		config.wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
 
 

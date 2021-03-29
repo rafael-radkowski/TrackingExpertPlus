@@ -688,6 +688,7 @@ int main(int argc, char** argv)
 	sampling_param.grid_x = 0.01;
 	sampling_param.grid_y = 0.01;
 	sampling_param.grid_z = 0.01;
+	sampling_param.uniform_step = 7;
 	Sampling::SetMethod(sampling_method, sampling_param);
 
 	ReaderWriterOBJ::Read(ref_file, pc_ref_as_loaded.points, pc_ref_as_loaded.normals, false, false);
@@ -791,6 +792,9 @@ int main(int argc, char** argv)
 	// Camera point cloud producer
 	cam = new KinectAzureCaptureDevice(0, KinectAzureCaptureDevice::Mode::RGBIRD, false);
 	cam_cloud = new PointCloudProducer(*cam, pc_camera_as_loaded);
+
+	sampling_param.uniform_step = 10;
+	cam_cloud->setSampingMode(sampling_method, sampling_param);
 
 	//thread_1.lock(); // block the start until the render window is up
 	//std::thread test_run_static(runTest);
