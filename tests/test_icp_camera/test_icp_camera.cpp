@@ -166,7 +166,7 @@ void keyboard_callback( int key, int action) {
 		case 44: //,
 		{
 			usingCam = !usingCam;
-			icp->setVerbose(!usingCam, 0);
+			icp->setVerbose(!usingCam, 1);
 			break;
 		}
 		case 87: // w
@@ -438,7 +438,7 @@ void findModel(void) {
 	icp->setCameraData(pc_camera_as_loaded);
 
 	//Low iteration count to make viewport framerate more bearable
-	icp->setMaxIterations(20);
+	icp->setMaxIterations(50);
 
 	// Move the point cloud to its start position and orientation
 
@@ -688,7 +688,7 @@ int main(int argc, char** argv)
 	sampling_param.grid_x = 0.01;
 	sampling_param.grid_y = 0.01;
 	sampling_param.grid_z = 0.01;
-	sampling_param.uniform_step = 7;
+	sampling_param.uniform_step = 10;
 	Sampling::SetMethod(sampling_method, sampling_param);
 
 	ReaderWriterOBJ::Read(ref_file, pc_ref_as_loaded.points, pc_ref_as_loaded.normals, false, false);
@@ -702,6 +702,7 @@ int main(int argc, char** argv)
 
 	
 	ReaderWriterOBJ::Read(ref_file, pc_eval_as_loaded.points, pc_eval_as_loaded.normals, false, false);
+	Sampling::SetMethod(sampling_method, sampling_param);
 	Sampling::Run(pc_eval_as_loaded, pc_eval_as_loaded);
 	pc_eval = pc_eval_as_loaded;
 	 
@@ -712,12 +713,13 @@ int main(int argc, char** argv)
 	*/
 	std:string camera_file = files[run_test];
 
-	camera_file = "../data/test/Azure_Kinect_model_1_2020-06-18_05-09-00_pc.ply";
+	camera_file = "../data/test/stanford_bunny_desk/model_10_2020-03-03_10-57-44_pc.ply";
 	ReaderWriterUtil::Read(camera_file, pc_camera_as_loaded.points, pc_camera_as_loaded.normals, true, false);
 	
 	sampling_param.grid_x = 0.01;
 	sampling_param.grid_y = 0.01;
 	sampling_param.grid_z = 0.01;
+	sampling_param.uniform_step = 1;
 	Sampling::SetMethod(sampling_method, sampling_param);
 	Sampling::Run(pc_camera_as_loaded, pc_camera_as_loaded);
 	pc_camera = pc_camera_as_loaded;

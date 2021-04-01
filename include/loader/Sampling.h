@@ -29,6 +29,9 @@ March 20, 2019, RR
 
 Aug 8, 2020, RR
 - Added a verbose level to surpress unnesssary information.
+
+Apr 1, 2021, WB
+- Changed Run to use the sampling param uniform_step
 */
 
 

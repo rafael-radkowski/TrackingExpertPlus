@@ -83,9 +83,12 @@ void Sampling::Uniform( PointCloud& src, PointCloud& dst, SamplingParam param)
     float offset_y = dimY - maxY;
     float offset_z = dimZ - maxZ ;
 
+    int step = curr_param.uniform_step;
+    if (step <= 0)
+        step = 1;
 
 	PointCloud ret = PointCloud();
-    for( int i=0; i<src.points.size(); i++){
+    for( int i=0; i<src.points.size(); i += step){
         int idx = ceil((src.points[i].x() + offset_x) / voxX );
         int idy = ceil((src.points[i].y() + offset_y) / voxY );
         int idz = ceil((src.points[i].z() + offset_z) / voxZ );
