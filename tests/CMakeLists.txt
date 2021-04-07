@@ -36,6 +36,7 @@ endif()
 
 if(${ENABLE_AZURE_KINECT} STREQUAL  ON )
 	add_subdirectory(test_azure_camera)
+	add_subdirectory(test_homography)
 endif()
 
 # Build the trackaing test class
