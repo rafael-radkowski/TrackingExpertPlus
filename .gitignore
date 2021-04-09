@@ -50,3 +50,4 @@ data/Antenna_Coupler_model.obj
 *.txt
 examples/antenna_demo/src/AntennaDemo.dir
 data/test/Bunny_Experiment_1
+tests/test_homography/test_homography.dir/
