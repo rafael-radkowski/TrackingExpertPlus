@@ -51,6 +51,12 @@ void MouseCallback(int action, int x, int y, int flag, void* userInput)
 	}
 }
 
+void transformImg(cv::Mat& input, cv::Mat& output, cv::Point2f* srcpts, cv::Point2f* dstpts)
+{
+	cv::Mat p_trans = cv::getPerspectiveTransform(srcpts, dstpts);
+	cv::warpPerspective(input, output, p_trans, cv::Size(input.cols, input.rows));
+}
+
 int main(int argc, char** argv)
 {
 	camera = new KinectAzureCaptureDevice();
@@ -135,7 +141,8 @@ int main(int argc, char** argv)
 
 	while (keyInput == 'r')
 	{
-		cv::Mat tempImg = colImg;
+		cv::Mat tempImg;
+		colImg.copyTo(tempImg);
 		cv::imshow(winname, colImg);
 
 		clicknum = 0;
@@ -144,7 +151,7 @@ int main(int argc, char** argv)
 		while (clicknum < 4)
 		{
 			for(int i = 0; i < clicknum; i++)
-				cv::circle(tempImg, points[i], 4, cv::Scalar(255, 30, 255));
+				cv::circle(tempImg, points[i], 4, cv::Scalar(50 * i, 50 * i, 255));
 
 			cv::imshow(winname, tempImg);
 
@@ -153,7 +160,7 @@ int main(int argc, char** argv)
 		getting_input = false;
 
 		for (int i = 0; i < clicknum; i++)
-			cv::circle(tempImg, points[i], 4, cv::Scalar(255, 30, 255));
+			cv::circle(tempImg, points[i], 4, cv::Scalar(50 * i, 50 * i, 255));
 
 		cv::imshow(winname, tempImg);
 
@@ -164,7 +171,8 @@ int main(int argc, char** argv)
 	keyInput = 'r';
 	while (keyInput == 'r')
 	{
-		cv::Mat tempImg = depthImg;
+		cv::Mat tempImg;
+		depthImg.copyTo(tempImg);
 		cv::imshow(winname, depthImg);
 
 		clicknum = 4;
@@ -173,7 +181,7 @@ int main(int argc, char** argv)
 		while (clicknum < 8)
 		{
 			for (int i = 4; i < clicknum; i++)
-				cv::circle(tempImg, points[i], 4, cv::Scalar(255, 30, 255));
+				cv::circle(tempImg, points[i], 4, cv::Scalar(30, 40 * i, 255));
 
 			cv::imshow(winname, tempImg);
 
@@ -182,7 +190,7 @@ int main(int argc, char** argv)
 		getting_input = false;
 
 		for (int i = 0; i < clicknum; i++)
-			cv::circle(tempImg, points[i], 4, cv::Scalar(255, 30, 255));
+			cv::circle(tempImg, points[i], 4, cv::Scalar(30, 40 * i, 255));
 
 		cv::imshow(winname, tempImg);
 
@@ -196,7 +204,7 @@ int main(int argc, char** argv)
 	cv::Mat p_trans = cv::getPerspectiveTransform(srcpts, dstpts);
 
 	cv::Mat resMat;
-	cv::warpPerspective(colImg, resMat, p_trans, cv::Size(colImg.cols, colImg.rows));
+	cv::warpPerspective(colImg, resMat, p_trans, cv::Size(std::fmax(colImg.cols, depthImg.cols), std::fmax(colImg.rows, depthImg.rows)));
 
 	cv::imshow(winname, resMat);
 	keyInput = cv::waitKey(0);
