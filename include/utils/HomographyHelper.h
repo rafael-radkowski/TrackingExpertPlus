@@ -21,10 +21,18 @@ Apr 12, 2021, WB
 //opencv
 #include "opencv2/opencv.hpp"
 
+//local
+#include "FileUtilsExt.h"
+
 class HomographyHelper
 {
-public:
-	static void Homography22d(cv::Mat& imgsrc, cv::Mat& imgdst, cv::Mat& output, bool save = false, char* filepath = "../../data");
 
-	static void Homography22d(cv::Mat& input, cv::Mat& output, bool save = false, char* filepath = "../../data");
+public:
+	static void Homography22d(cv::Mat& imgsrc, cv::Mat& imgdst, cv::Mat& output);
+
+	static void Homography22d(cv::Mat& input, cv::Mat& output);
+
+	static void SaveHomography(cv::Mat& input, const char* filepath);
+
+	static void LoadHomography(cv::Mat& output, const char* filepath);
 };
