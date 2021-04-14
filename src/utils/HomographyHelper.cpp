@@ -28,7 +28,9 @@ namespace ns_HomographyHelper
 
 using namespace ns_HomographyHelper;
 
-void HomographyHelper::Homography22d(cv::Mat& imgsrc, cv::Mat& imgdst, cv::Mat& output)
+
+//static
+void HomographyHelper::Homography22d(cv::Mat& imgsrc, cv::Mat& imgdst, cv::Mat& output, bool verbose)
 {
 	if (imgsrc.empty())
 	{
@@ -112,14 +114,22 @@ void HomographyHelper::Homography22d(cv::Mat& imgsrc, cv::Mat& imgdst, cv::Mat& 
 	cv::Point2f srcpts[4] = { points[0], points[1], points[2], points[3] };
 	cv::Point2f dstpts[4] = { points[4], points[5], points[6], points[7] };
 
-	cv::Mat p_trans = cv::getPerspectiveTransform(srcpts, dstpts);
+	output = cv::getPerspectiveTransform(srcpts, dstpts);
 
-	cv::warpPerspective(imgsrc, output, p_trans, cv::Size(std::fmax(imgsrc.cols, imgdst.cols), std::fmax(imgsrc.rows, imgdst.rows)));
+	if (verbose)
+	{
+		cv::Mat viewMat;
+		cv::warpPerspective(imgsrc, viewMat, output, cv::Size(std::fmax(imgsrc.cols, imgdst.cols), std::fmax(imgsrc.rows, imgdst.rows)));
+		cv::imshow(winname, viewMat);
+		cv::waitKey(0);
+	}
 
 	cv::destroyWindow(winname);
 }
 
-void HomographyHelper::Homography22d(cv::Mat& input, cv::Mat& output)
+
+//static
+void HomographyHelper::Homography22d(cv::Mat& input, cv::Mat& output, bool verbose)
 {
 	if (input.empty())
 	{
@@ -198,25 +208,71 @@ void HomographyHelper::Homography22d(cv::Mat& input, cv::Mat& output)
 	cv::Point2f srcpts[4] = { points[0], points[1], points[2], points[3] };
 	cv::Point2f dstpts[4] = { points[4], points[5], points[6], points[7] };
 
-	cv::Mat p_trans = cv::getPerspectiveTransform(srcpts, dstpts);
+	output = cv::getPerspectiveTransform(srcpts, dstpts);
 
-	cv::warpPerspective(input, output, p_trans, cv::Size(std::fmax(input.cols, input.cols), std::fmax(input.rows, input.rows)));
+	if (verbose)
+	{
+		cv::Mat viewMat;
+		cv::warpPerspective(input, viewMat, output, cv::Size(input.cols, input.rows));
+		cv::imshow(winname, viewMat);
+		cv::waitKey(0);
+	}
 
 	cv::destroyWindow(winname);
 }
 
+
+//static
+void HomographyHelper::Homography22d(cv::Point2f srcpts[4], cv::Point2f dstpts[4], cv::Mat& output)
+{
+	output = cv::getPerspectiveTransform(srcpts, dstpts);
+}
+
+
+//static
 void HomographyHelper::SaveHomography(cv::Mat& input, const char* filepath)
 {
 	ofstream file;
 	file.open(filepath);
 
-	char* matrix;
-	sprintf(matrix, "%lf\t, %lf\t, %lf\t\n%lf\t, %lf\t, %lf\t\n%lf\t, %lf\t, %lf\t\n",
-		input.at<double>(0, 0), input.at<double>(0, 1), input.at<double>(0, 2),
-		input.at<double>(1, 0), input.at<double>(1, 1), input.at<double>(1, 2),
-		input.at<double>(2, 0), input.at<double>(2, 1), input.at<double>(2, 2));
+	if (!file.is_open())
+	{
+		std::cout << "WARNING: Could not open file " << filepath << ".\n";
+		return;
+	}
 
-	file << matrix;
+	char* matrix = (char*)malloc(300 * sizeof(char));
+	sprintf(matrix, "%0.6f\t, %0.6f\t, %0.6f\t\n%0.6f\t, %0.6f\t, %0.6f\t\n%0.6f\t, %0.6f\t, %0.6f\t\n",
+		((double*)input.data)[0], ((double*)input.data)[1], ((double*)input.data)[2],
+		((double*)input.data)[3], ((double*)input.data)[4], ((double*)input.data)[5],
+		((double*)input.data)[6], ((double*)input.data)[7], ((double*)input.data)[8]);
+
+	file.close();
+}
+
+
+//static
+void HomographyHelper::LoadHomography(cv::Mat& output, const char* filepath)
+{
+	ifstream file;
+	file.open(filepath);
+
+	if (!file.is_open())
+	{
+		std::cout << "WARNING: Could not open file " << filepath << ".\n";
+		return;
+	}
+
+	char* buffer = (char*)malloc(300 * sizeof(char));
+	output = cv::Mat(3, 3, CV_32F);
+
+	for (int i = 0; i < 3; i++)
+	{
+		file.getline(buffer, 300);
+
+		sscanf(buffer, "%f\t, %f\t, %f\t\n",
+			&((float*)output.data)[0 + i * 3], &((float*)output.data)[1 + i * 3], &((float*)output.data)[2 + i * 3]);
+	}
 
 	file.close();
 }

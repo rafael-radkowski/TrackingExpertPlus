@@ -112,8 +112,7 @@ int main(int argc, char** argv)
 	HomographyHelper::Homography22d(colImg, resMat);
 	HomographyHelper::SaveHomography(resMat, out_file);
 
-	cv::imshow(winname, resMat);
-	keyInput = cv::waitKey(0);
+	HomographyHelper::LoadHomography(resMat, out_file);
 
 	return 0;
 }

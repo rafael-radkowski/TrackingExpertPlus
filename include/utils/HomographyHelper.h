@@ -4,8 +4,9 @@
 @brief Static class to aid in determining homography between points
 
 Features:
-- Finds and optionally saves the homography between a set of 2D-2D correspondences
-- Finds and optionally saves the homography between a set of 2D-3D correspondences
+- Finds the homography between a set of 2D-2D correspondences
+- Finds the homography between a set of 2D-3D correspondences
+- Saves and loads homography to/from a file
 
 William Blanchard
 Iowa State University
@@ -14,8 +15,9 @@ wsb@iastate.edu
 MIT License
 ---------------------------------------------------------------
 Last edits:
-Apr 12, 2021, WB
-	- Initial commit
+Apr 14, 2021, WB
+	- Added Save/Load homography functions
+	- Added Homography22d function where source and destination points are already found
 */
 
 //opencv
@@ -28,9 +30,11 @@ class HomographyHelper
 {
 
 public:
-	static void Homography22d(cv::Mat& imgsrc, cv::Mat& imgdst, cv::Mat& output);
+	static void Homography22d(cv::Mat& imgsrc, cv::Mat& imgdst, cv::Mat& output, bool verbose = false);
 
-	static void Homography22d(cv::Mat& input, cv::Mat& output);
+	static void Homography22d(cv::Mat& input, cv::Mat& output, bool verbose = false);
+
+	static void Homography22d(cv::Point2f srcpts[4], cv::Point2f dstpts[4], cv::Mat& output);
 
 	static void SaveHomography(cv::Mat& input, const char* filepath);
 
