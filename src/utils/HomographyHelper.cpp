@@ -17,12 +17,6 @@ namespace ns_HomographyHelper
 				clicknum++;
 			}
 		}
-
-		//DEBUG
-		if (action == CV_EVENT_LBUTTONUP)
-		{
-			std::cout << x << ", " << y << std::endl;
-		}
 	}
 }
 
@@ -230,49 +224,52 @@ void HomographyHelper::Homography22d(cv::Point2f srcpts[4], cv::Point2f dstpts[4
 
 
 //static
-void HomographyHelper::SaveHomography(cv::Mat& input, const char* filepath)
+void Homography23d(std::vector<cv::Point2f> imgpts, std::vector<cv::Point3f> modelpts, cv::Mat& output, bool verbose = false)
 {
-	ofstream file;
-	file.open(filepath);
+	
+}
 
-	if (!file.is_open())
+//static
+void HomographyHelper::SaveHomography(cv::Mat& input, std::string filepath)
+{
+	// determine the file type
+	int idx = filepath.find_last_of(".");
+	std::string sub = filepath.substr(idx + 1, 3);
+	std::transform(sub.begin(), sub.end(), sub.begin(), ::tolower);
+
+	if (!(sub.compare("jso") == 0))
 	{
-		std::cout << "WARNING: Could not open file " << filepath << ".\n";
+		std::cerr << "[HomographyHelper] ERROR - cannot load " << filepath << ". Wrong file format. json is required." << std::endl;
 		return;
 	}
 
-	char* matrix = (char*)malloc(300 * sizeof(char));
-	sprintf(matrix, "%0.6f\t, %0.6f\t, %0.6f\t\n%0.6f\t, %0.6f\t, %0.6f\t\n%0.6f\t, %0.6f\t, %0.6f\t\n",
-		((double*)input.data)[0], ((double*)input.data)[1], ((double*)input.data)[2],
-		((double*)input.data)[3], ((double*)input.data)[4], ((double*)input.data)[5],
-		((double*)input.data)[6], ((double*)input.data)[7], ((double*)input.data)[8]);
+	cv::FileStorage file = cv::FileStorage(filepath, cv::FileStorage::WRITE);
 
-	file.close();
+	file.write("matrix", input);
 }
 
 
 //static
-void HomographyHelper::LoadHomography(cv::Mat& output, const char* filepath)
+void HomographyHelper::LoadHomography(cv::Mat& output, std::string filepath)
 {
-	ifstream file;
-	file.open(filepath);
-
-	if (!file.is_open())
+	if (!FileUtils::Exists(filepath))
 	{
-		std::cout << "WARNING: Could not open file " << filepath << ".\n";
+		std::cerr << "[HomographyHelper] ERROR - cannot find file " << filepath << "." << std::endl;
 		return;
 	}
 
-	char* buffer = (char*)malloc(300 * sizeof(char));
-	output = cv::Mat(3, 3, CV_32F);
+	int idx = filepath.find_last_of(".");
+	std::string sub = filepath.substr(idx + 1, 3);
+	std::transform(sub.begin(), sub.end(), sub.begin(), ::tolower);
 
-	for (int i = 0; i < 3; i++)
+	if (!(sub.compare("jso") == 0))
 	{
-		file.getline(buffer, 300);
-
-		sscanf(buffer, "%f\t, %f\t, %f\t\n",
-			&((float*)output.data)[0 + i * 3], &((float*)output.data)[1 + i * 3], &((float*)output.data)[2 + i * 3]);
+		std::cerr << "[HomographyHelper] ERROR - cannot load " << filepath << ". Wrong file format. json is required." << std::endl;
+		return;
 	}
 
-	file.close();
+	cv::FileStorage file = cv::FileStorage(filepath, cv::FileStorage::READ);
+
+	char* buffer = (char*)malloc(300 * sizeof(char));
+	output = file["matrix"].mat();
 }

@@ -32,8 +32,8 @@ std::vector<cv::Point2f> points;
 
 const char* winname = "Homography Test";
 const char* rgb_pic = "../../data/pics/pc_pic_overlay.png";
-const char* depth_pic = "../../data/pics/pc_pic_overlay.png";
-const char* out_file = "output.txt";
+const char* depth_pic = "../../data/pics/pc_pic_overlay_box.png";
+const char* out_file = "output.json";
 
 int main(int argc, char** argv)
 {
@@ -109,10 +109,14 @@ int main(int argc, char** argv)
 	cv::resize(colImg, colImg, cv::Size(colImg.cols / 2, colImg.rows / 2));
 	cv::resize(depthImg, depthImg, cv::Size(depthImg.cols / 2, depthImg.rows / 2));
 
-	HomographyHelper::Homography22d(colImg, resMat);
+	HomographyHelper::Homography22d(colImg, depthImg, resMat, true);
+
 	HomographyHelper::SaveHomography(resMat, out_file);
 
-	HomographyHelper::LoadHomography(resMat, out_file);
+	cv::Mat questionableMat;
+	HomographyHelper::LoadHomography(questionableMat, out_file);
+
+	std::cout << questionableMat << endl;
 
 	return 0;
 }
