@@ -109,7 +109,7 @@ int main(int argc, char** argv)
 	cv::resize(colImg, colImg, cv::Size(colImg.cols / 2, colImg.rows / 2));
 	cv::resize(depthImg, depthImg, cv::Size(depthImg.cols / 2, depthImg.rows / 2));
 
-	HomographyHelper::Homography22d(colImg, depthImg, resMat, true);
+	HomographyHelper::Homography22dProcess(colImg, depthImg, resMat, true);
 
 	HomographyHelper::SaveHomography(resMat, out_file);
 

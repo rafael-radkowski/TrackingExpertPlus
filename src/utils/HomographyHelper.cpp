@@ -6,6 +6,7 @@ namespace ns_HomographyHelper
 	int clicknum = 0;
 	cv::Point2d* points = (cv::Point2d*)malloc(8 * sizeof(cv::Point2d));
 
+	//Namespace OpenCV mouse callback
 	void MouseCallback(int action, int x, int y, int flag, void* userInput)
 	{
 		if (getting_input)
@@ -24,7 +25,7 @@ using namespace ns_HomographyHelper;
 
 
 //static
-void HomographyHelper::Homography22d(cv::Mat& imgsrc, cv::Mat& imgdst, cv::Mat& output, bool verbose)
+void HomographyHelper::Homography22dProcess(cv::Mat& imgsrc, cv::Mat& imgdst, cv::Mat& output, bool verbose)
 {
 	if (imgsrc.empty())
 	{
@@ -37,16 +38,17 @@ void HomographyHelper::Homography22d(cv::Mat& imgsrc, cv::Mat& imgdst, cv::Mat& 
 		return;
 	}
 
+	//Initialize loop variables
 	const char* winname = "Homography Chooser";
 	getting_input = false;
 	clicknum = 0;
 	char keyInput = 'r';
 
-
+	//Start window, set mouse callback
 	cv::imshow(winname, imgsrc);
 	cv::setMouseCallback(winname, MouseCallback);
 
-
+	//Select points on the source image
 	while (keyInput == 'r')
 	{
 		cv::Mat tempImg;
@@ -75,6 +77,7 @@ void HomographyHelper::Homography22d(cv::Mat& imgsrc, cv::Mat& imgdst, cv::Mat& 
 		keyInput = cv::waitKey(0);
 	}
 
+	//Select points on the destination image
 	keyInput = 'r';
 	while (keyInput == 'r')
 	{
@@ -105,11 +108,14 @@ void HomographyHelper::Homography22d(cv::Mat& imgsrc, cv::Mat& imgdst, cv::Mat& 
 		keyInput = cv::waitKey(0);
 	}
 
+	//Put points on arrays
 	cv::Point2f srcpts[4] = { points[0], points[1], points[2], points[3] };
 	cv::Point2f dstpts[4] = { points[4], points[5], points[6], points[7] };
 
+	//Set output matrix to calculated homography
 	output = cv::getPerspectiveTransform(srcpts, dstpts);
 
+	//Show original image transformed by the homography matrix
 	if (verbose)
 	{
 		cv::Mat viewMat;
@@ -123,7 +129,7 @@ void HomographyHelper::Homography22d(cv::Mat& imgsrc, cv::Mat& imgdst, cv::Mat& 
 
 
 //static
-void HomographyHelper::Homography22d(cv::Mat& input, cv::Mat& output, bool verbose)
+void HomographyHelper::Homography22dProcess(cv::Mat& input, cv::Mat& output, bool verbose)
 {
 	if (input.empty())
 	{
@@ -131,16 +137,17 @@ void HomographyHelper::Homography22d(cv::Mat& input, cv::Mat& output, bool verbo
 		return;
 	}
 
+	//Initialize loop variables
 	const char* winname = "Homography Chooser";
 	getting_input = false;
 	clicknum = 0;
 	char keyInput = 'r';
 
-
+	//Start window, set mouse callback
 	cv::imshow(winname, input);
 	cv::setMouseCallback(winname, MouseCallback);
 
-
+	//Select source points on the image
 	while (keyInput == 'r')
 	{
 		cv::Mat tempImg;
@@ -169,6 +176,7 @@ void HomographyHelper::Homography22d(cv::Mat& input, cv::Mat& output, bool verbo
 		keyInput = cv::waitKey(0);
 	}
 
+	//Select destination points on the image
 	keyInput = 'r';
 	while (keyInput == 'r')
 	{
@@ -199,11 +207,14 @@ void HomographyHelper::Homography22d(cv::Mat& input, cv::Mat& output, bool verbo
 		keyInput = cv::waitKey(0);
 	}
 
+	//Put points on arrays
 	cv::Point2f srcpts[4] = { points[0], points[1], points[2], points[3] };
 	cv::Point2f dstpts[4] = { points[4], points[5], points[6], points[7] };
 
+	//Set output matrix to calculated homography
 	output = cv::getPerspectiveTransform(srcpts, dstpts);
 
+	//Show original image transformed by the homography matrix
 	if (verbose)
 	{
 		cv::Mat viewMat;
@@ -224,9 +235,9 @@ void HomographyHelper::Homography22d(cv::Point2f srcpts[4], cv::Point2f dstpts[4
 
 
 //static
-void Homography23d(std::vector<cv::Point2f> imgpts, std::vector<cv::Point3f> modelpts, cv::Mat& output, bool verbose = false)
+void HomographyHelper::Homography22d(std::vector<cv::Point2f> srcpts, std::vector<cv::Point2f> dstpts, cv::Mat& output)
 {
-	
+	output = cv::getPerspectiveTransform(srcpts, dstpts);
 }
 
 //static
@@ -243,32 +254,42 @@ void HomographyHelper::SaveHomography(cv::Mat& input, std::string filepath)
 		return;
 	}
 
+	//Open the file and write the homography matrix to it
 	cv::FileStorage file = cv::FileStorage(filepath, cv::FileStorage::WRITE);
-
 	file.write("matrix", input);
+	file.release();
 }
 
 
 //static
 void HomographyHelper::LoadHomography(cv::Mat& output, std::string filepath)
 {
+	//Find the file
 	if (!FileUtils::Exists(filepath))
 	{
 		std::cerr << "[HomographyHelper] ERROR - cannot find file " << filepath << "." << std::endl;
 		return;
 	}
 
+	//Make sure the file is a .json file
 	int idx = filepath.find_last_of(".");
 	std::string sub = filepath.substr(idx + 1, 3);
 	std::transform(sub.begin(), sub.end(), sub.begin(), ::tolower);
-
 	if (!(sub.compare("jso") == 0))
 	{
 		std::cerr << "[HomographyHelper] ERROR - cannot load " << filepath << ". Wrong file format. json is required." << std::endl;
 		return;
 	}
 
+	//Open the homography file
 	cv::FileStorage file = cv::FileStorage(filepath, cv::FileStorage::READ);
+	
+	//Check if a matrix exists in the file
+	if (file["matrix"].isNone())
+	{
+		std::cerr << "[HomographyHelper] ERROR - cannot find matrix in file " << filepath << "." << std::endl;
+		return;
+	}
 
 	char* buffer = (char*)malloc(300 * sizeof(char));
 	output = file["matrix"].mat();

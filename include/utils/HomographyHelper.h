@@ -1,10 +1,10 @@
 #pragma once
 /*
-@class HomographyHelper.h
+@class HomographyHelper
 @brief Static class to aid in determining homography between points
 
-This class is meant to help find the homograpy matrix between multiple sets of points, 
-either in 3D or 2D space.  
+This class is meant to help find the homograpy matrix between multiple sets of points
+in 2D space.  
 
 Functions named Homography22d find the homography between 2D points.  They are either 
 passed images, in which case they will initiate a process where the user chooses points 
@@ -16,7 +16,6 @@ files.  They use OpenCV's FileStorage class to perform these actions.
 
 Features:
 - Finds the homography between a set of 2D-2D correspondences
-- Finds the homography between a set of 2D-3D correspondences
 - Saves and loads homography to/from a file
 
 William Blanchard
@@ -26,9 +25,7 @@ wsb@iastate.edu
 MIT License
 ---------------------------------------------------------------
 Last edits:
-Apr 16, 2021, WB
-	- Fixed Save/Load homography functions to use .json files instead of any text file
-	- Added verbose option to Homography22d process functions
+Apr 19, 2021, WB
 	- Added documentation
 */
 
@@ -51,7 +48,7 @@ public:
 		@param output - the matrix to put the homography into
 		@param verbose - show imgsrc transformed by the resulting homography matrix if true
 	*/
-	static void Homography22d(cv::Mat& imgsrc, cv::Mat& imgdst, cv::Mat& output, bool verbose = false);
+	static void Homography22dProcess(cv::Mat& imgsrc, cv::Mat& imgdst, cv::Mat& output, bool verbose = false);
 
 	/*
 		Prompt the user to choose 8 points from image input and output the homography
@@ -61,7 +58,7 @@ public:
 		@param output - the matrix to put the homography into
 		@param verbose - show imgsrc transformed by the resulting homography matrix if true
 	*/
-	static void Homography22d(cv::Mat& input, cv::Mat& output, bool verbose = false);
+	static void Homography22dProcess(cv::Mat& input, cv::Mat& output, bool verbose = false);
 
 	/*
 		Find the homography between the 2D points stored in srcpts and those stored in dstpts
@@ -72,7 +69,14 @@ public:
 	*/
 	static void Homography22d(cv::Point2f srcpts[4], cv::Point2f dstpts[4], cv::Mat& output);
 
-	static void Homography23d(std::vector<cv::Point2f> imgpts, std::vector<cv::Point3f> modelpts, cv::Mat& output, bool verbose = false);
+	/*
+		Find the homography between the 2D points stored in srcpts and those stored in dstpts
+
+		@param srcpts - the original points as a vector of 4 or more cv::Point2f
+		@param dstpts - the destination points as a vector of 4 or more cv::Point2f
+		@param output - the matrix to put the homography into
+	*/
+	static void Homography22d(std::vector<cv::Point2f> srcpts, std::vector<cv::Point2f> dstpts, cv::Mat& output);
 
 	/*
 		Save a homography matrix into a .json file specified by filepath
