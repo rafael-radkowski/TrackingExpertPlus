@@ -31,8 +31,8 @@ bool getting_input;
 std::vector<cv::Point2f> points;
 
 const char* winname = "Homography Test";
-const char* rgb_pic = "../../data/pics/pc_pic_overlay.png";
-const char* depth_pic = "../../data/pics/pc_pic_overlay_box.png";
+const char* depth_pic = "../../data/pics/sfac.png";
+const char* rgb_pic = "../../data/pics/sfacbox.png";
 const char* out_file = "output.json";
 
 int main(int argc, char** argv)
@@ -106,8 +106,10 @@ int main(int argc, char** argv)
 	cv::Mat depthImg = cv::imread(depth_pic);
 	cv::Mat resMat;
 
-	cv::resize(colImg, colImg, cv::Size(colImg.cols / 2, colImg.rows / 2));
-	cv::resize(depthImg, depthImg, cv::Size(depthImg.cols / 2, depthImg.rows / 2));
+	float scale = 1.0f;
+
+	cv::resize(colImg, colImg, cv::Size(colImg.cols / scale, colImg.rows / scale));
+	cv::resize(depthImg, depthImg, cv::Size(depthImg.cols / scale, depthImg.rows / scale));
 
 	HomographyHelper::Homography22dProcess(colImg, depthImg, resMat, true);
 

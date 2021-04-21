@@ -45,15 +45,18 @@ void HomographyHelper::Homography22dProcess(cv::Mat& imgsrc, cv::Mat& imgdst, cv
 	char keyInput = 'r';
 
 	//Start window, set mouse callback
-	cv::imshow(winname, imgsrc);
+	cv::Mat merged;
+	cv::addWeighted(imgsrc, 1.0, imgdst, 1.0, 0.0, merged);
+
+	cv::imshow(winname, merged);
 	cv::setMouseCallback(winname, MouseCallback);
 
 	//Select points on the source image
 	while (keyInput == 'r')
 	{
 		cv::Mat tempImg;
-		imgsrc.copyTo(tempImg);
-		cv::imshow(winname, imgsrc);
+		merged.copyTo(tempImg);
+		cv::imshow(winname, merged);
 		clicknum = 0;
 
 		getting_input = true;
@@ -119,9 +122,13 @@ void HomographyHelper::Homography22dProcess(cv::Mat& imgsrc, cv::Mat& imgdst, cv
 	if (verbose)
 	{
 		cv::Mat viewMat;
+		cv::Mat mergedRes;
 		cv::warpPerspective(imgsrc, viewMat, output, cv::Size(std::fmax(imgsrc.cols, imgdst.cols), std::fmax(imgsrc.rows, imgdst.rows)));
-		cv::imshow(winname, viewMat);
+		cv::addWeighted(viewMat, 1.0, imgdst, 1.0, 0.0, mergedRes);
+		cv::imshow(winname, mergedRes);
+		cv::imshow("Reference", merged);
 		cv::waitKey(0);
+		cv::destroyWindow("Reference");
 	}
 
 	cv::destroyWindow(winname);

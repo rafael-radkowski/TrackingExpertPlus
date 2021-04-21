@@ -25,8 +25,8 @@ wsb@iastate.edu
 MIT License
 ---------------------------------------------------------------
 Last edits:
-Apr 19, 2021, WB
-	- Added documentation
+Apr 21, 2021, WB
+	- Modified 2-image homography process to superimpose imgsrc on top of imgdst
 */
 
 //opencv
