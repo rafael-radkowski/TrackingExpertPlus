@@ -89,7 +89,8 @@ endif ()
 # OpenCV Version 3 support
 find_file(__find_version "version.hpp"  PATHS  "${OpenCV_DIR}/modules/core/include/opencv2/core/" 
 												"${OpenCV_DIR}/include/opencv2/core"
-												"${OpenCV_DIR}/build/include/opencv2/core")
+												"${OpenCV_DIR}/build/include/opencv2/core"
+		"${OpenCV_DIR}/opencv2/core")
 									
 									
 if(__find_version)
@@ -144,6 +145,7 @@ set(__INCLUDE_DIRS
 	${OpenCV_DIR}/build/include/
 	${OpenCV_DIR}/builds/include/
 	${OpenCV_DIR}/include/
+	${OpenCV_DIR}/
 )
 
 find_path (
@@ -236,8 +238,9 @@ endif()
 ##------------------------------------------
 ## Get the libraries
 
-if(${OPENCV_VERSION_MAJOR} EQUAL "3")
-
+if(${OPENCV_VERSION_MAJOR} EQUAL "3" OR ${OPENCV_VERSION_MAJOR} EQUAL "4")
+    if (WIN32)
+  
 	##------------------------------------------
 	## Release libraries
 	if ( OpenCV_LIBRARY_DIR)
@@ -784,8 +787,51 @@ if(${OPENCV_VERSION_MAJOR} EQUAL "3")
 			CACHE PATH "Libraries")
 	endif()
 	set (OpenCV_FOUND TRUE CACHE PATH "Found opencv")
+    else(WIN32)
 
+      list(APPEND OpenCV_Lib_list opencv_calib3d)
+      
+      list(APPEND OpenCV_Lib_list opencv_calib3d)
+      list(APPEND OpenCV_Lib_list opencv_core)
+      #list(APPEND OpenCV_Lib_list opencv_cudev)
+      
+      list(APPEND OpenCV_Lib_list opencv_dnn)
+      list(APPEND OpenCV_Lib_list opencv_features2d)
+      list(APPEND OpenCV_Lib_list opencv_flann)
+      list(APPEND OpenCV_Lib_list opencv_highgui)
+      list(APPEND OpenCV_Lib_list opencv_imgcodecs)
 
+      list(APPEND OpenCV_Lib_list opencv_imgproc)
+      list(APPEND OpenCV_Lib_list opencv_ml)
+      list(APPEND OpenCV_Lib_list opencv_objdetect)
+      list(APPEND OpenCV_Lib_list opencv_photo)
+      list(APPEND OpenCV_Lib_list opencv_shape)
+
+      list(APPEND OpenCV_Lib_list opencv_stitching)
+      list(APPEND OpenCV_Lib_list opencv_superres)
+      list(APPEND OpenCV_Lib_list opencv_video)
+      list(APPEND OpenCV_Lib_list opencv_videoio)
+      list(APPEND OpenCV_Lib_list opencv_videostab)
+      list(APPEND OpenCV_Lib_list opencv_cuda_arithm)
+      list(APPEND OpenCV_Lib_list opencv_cuda_bgsegm)
+	  
+      list(APPEND OpenCV_Lib_list opencv_cuda_codec)
+      list(APPEND OpenCV_Lib_list opencv_cuda_features2d)
+      list(APPEND OpenCV_Lib_list opencv_cuda_filters)
+      list(APPEND OpenCV_Lib_list opencv_cuda_imgproc )
+      list(APPEND OpenCV_Lib_list opencv_cuda_legacy)
+      list(APPEND OpenCV_Lib_list opencv_cuda_objdectect)
+      list(APPEND OpenCV_Lib_list opencv_cuda_optflow)
+      list(APPEND OpenCV_Lib_list opencv_cuda_stereo)
+      list(APPEND OpenCV_Lib_list opencv_cuda_warping)
+      list(APPEND OpenCV_Lib_list opencv_calib3d)
+      
+      set(OpenCV_LIBS ${OpenCV_Lib_list} 
+	CACHE STRING "OpenCV Libraries")
+      
+      set (OpenCV_FOUND TRUE CACHE PATH "Found opencv")
+	
+    endif(WIN32)
 elseif (${OPENCV_VERSION_MAJOR} EQUAL "2")
 
 ##----------------------------------------------------------------------------------------------------

@@ -38,7 +38,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 # Check for CUDA support
 include(CheckLanguage)
 check_language(CUDA)
-find_package(Cuda REQUIRED)
+find_package(CUDA REQUIRED)
 
 
 
@@ -63,11 +63,11 @@ endif()
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(TBB REQUIRED)
-find_package(GLM REQUIRED)
+find_package(glm REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(GLFW3 REQUIRED)
-FIND_PACKAGE(Cuda REQUIRED)
-FIND_PACKAGE(Cub REQUIRED)
+FIND_PACKAGE(CUDA REQUIRED)
+FIND_PACKAGE(CUB REQUIRED)
 FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(Structure REQUIRED)
 
