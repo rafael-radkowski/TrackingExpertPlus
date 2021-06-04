@@ -34,8 +34,9 @@ Feb 7, 2020, RR
 #include <vector>
 #include <fstream>
 #include <strstream>
+#ifdef _WIN32
 #include <conio.h>
-
+#endif
 // Eigen
 #include <Eigen/Dense>
 

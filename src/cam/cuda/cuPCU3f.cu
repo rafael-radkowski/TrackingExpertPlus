@@ -12,7 +12,11 @@
 #include "cuFilter.h" // bilateral filter
 
 // stl
+#ifdef _WIN32
 #include <conio.h>
+#else
+#define _cprintf printf
+#endif
 
 using namespace texpert;
 

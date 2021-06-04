@@ -45,7 +45,7 @@ bool ICPReject::testAngle(Eigen::Vector3f n0, Eigen::Vector3f n1)
 	dot = std::max(-1.0f, std::min(1.0f, dot));
 	
 	// return the angle
-	float angle = std::acosf(dot);
+	float angle = acosf(dot);
 
 	return ((angle <= _max_angle) || (angle >= (2*3.14159265358979323846 - _max_angle)) ? true : false);
 
