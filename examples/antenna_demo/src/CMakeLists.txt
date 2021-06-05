@@ -122,6 +122,8 @@ source_group(src FILES ${Demo_SRC})
 add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
 
 
+link_directories(BEFORE ${OpenCV_LIBRARY_DIR})
+
 
 # Create the executable
 add_executable(${ProjectName}
@@ -144,25 +146,34 @@ target_link_libraries(${ProjectName}  ${AZUREKINECT_LIBRARY})
 target_link_libraries(${ProjectName}  ${TBB_LIBS})
 target_link_libraries(${ProjectName}  ${GLEW_LIBS})
 target_link_libraries(${ProjectName}  ${GLFW3_LIBS})
-target_link_libraries(${ProjectName} optimized ${TRACKINGX_ROOT_DIR}/lib/trackingx.lib)
-target_link_libraries(${ProjectName} debug ${TRACKINGX_ROOT_DIR}/lib/trackingxd.lib)
-target_link_libraries(${ProjectName} debug  ${TRACKINGX_ROOT_DIR}/lib/GLUtilsd.lib )
-target_link_libraries(${ProjectName} optimized  ${TRACKINGX_ROOT_DIR}/lib/GLUtils.lib )
-target_link_libraries(${ProjectName} optimized  cudart.lib )
-target_link_libraries(${ProjectName} debug  cudart.lib )
+if (WIN32)
+  target_link_libraries(${ProjectName} optimized ${TRACKINGX_ROOT_DIR}/lib/trackingx.lib)
+  target_link_libraries(${ProjectName} debug ${TRACKINGX_ROOT_DIR}/lib/trackingxd.lib)
+  target_link_libraries(${ProjectName} debug  ${TRACKINGX_ROOT_DIR}/lib/GLUtilsd.lib )
+  target_link_libraries(${ProjectName} optimized  ${TRACKINGX_ROOT_DIR}/lib/GLUtils.lib )
+  target_link_libraries(${ProjectName} optimized  cudart.lib )
+  target_link_libraries(${ProjectName} debug  cudart.lib )
+else(WIN32)
+  target_link_libraries(${ProjectName} trackingx GLUtils cudart )
+
+endif()
 target_link_libraries(${ProjectName} ${GLEW_LIBS} ${GLEW_LIBS} ${GLFW3_LIBS} ${OPENGL_LIBS} ${OPENGL_LIBRARIES} )
 target_link_libraries(${ProjectName} ${STRUCTURE_LIBRARY} )
+if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang )
+  target_link_libraries(${ProjectName} stdc++fs )  # support std::experimental::filesystem
+endif()
 
 #----------------------------------------------------------------------
 # Pre-processor definitions
 add_compile_definitions( _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING )
 
 # add a "d" to all debug libraries
-SET_TARGET_PROPERTIES(${ProjectName} PROPERTIES  DEBUG_POSTFIX "d")
-SET_TARGET_PROPERTIES(${ProjectName} PROPERTIES LINK_FLAGS_RELEASE " /FORCE:MULTIPLE")
-SET_TARGET_PROPERTIES(${ProjectName} PROPERTIES LINK_FLAGS_DEBUG "/FORCE:MULTIPLE ")
-SET_TARGET_PROPERTIES(${ProjectName} PROPERTIES LINK_FLAGS "/FORCE:MULTIPLE")
-
+if (WIN32)
+  SET_TARGET_PROPERTIES(${ProjectName} PROPERTIES  DEBUG_POSTFIX "d")
+  SET_TARGET_PROPERTIES(${ProjectName} PROPERTIES LINK_FLAGS_RELEASE " /FORCE:MULTIPLE")
+  SET_TARGET_PROPERTIES(${ProjectName} PROPERTIES LINK_FLAGS_DEBUG "/FORCE:MULTIPLE ")
+  SET_TARGET_PROPERTIES(${ProjectName} PROPERTIES LINK_FLAGS "/FORCE:MULTIPLE")
+endif(WIN32)
 
 
 
