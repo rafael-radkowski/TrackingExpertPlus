@@ -133,14 +133,14 @@ if(GLFW3_DIR AND GLFW_DIR_LOCAL_ MATCHES FALSE)
 	
 	set(GLFW3_LIBS ${GLFW3_LIBS_LIST} CACHE STRING "Glfw3 libs")
   else(WIN32)
-    set(GLFW3_LIBS_LIST glfw CACHE STRING "Glfw3 libs")
+    set(GLFW3_LIBS glfw CACHE STRING "Glfw3 libs")
   endif(WIN32)
 
 else()
   if (WIN32)
 	set(GLFW3_LIBS ${GLFW3_DIR}/lib/glfw3.lib CACHE STRING "Glfw3 libs")
   else(WIN32)
-    set(GLFW3_LIBS_LIST glfw CACHE STRING "Glfw3 libs")
+    set(GLFW3_LIBS glfw CACHE STRING "Glfw3 libs")
   endif()
 endif ()
 

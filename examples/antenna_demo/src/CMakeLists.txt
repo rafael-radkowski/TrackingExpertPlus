@@ -49,6 +49,7 @@ find_package(glm REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(GLFW3 REQUIRED)
 FIND_PACKAGE(CUDA REQUIRED)
+FIND_PACKAGE(CUDAToolkit REQUIRED)
 FIND_PACKAGE(CUB REQUIRED)
 FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(Structure REQUIRED)
@@ -63,6 +64,7 @@ include_directories(${GLFW3_INCLUDE_DIR})
 include_directories(${GLEW_INCLUDE_DIR})
 include_directories(${STRUCTURE_INCLUDE_DIR})
 include_directories(${AZUREKINECT_INCLUDE_DIR})
+include_directories(${CUDAToolkit_TARGET_DIR}/include)
 
 
 # local 

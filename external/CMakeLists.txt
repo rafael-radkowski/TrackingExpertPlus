@@ -179,9 +179,12 @@ add_dependencies(${TEST_APP0} GLUtils)
 
 # Add libraries
 target_link_libraries(${TEST_APP0}  ${GLEW_LIBS} ${GLEW_LIBS} ${GLFW3_LIBS} ${OPENGL_LIBS} ${OPENGL_LIBRARIES}  )
-target_link_libraries(${TEST_APP0} debug  GLUtilsd.lib )
-target_link_libraries(${TEST_APP0} optimized  GLUtils.lib )
-
+if (WIN32)
+  target_link_libraries(${TEST_APP0} debug  GLUtilsd.lib )
+  target_link_libraries(${TEST_APP0} optimized  GLUtils.lib )
+else (WIN32)
+  target_link_libraries(${TEST_APP0} GLUtils )
+endif(WIN32)
 
 set_target_properties (GLUtils_Test PROPERTIES
     FOLDER External

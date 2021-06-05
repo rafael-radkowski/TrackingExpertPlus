@@ -124,6 +124,7 @@ source_group(main_tests FILES ${test_SRC})
 
 add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
 
+link_directories(BEFORE ${OpenCV_LIBRARY_DIR})
 
 # Create the tracking expert library
 set(ProjectName test_detection)
@@ -142,6 +143,7 @@ add_dependencies(${ProjectName} GLUtils)
 
 # preporcessor properties
 
+
 target_link_libraries(${ProjectName}  ${OpenCV_LIBS})
 target_link_libraries(${ProjectName}  ${TBB_LIBS})
 target_link_libraries(${ProjectName}  ${GLEW_LIBS})
@@ -158,6 +160,10 @@ else(WIN32)
 endif(WIN32)
 target_link_libraries(${ProjectName} ${GLEW_LIBS} ${GLEW_LIBS} ${GLFW3_LIBS} ${OPENGL_LIBS} ${OPENGL_LIBRARIES} )
 target_link_libraries(${ProjectName} ${STRUCTURE_LIBRARY} )
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang )
+  target_link_libraries(${ProjectName} stdc++fs )  # support std::experimental::filesystem
+endif()
 
 #----------------------------------------------------------------------
 # Pre-processor definitions
