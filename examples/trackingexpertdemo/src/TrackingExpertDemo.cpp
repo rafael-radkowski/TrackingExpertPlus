@@ -326,8 +326,12 @@ bool TrackingExpertDemo::run(void)
 
 	// init graphics
 	initGfx();
-
+	
+#ifdef _WIN32
 	Sleep(100);
+#else
+	usleep(100000);
+#endif
 
 	// start the viewer
 	m_window->start();
@@ -559,7 +563,8 @@ void TrackingExpertDemo::upderRenderPose(void) {
 	}
 
 	glm::mat4 icpmat;
-	m_conv->Matrix4f2Mat4(m_reg->getICPPose(), icpmat);
+	Eigen::Matrix4f curpose=m_reg->getICPPose();
+	m_conv->Matrix4f2Mat4(curpose, icpmat);
 	gl_reference_eval->setModelmatrix(icpmat);
 	//gl_reference_eval->setModelmatrix(m);
 

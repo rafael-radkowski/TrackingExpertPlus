@@ -23,6 +23,7 @@ Feb 22, 2020, RR
 #include <strstream>
 #include <algorithm>
 #include <locale>
+#include <cctype>
 
 // Eigen
 #include <Eigen/Dense>
@@ -68,7 +69,7 @@ protected:
 		std::string t = path_and_file.substr(idx0+1, path_and_file.size() - idx0 - 1);
 
 		// remove space
-		t.erase(remove_if(t.begin(), t.end(), isspace), t.end());
+		t.erase(remove_if(t.begin(), t.end(), ::isspace), t.end());
 
 		// convert to lower case
 		std::for_each(t.begin(), t.end(), [](char & c) {

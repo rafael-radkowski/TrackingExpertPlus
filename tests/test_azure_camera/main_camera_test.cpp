@@ -25,7 +25,11 @@ Last edits:
 // stl
 #include <iostream>
 #include <string>
+#ifdef _WIN32
 #include <Windows.h>
+#else
+#include <unistd.h>
+#endif
 #include <chrono>
 
 // GLM include files
@@ -194,14 +198,18 @@ void render_loop(glm::mat4 pm, glm::mat4 vm) {
 
 #endif
 	
+#ifdef _WIN32
 	Sleep(10);
+#else
+	usleep(10000);
+#endif
 }
 
 
 
 
 
-int main(int argc, char* argv)
+int main(int argc, char** argv)
 {
 	date = TimeUtils::GetCurrentDateTime();
 
