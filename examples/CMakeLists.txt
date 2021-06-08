@@ -30,7 +30,10 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 
-# build the gearbox demo
-add_subdirectory(antenna_demo)
-add_subdirectory(gear_demo)
+# build the antenna and gearbox demos if the Azure Kinect (which they use unconditionally) is available
+if (ENABLE_AZURE_KINECT)
+  add_subdirectory(antenna_demo)
+  add_subdirectory(gear_demo)
+endif(ENABLE_AZURE_KINECT)
+
 add_subdirectory(trackingexpertdemo)

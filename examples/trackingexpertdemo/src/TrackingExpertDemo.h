@@ -41,10 +41,11 @@ Mar 08, 2021, WB
 #include "FilterTypes.h"
 #include "MatrixConv.h"
 
+#include "GPUvoxelDownsample.h"
+
 #ifdef _WITH_AZURE_KINECT // set via cmake
 #include "KinectAzureCaptureDevice.h"  // the camera
 #include "PointCloudProducer.h"
-#include "GPUvoxelDownsample.h"
 #define _WITH_PRODUCER
 #endif
 
