@@ -19,7 +19,9 @@
 # Oct 22, 2019, RR
 # - Added the CMAKE_TRY_COMPILE_TARGET_TYPE compiler option. 
 # Feb 5, 2020, RR
-# - Added submodule support for glGLutils
+# - Added submodule support for glGLutils4
+# 08/02/21, 
+# - RR: Added feature toggle ENABLE_CPF_GPU to add/remove detection GPU support. Runs for a specific cuda version only. 
 # 
 
 
@@ -150,6 +152,9 @@ option(ENABLE_REAL_SENSE "Enable Intel Real sense support" OFF)
 option(ENABLE_STRUCTURE_CORE "Enable Structure Core support" OFF)
 option(ENABLE_AZURE_KINECT "Enable Structure Core support" OFF)
 
+#--------------------------------------------
+# Features toggles
+option(ENABLE_CPF_GPU "Enable CPF GPU support" OFF)
 
 ################################################################
 add_subdirectory(src)

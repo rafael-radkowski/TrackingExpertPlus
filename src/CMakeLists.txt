@@ -16,7 +16,8 @@
 #---------------------------------------------------------------------
 #
 # Last edits:
-#
+# 08/02/21, RR 
+#  - Added feature toggle ENABLE_CPF_GPU to add/remove detection GPU support. Runs for a specific cuda version only. 
 # 
 cmake_minimum_required(VERSION 2.6)
 
@@ -165,6 +166,16 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/loader/ImgReaderWriterPNG.h
 	${PROJECT_SOURCE_DIR}/include/loader/DataReaderWriter.h
 	
+	
+	
+#endif()
+#if( ENABLE_REAL_SENSE)
+#	${PROJECT_SOURCE_DIR}/include/camera/SensorRealSense.h
+#endif()
+)
+
+set(DataSrc_SRC
+	${PROJECT_SOURCE_DIR}/include/camera/AzureKinectFromMKV.h
 	${PROJECT_SOURCE_DIR}/include/camera/KinectAzureCaptureDevice.h
 	${PROJECT_SOURCE_DIR}/include/camera/StructureCoreCaptureDevice.h
 	${PROJECT_SOURCE_DIR}/include/camera/ICaptureDevice.h
@@ -172,19 +183,13 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/camera/PointCloudProducer.h
 	${PROJECT_SOURCE_DIR}/include/camera/CameraParameters.h
 
-	
-
-	
-	
-	
-	
-
-	
-#endif()
-#if( ENABLE_REAL_SENSE)
-#	${PROJECT_SOURCE_DIR}/include/camera/SensorRealSense.h
-#endif()
+	cam/KinectAzureCaptureDevice.cpp
+	cam/StructureCoreCaptureDevice.cpp
+	cam/PointCloudProducer.cpp
+	cam/CameraParameters.cpp
+	cam/AzureKinectFromMKV.cpp
 )
+
 
 
 set( PointCloud_cuda_INC
@@ -270,10 +275,7 @@ set( PointCloud_SRC
 	point_cloud/PointCloudTransform.cpp
 	point_cloud/PointCloudEval.cpp
 	point_cloud/MatrixUtils.cpp
-	cam/KinectAzureCaptureDevice.cpp
-	cam/StructureCoreCaptureDevice.cpp
-	cam/PointCloudProducer.cpp
-	cam/CameraParameters.cpp
+
 #endif()
 #if( ENABLE_REAL_SENSE)
 #	cam/SensorRealSense.cpp
@@ -315,9 +317,19 @@ if(${ENABLE_STRUCTURE_CORE} STREQUAL  OFF )
 	list(REMOVE_ITEM Header_SRC ${PROJECT_SOURCE_DIR}/include/camera/StructureCoreCaptureDevice.h)
 endif()
 
+
 if(${ENABLE_AZURE_KINECT} STREQUAL  OFF )
 	list(REMOVE_ITEM PointCloud_SRC cam/KinectAzureCaptureDevice.cpp)
 	list(REMOVE_ITEM Header_SRC ${PROJECT_SOURCE_DIR}/include/camera/KinectAzureCaptureDevice.h)
+	list(REMOVE_ITEM PointCloud_SRC cam/AzureKinectFromMKV.cpp)
+	list(REMOVE_ITEM Header_SRC ${PROJECT_SOURCE_DIR}/include/camera/AzureKinectFromMKV.h)
+endif()
+
+if(${ENABLE_CPF_GPU} STREQUAL  OFF )
+	list(REMOVE_ITEM Detection_SRC detection/CPFToolsGPU.cu)
+	list(REMOVE_ITEM Detection_SRC ${PROJECT_SOURCE_DIR}/include/detection/CPFToolsGPU.h)
+	list(REMOVE_ITEM Detection_SRC ${PROJECT_SOURCE_DIR}/include/detection/CPFMatchingExpGPU.h)
+	list(REMOVE_ITEM Detection_SRC detection/CPFMatchingExpGPU.cpp)
 endif()
 
 
@@ -325,6 +337,7 @@ endif()
 #-----------------------------------------------------------------
 #  SRC Groups, organize the tree
 
+source_group(Inputs FILES ${DataSrc_SRC})
 source_group(Detection FILES ${Detection_SRC})
 source_group(kdtree FILES ${Cuda_kdtree_SRC})
 source_group(Loader FILES ${Loader_SRC})
@@ -333,6 +346,9 @@ source_group(PointCloud FILES ${PointCloud_SRC})
 source_group(Shader FILES ${Shader_SRC})
 source_group(Utils FILES ${Utils_SRC})
 source_group("Cuda/PointCloud" FILES ${PointCloud_cuda_SRC} ${PointCloud_cuda_INC})
+
+
+
 #source_group(Cuda FILES ${PointCloud_cuda_INC})
 #----------------------------------------------------------------------
 # Compiler standards
@@ -353,6 +369,7 @@ add_library(trackingx
 	${Utils_SRC}
 	${PointCloud_cuda_SRC}
 	${PointCloud_cuda_INC}
+	${DataSrc_SRC}
 )
 
 # preporcessor properties
