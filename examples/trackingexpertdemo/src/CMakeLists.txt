@@ -108,6 +108,18 @@ set(Demo_SRC
 	ColorCoder.h
 	ColorCoder.cpp
 	TrackingExpertParams.h
+	GPUvoxelDownsample.cu
+	GPUvoxelDownsample.h
+	PointCloudGPU.cpp
+	PointCloudGPU.h
+	CamPose.cpp
+	CamPose.h
+	CameraParameters.cpp
+	CameraParameters.h
+	FileUtils.cpp
+	FileUtils.h
+	EasyTimer.h
+	EasyTimer.cpp
 )
 
 

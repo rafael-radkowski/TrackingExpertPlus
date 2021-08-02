@@ -97,8 +97,13 @@ set(Demo_SRC
 	../../demo_common/AssemblySequence.cpp
 	../../demo_common/PartDatabase.cpp
 	../../demo_common/AssemblySequence.h
+	../../demo_common/ProcedureLoader.h
+	../../demo_common/ProcedureLoader.cpp
 	../../demo_common/PartDatabase.h
 	../../demo_common/Sequence.h
+	../../demo_common/Procedure.h
+	../../demo_common/ProcedureRenderer.cpp
+	../../demo_common/ProcedureRenderer.h
 )
 
 

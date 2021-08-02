@@ -41,15 +41,15 @@ typedef struct TEParams {
 
 	TEParams() {
 		verbose = false;
-		angle_step = 12.0;
-		cluster_trans_threshold = 0.03;
-		cluster_rot_threshold = 0.8;
-		curvature_search_radius = 0.1;
-		sampling_grid_size = 0.015;
+		angle_step = 12.0f;
+		cluster_trans_threshold = 0.03f;
+		cluster_rot_threshold = 0.8f;
+		curvature_search_radius = 0.1f;
+		sampling_grid_size = 0.015f;
 		camera_sampling_offset = 8;
-		icp_outlier_reject_angle = 45.0;
-		icp_outlier_reject_distance = 0.1;
-		icp_termination_dist = 0.00000001;
+		icp_outlier_reject_angle = 45.0f;
+		icp_outlier_reject_distance = 0.1f;
+		icp_termination_dist = 0.00000001f;
 		icp_num_max_iterations = 200;
 		curvature_multiplier = 10;
 

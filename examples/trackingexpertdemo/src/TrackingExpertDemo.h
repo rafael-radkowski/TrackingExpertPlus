@@ -4,8 +4,8 @@
 --------------------------------------------------------------------------------
 Last edits:
 
-Aug 06, 2020, RR
-- Changed the final pose source. It comes from ICP instead of the descriptor.
+Mar 08, 2021, WB
+- Fixed conversion of ICP matrix from Matrix4f to Mat4
 */
 
 // STL
@@ -35,10 +35,12 @@ Aug 06, 2020, RR
 #include "ColorCoder.h"
 #include "TrackingExpertParams.h"
 #include "FilterTypes.h"
+#include "MatrixConv.h"
 
 #ifdef _WITH_AZURE_KINECT // set via cmake
 #include "KinectAzureCaptureDevice.h"  // the camera
 #include "PointCloudProducer.h"
+#include "GPUvoxelDownsample.h"
 #define _WITH_PRODUCER
 #endif
 
@@ -106,6 +108,12 @@ public:
 	@param params - struct params of type TEParams. 
 	*/
 	bool setParams(TEParams params);
+
+	/*
+	Generates pose for Azure cameras.
+	*/
+	static void generatePoseData(string poseFolderlocation, string fileName);
+		
 
 private:
 
@@ -227,10 +235,10 @@ private:
 
 
 	// instance of a structure core camera 
-	texpert::ICaptureDevice* m_camera;
+	std::vector<texpert::ICaptureDevice*> m_cameras;
 
 #ifdef _WITH_PRODUCER
-	PointCloudProducer*		 m_producer;
+	std::vector<PointCloudProducer>		 m_producers;
 #endif
 	SamplingParam		m_producer_param;
 	//--------------------------------------------------------------------
@@ -239,6 +247,7 @@ private:
 	// point cloud data
 	PointCloud			m_pc_camera_raw;
 	PointCloud			m_pc_camera;
+	std::vector<PointCloud*>	m_pc_camerasIndividual;
 
 	// The reference point cloud.
 	// The first one is the point cloud for all ICP purposes.
@@ -246,8 +255,17 @@ private:
 	PointCloud			pc_ref;
 	PointCloud			pc_ref_as_loaded;
 
+
+	/*
+	An object that stores pointclouds with GPU allocated space. Can be used to voxel downsample numerous pointclouds into one pointcloud
+	*/
+	GPUvoxelDownsample m_voxel;
+
 	// object detection and registration 
 	TrackingExpertRegistration*	m_reg;
+
+	// Matrix conversion helper
+	MatrixConv*			m_conv;
 
 	bool				m_new_scene;
 	bool				m_enable_tracking;

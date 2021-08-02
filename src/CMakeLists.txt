@@ -151,6 +151,7 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/pointcloud/PointCloudEval.h
 	${PROJECT_SOURCE_DIR}/include/pointcloud/MatrixUtils.h
 	${PROJECT_SOURCE_DIR}/include/pointcloud/Utils.h
+	${PROJECT_SOURCE_DIR}/include/pointcloud/PointCloudTrans.h
 	${PROJECT_SOURCE_DIR}/include/utils/TimeUtils.h
 	${PROJECT_SOURCE_DIR}/include/utils/RandomGenerator.h
 	${PROJECT_SOURCE_DIR}/include/utils/LogTypes.h
@@ -158,6 +159,7 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/utils/ArgParser.h
 	${PROJECT_SOURCE_DIR}/include/utils/FileUtilsX.h
 	${PROJECT_SOURCE_DIR}/include/utils/MSVerCheck.h
+	${PROJECT_SOURCE_DIR}/include/utils/MatrixConv.h
 	${PROJECT_SOURCE_DIR}/include/loader/ReaderWriter.h
 	${PROJECT_SOURCE_DIR}/include/loader/ReaderWriterOBJ.h
 	${PROJECT_SOURCE_DIR}/include/loader/ReaderWriterPLY.h
@@ -305,6 +307,7 @@ set( Utils_SRC
 	utils/LogReaderWriter.cpp
 	utils/ArgParser.cpp
 	utils/FileUtilsX.cpp
+	utils/MatrixConv.cpp
 )
 
 

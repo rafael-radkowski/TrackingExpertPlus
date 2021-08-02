@@ -20,6 +20,8 @@ ICP::ICP() {
 	_outlier_reject.setMaxNormalVectorAngle(45.0f);
 	_outlier_reject.setMaxThreshold(0.1f);
 
+	_conv = MatrixConv::getInstance();
+
 }
 
 ICP::~ICP(){
@@ -241,56 +243,11 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 
 Matrix4f ICP::Rt(void){
 
-
-	// TODO: Check the pose calculation. 
-
 	Eigen::Matrix4f finalRt = Eigen::Matrix4f::Identity();
 
-	Eigen::Vector3f tall = t();
-	Eigen::Matrix3f Rall = R();
-
-	
 	Eigen::Vector3f centroid = ICPTransform::CalculateCentroid(_testPoints.points);
 
-
-	Affine3f transform(Translation3f(-centroid.x(), -centroid.y(), -centroid.z()));
-	Eigen::Matrix4f centInv  = transform.matrix().transpose();
-
-	Affine3f transform2(Translation3f(centroid.x(), centroid.y(), centroid.z()));
-	Eigen::Matrix4f cent  = transform2.matrix().transpose();
-
-	Affine3f transform3(Translation3f(tall.x(), tall.y(), tall.z()));
-	Eigen::Matrix4f t2  = transform3.matrix().transpose();
-
-	Eigen::Matrix4f R2 = Eigen::Matrix4f::Identity();
-	R2.block<3,3>(0,0) = Rall;
-
-	Affine3f m;     
-	m  = Translation3f(_Rt_affine.translation());
-	Matrix4f ti;
-	ti = m.matrix();
-
-	Matrix4f Ri;
-	Ri = Matrix4f::Identity();
-	Ri.block(0,0,3,3) = _Rt_affine.rotation().matrix();
-
-	//finalRt = t2 * cent * R2 * centInv;
-	finalRt = Ri.transpose()  *  (  centInv  * R2 * cent * t2 ) * ti.transpose();
-
-	//MatrixUtils::PrintMatrix4f(Ri);
-	//MatrixUtils::PrintMatrix4f(finalRt);
-
-//		glm::mat4 centInv = glm::translate(glm::vec3(-centroid.x(), -centroid.y(), -centroid.z() ));
-//	glm::mat4 cent = glm::translate(glm::vec3(centroid.x(), centroid.y(), centroid.z() ));
-//	glm::mat4 tInv = glm::translate(glm::vec3(-m[3][0],-m[3][1], -m[3][2]));
-//	//glm::mat4 t = glm::translate(glm::vec3(m[3][0],m[3][1], m[3][2]));
-//	glm::mat4 t = glm::translate(glm::vec3(tall.x(),tall.y(),tall.z()));
-
-	//finalRt = tall
-
-	//glm::mat4 all = t *  cent * Rglm *  centInv;
-
-	//_testPoint_centroid
+	PointCloudTrans::getTransformFromPosition(t(), R(), centroid, _Rt_affine, finalRt);
 
 	return finalRt;
 }

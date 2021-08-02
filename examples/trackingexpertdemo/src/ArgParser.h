@@ -61,16 +61,16 @@ typedef struct _Arguments
 		model_file = "";
 
 		current_path = "";
-		fd_angle_step = 12.0;
-		fd_cluster_trans_th = 0.03;
-		fd_cluster_rot_th = 45.0;
-		icp_min_rms = 0.00000001;
-		icp_outlier_ang_th = 45.0;
-		icp_outlier_dist_th = 0.1;
+		fd_angle_step = 12.0f;
+		fd_cluster_trans_th = 0.03f;
+		fd_cluster_rot_th = 45.0f;
+		icp_min_rms = 0.00000001f;
+		icp_outlier_ang_th = 45.0f;
+		icp_outlier_dist_th = 0.1f;
 		icp_max_iterations = 200;
-		sampling_grid_size = 0.015;
+		sampling_grid_size = 0.015f;
 		camera_sampling_offset = 12;
-		fd_curvature_radius = 0.1;
+		fd_curvature_radius = 0.1f;
 
 		intrincic_params_file = "";
 

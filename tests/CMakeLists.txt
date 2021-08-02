@@ -27,6 +27,7 @@ option( TRAKINGX_BUILD_TEST_ICP "TrackingX Build ICP Test" OFF)
 option( TRAKINGX_BUILD_TEST_CPF "TrackingX Build CPF Test" OFF)
 
 add_subdirectory(test_detection)
+add_subdirectory(test_matrix_conv)
 
 if(ENABLE_STRUCTURE_CORE)
 	add_subdirectory(test_camera)

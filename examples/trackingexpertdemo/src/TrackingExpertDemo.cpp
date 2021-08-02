@@ -1,4 +1,5 @@
 #include "TrackingExpertDemo.h"
+#include "CamPose.h"
 
 using namespace texpert;
 
@@ -20,7 +21,7 @@ TrackingExpertDemo::~TrackingExpertDemo()
 	delete gl_best_pose;
 
 #ifdef _WITH_PRODUCER
-	delete m_producer;
+	m_producers.clear();
 #endif
 	delete m_reg;
 }
@@ -43,7 +44,7 @@ void TrackingExpertDemo::init(void)
 	m_render_normals = false;
 	m_current_debug_point = 0;
 	m_current_debug_cluster = 0;
-	m_producer = NULL;
+	m_producers = std::vector<PointCloudProducer>();
 	m_enable_tracking = true;
 	m_producer_param.uniform_step = 8;
 	m_update_camera = true;
@@ -51,15 +52,17 @@ void TrackingExpertDemo::init(void)
 
 	m_filter_method = BILATERAL;
 
+	m_voxel = GPUvoxelDownsample();
+
 	// sampling parameters
 	sampling_method = SamplingMethod::UNIFORM;
-	sampling_param.grid_x = 0.015;
-	sampling_param.grid_y = 0.015;
-	sampling_param.grid_z = 0.015;
+	sampling_param.grid_x = 0.015f;
+	sampling_param.grid_y = 0.015f;
+	sampling_param.grid_z = 0.015f;
 	Sampling::SetMethod(sampling_method, sampling_param);
 	
 	// init the opengl window
-	glm::mat4 vm = glm::lookAt(glm::vec3(0.0f, 0.0, -0.5f), glm::vec3(0.0f, 0.0f, 0.5), glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 vm = glm::lookAt(glm::vec3(0.0f, 0.0f, -0.5f), glm::vec3(0.0f, 0.0f, 0.5), glm::vec3(0.0f, 1.0f, 0.0f));
 	m_window = new isu_ar::GLViewer();
 	m_window->create(1280, 1280, "TrackingExpert+ Demo");
 	m_window->addRenderFcn(std::bind(&TrackingExpertDemo::render_fcn, this, _1, _2));
@@ -88,7 +91,28 @@ bool TrackingExpertDemo::setCamera(CaptureDeviceType type)
 		case CaptureDeviceType::KinectAzure:
 		{
 #ifdef _WITH_AZURE_KINECT
-			m_camera = new KinectAzureCaptureDevice();
+			//set up pose based on given file
+			CamPose poseFile = CamPose(2, 4, 7, 0.028f);
+			poseFile.readFile("../pose.txt"); 
+
+			for (int i = KinectAzureCaptureDevice::getNumberConnectedCameras()-1; i >= 0; i--)
+			{ 
+				m_cameras.emplace(m_cameras.begin(), new KinectAzureCaptureDevice(i, KinectAzureCaptureDevice::Mode::RGBIRD, false));
+				m_pc_camerasIndividual.push_back(new PointCloud());
+			}
+
+			//set pose for each PC
+			for (int i = 0; i < m_cameras.size(); i++)
+			{
+				vector<vector<float>> pose = poseFile.getPose(i);
+				m_pc_camerasIndividual[i]->pose = Eigen::Matrix4f();
+				m_pc_camerasIndividual[i]->pose << // Eigen is column major be default
+					pose.at(0).at(0), pose.at(1).at(0), pose.at(2).at(0), pose.at(3).at(0),
+					pose.at(0).at(1), pose.at(1).at(1), pose.at(2).at(1), pose.at(3).at(1),
+					pose.at(0).at(2), pose.at(1).at(2), pose.at(2).at(2), pose.at(3).at(2),
+					pose.at(0).at(3), pose.at(1).at(3), pose.at(2).at(3), pose.at(3).at(3);
+			}
+
 #else
 			std::cout << "[ERROR] - Camera Azure Kinect selected but no such camera is present." << std::endl;
 #endif
@@ -96,34 +120,49 @@ bool TrackingExpertDemo::setCamera(CaptureDeviceType type)
 	}
 
 
-	if (m_camera == NULL) {
+	if (m_cameras.size() == 0) {
 		std::cout << "[ERROR] - Could not create a camera " << std::endl;
 		return false;
 	}
-
-	if (!m_camera->isOpen()) {
-		std::cout << "[ERROR] - Could not open a camera " << std::endl;
+	for (int i = 0; i < m_cameras.size(); i++)
+	{
+		if (!m_cameras[i]->isOpen()) {
+			std::cout << "[ERROR] - Could not open camera at index " << i << std::endl;
+		}
 	}
-
 	
 	/*
 	Create a point cloud producer. It creates a point cloud 
 	from a depth map. Assign a camera and the location to store the point cloud data. 
 	*/
 #ifdef _WITH_PRODUCER
-	m_producer = new texpert::PointCloudProducer(*m_camera, m_pc_camera);
-	m_producer->setSampingMode(SamplingMethod::UNIFORM, m_producer_param );
-	m_producer->setFilterMethod (m_filter_method, m_filter_param);
+	
+	for (int i = 0; i < m_cameras.size(); i++)
+	{
+		m_producers.emplace_back(texpert::PointCloudProducer(*m_cameras[i], *m_pc_camerasIndividual[i]));
+		m_producers[i].setSampingMode(SamplingMethod::UNIFORM, m_producer_param);
+		m_producers[i].setFilterMethod(m_filter_method, m_filter_param);
+	}
+
+	//voxel stuff
+	float3 minBoandaries = make_float3(-2.0f, -2.0f, 0.0f);
+	float3 maxBoundaries = make_float3(2.0f, 2.0f, 5.0f);
+	m_voxel = GPUvoxelDownsample((int)m_cameras.size(), m_cameras[0]->getRows(CaptureDeviceComponent::DEPTH), m_cameras[0]->getCols(CaptureDeviceComponent::DEPTH));
+	m_voxel.setBoundaries(minBoandaries, maxBoundaries, .01f);
+
+
+
+	
 #else
 	m_producer = NULL;
 #endif
 	
 	if(m_verbose){
 		std::cout << "[INFO] - Open camera device successfull." << std::endl;
-		std::cout << "[INFO] - RGB cols: " << m_camera->getCols(CaptureDeviceComponent::COLOR) << std::endl;
-		std::cout << "[INFO] - RGB rows: " << m_camera->getRows(CaptureDeviceComponent::COLOR) << std::endl;
-		std::cout << "[INFO] - Depth cols: " << m_camera->getCols(CaptureDeviceComponent::DEPTH) << std::endl;
-		std::cout << "[INFO] - Depth rows: " << m_camera->getRows(CaptureDeviceComponent::DEPTH) << std::endl;
+		std::cout << "[INFO] - RGB cols: " << m_cameras[0]->getCols(CaptureDeviceComponent::COLOR) << std::endl;
+		std::cout << "[INFO] - RGB rows: " << m_cameras[0]->getRows(CaptureDeviceComponent::COLOR) << std::endl;
+		std::cout << "[INFO] - Depth cols: " << m_cameras[0]->getCols(CaptureDeviceComponent::DEPTH) << std::endl;
+		std::cout << "[INFO] - Depth rows: " << m_cameras[0]->getRows(CaptureDeviceComponent::DEPTH) << std::endl;
 	}
 
 	return true;
@@ -366,14 +405,26 @@ Update camera data
 void TrackingExpertDemo::updateCamera(void)
 {
 	if(m_camera_type == None || m_update_camera == false) return;
-	if(m_producer == NULL) return;
+	if(m_producers.size() == 0) return;
+	if (!m_voxel.properConstructorUsed()) return;
 
-	// fetches a new camera image and update the data
-	m_producer->process();
+	// fetches a new camera image and update the data for all cameras. 
+	for(int i = 0; i< m_producers.size(); i++)
+		m_producers[i].process();
+
+	std::vector<PointCloud*> temp = std::vector<PointCloud*>();
+	for (int i = 0; i < m_pc_camerasIndividual.size(); i++)
+		temp.emplace_back(new PointCloud());
+
+
+	//voxel downsample into m_pc_camera
+	m_voxel.voxelDownSample(m_pc_camerasIndividual);
+	m_voxel.copyBackToHost(temp);
+	m_voxel.removeDuplicates(temp, &m_pc_camera);
 
 	//Sampling::Run(m_pc_camera, m_pc_camera, m_verbose);
 
-	// camera point cloud
+	// camera point cloud, m_pc_camera needs to be the voxel downsample
 	m_reg->updateScene(m_pc_camera);
 
 	// Update the opengl points and draw the points. 
@@ -395,10 +446,17 @@ void TrackingExpertDemo::grabSingleFrame(void)
 {
 
 	if(m_camera_type == None ) return;
-	if(m_producer == NULL) return;
+	if(m_producers.size() == 0) return;
+	if (!m_voxel.properConstructorUsed()) return;
 
 	// fetches a new camera image and update the data
-	m_producer->process();
+	for(int i = 0; i < m_cameras.size(); i++)
+		m_producers[i].process();
+
+	//voxel downsample pc into m_pc_camera
+	m_voxel.voxelDownSample(m_pc_camerasIndividual);
+	m_voxel.copyBackToHost(m_pc_camerasIndividual);
+	m_voxel.removeDuplicates(m_pc_camerasIndividual, &m_pc_camera);
 
 	// camera point cloud
 	m_reg->updateScene(m_pc_camera);
@@ -461,9 +519,12 @@ bool TrackingExpertDemo::setParams(TEParams params)
 	// Go to setCamera to change default params. 
 	// This method is only useful for changed during runtime. 
 #ifdef _WITH_PRODUCER
-	if(m_producer){
-		m_producer->setSampingMode(SamplingMethod::UNIFORM, m_producer_param );
-		m_producer->setFilterMethod (m_filter_method, m_filter_param);
+	if (m_producers.size() != 0) {
+		for (int i = 0; i < m_producers.size(); i++)
+		{
+			m_producers[i].setSampingMode(SamplingMethod::UNIFORM, m_producer_param);
+			m_producers[i].setFilterMethod(m_filter_method, m_filter_param);
+		}
 	}
 #endif
 
@@ -497,7 +558,9 @@ void TrackingExpertDemo::upderRenderPose(void) {
 		m[i/4][i%4] =  mat.data()[i];
 	}
 
-	gl_reference_eval->setModelmatrix(MatrixUtils::ICPRt3Mat4(m_reg->getICPPose()));
+	glm::mat4 icpmat;
+	m_conv->Matrix4f2Mat4(m_reg->getICPPose(), icpmat);
+	gl_reference_eval->setModelmatrix(icpmat);
 	//gl_reference_eval->setModelmatrix(m);
 
 	gl_reference_eval->enablePointRendering(true);
@@ -704,8 +767,10 @@ void TrackingExpertDemo::keyboard_cb(int key, int action)
 				}
 
 #ifdef _WITH_PRODUCER
-				if(m_producer){
-					m_producer->setFilterMethod (m_filter_method, m_filter_param);
+				if(m_producers.size() != 0)
+				{
+					for(int i = 0; i < m_producers.size(); i++)
+						m_producers[i].setFilterMethod (m_filter_method, m_filter_param);
 				}
 #endif
 				break;
@@ -748,4 +813,80 @@ bool TrackingExpertDemo::setVerbose(bool verbose)
 	m_reg->setVerbose(m_verbose);
 
 	return m_verbose;
+}
+
+void TrackingExpertDemo::generatePoseData(string poseFolderlocation, string fileName)
+{
+	int numCameras = KinectAzureCaptureDevice::getNumberConnectedCameras();
+	if (numCameras <= 0)
+	{
+		printf("No cameras connected. File not created.\n");
+		return;
+	}
+
+	//initiliaze cameras
+	std::vector<KinectAzureCaptureDevice*> cameras = std::vector<KinectAzureCaptureDevice*>();
+	for (int i = 0; i < numCameras; i++)
+	{
+		cameras.push_back(new KinectAzureCaptureDevice(i, KinectAzureCaptureDevice::Mode::RGBIRD, false));
+	}
+
+	cv::String window = "Generate Pose";
+
+	//declare opencv windows, move them
+	cv::namedWindow(window);
+	cv::resizeWindow(window, 1080 * numCameras, 720);
+	cv::moveWindow(window, 0, 0);
+	cv::waitKey(1);
+
+	//Test if the cameras are ready to run.
+	for (int i = 0; i < numCameras; i++)
+	{
+		if (cameras[i]->isOpen() == false)
+		{
+			std::cout << "Camera at index " << i << " could not connect." << endl;
+			return;
+		}
+	}
+
+	vector<cv::Mat> colors;
+	cv::Mat ColorConcat;
+
+	//start rendering
+	printf("Place the checkerboard in clear view of all cameras. The squares must be visible and clear in each frame. Make sure it is in a static position (not being held by a person).\n");
+	printf("Press ESC when your cameras meet the above criteria.\n");
+	while (1)
+	{
+		colors.clear();
+		for (int i = 0; i < numCameras; i++)
+		{
+			if (cameras[i]->isOpen() == false)
+				break;
+			colors.emplace_back(cv::Mat());
+			cameras[i]->getRGBFrame(colors[i]);
+		}
+		cv::hconcat(colors, ColorConcat);
+		cv::imshow(window, ColorConcat);
+
+
+		// Press  ESC on keyboard to  exit
+		if ((char)cv::waitKey(10) == 27) break;
+	}
+
+	cv::destroyAllWindows();
+	cv::waitKey(1);
+	printf("Generating pose file. This may take a few minutes depending on the image quality, size, and checkerboard layout.\n");
+
+	//Cameras are in position
+	//Using 2 cameras, a 4x7 checkerboard with square sides of 32mm
+	CamPose pose = CamPose(numCameras, 4, 7, 0.032f);
+	//set calibration files
+	for (int i = 0; i < numCameras; i++)
+	{
+		pose.addCameraCalibrations(i, cameras[i]->getCalibration(texpert::CaptureDeviceComponent::COLOR));
+	}
+	pose.start(colors, poseFolderlocation.c_str(), true, fileName.c_str());
+
+	// delete all instances.
+	cv::destroyAllWindows();
 }

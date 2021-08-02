@@ -51,11 +51,11 @@ typedef struct _SamplingParam
     _SamplingParam()
     {
         // Unit of the grid is the model unit. 
-        grid_x = 0.01;
-        grid_y = 0.01;
-        grid_z = 0.01;
+        grid_x = 0.01f;
+        grid_y = 0.01f;
+        grid_z = 0.01f;
 
-		uniform_step = 1.0;
+		uniform_step = 1;
 		random_max_points = 5000;
 		ramdom_percentage = 25; // currently not in use. Use the max random points number. 
     }

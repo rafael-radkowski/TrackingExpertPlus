@@ -44,10 +44,10 @@ typedef struct PCRegParams{
 
 	PCRegParams()
 	{
-		ppf_angle_step = 3.0;
-		ppf_distance_step = 0.3;
-		ppf_cluster_distance_th = 0.8;
-		ppf_cluster_angle_th = 12.0;
+		ppf_angle_step = 3.0f;
+		ppf_distance_step = 0.3f;
+		ppf_cluster_distance_th = 0.8f;
+		ppf_cluster_angle_th = 12.0f;
 	}
 
 

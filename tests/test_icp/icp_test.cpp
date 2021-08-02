@@ -54,6 +54,7 @@ Last edited:
 #include "ReaderWriterOBJ.h"
 #include "ReaderWriterPLY.h"
 #include "ICP.h"  // the ICP class to test
+#include "MatrixConv.h"
 
 using namespace texpert;
 
@@ -90,6 +91,8 @@ PointCloud			pc_camera_as_loaded;
 // the two test files to load. 
 std::string			ref_file = "../data/stanford_bunny_pc.obj";
 std::string			camera_file = "../data/stanford_bunny_pc.obj";
+
+MatrixConv*			_conv = MatrixConv::getInstance();
 
 //////////////////////////////////////////////////////////////////////
 // ICP
@@ -205,7 +208,7 @@ float runTest(void)
 	//---------------------------------------------------------------------------
 	// Apply the ICP pose to the initial point cloud
 	Eigen::Vector3f t = icp->t();
-	Eigen::Matrix3f R = icp->R().inverse();
+	Eigen::Matrix3f R = icp->R();
 
 
 	PointCloud test_cloud = pc_ref;
@@ -227,7 +230,13 @@ float runTest(void)
 
 	Eigen::Affine3f a_mat;
 	a_mat = pose_result;
-	gl_reference_eval->setModelmatrix(MatrixUtils::ICPRt3Mat4( icp->Rt()));
+
+	glm::mat4 r_mat;
+	Eigen::Matrix4f s_mat = icp->Rt();
+	_conv->Matrix4f2Mat4(s_mat, r_mat);
+	//_conv->printColMjr(glm::value_ptr(r_mat), 4, 4);
+	//_conv->printColMjr(icp->Rt().data(), 4, 4);
+	gl_reference_eval->setModelmatrix(r_mat);
 
 	current_set++;
 	N++;
@@ -413,7 +422,10 @@ int main(int argc, char** argv)
 
 	Eigen::Affine3f a_mat;
 	a_mat = pose_result;
-	gl_reference_eval->setModelmatrix(MatrixUtils::Affine3f2Mat4(a_mat));
+
+	glm::mat4 r_mat;
+	_conv->Affine3f2Mat4(a_mat, r_mat);
+	gl_reference_eval->setModelmatrix(r_mat);
 	
 	
 
