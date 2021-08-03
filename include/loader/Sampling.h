@@ -29,6 +29,9 @@ March 20, 2019, RR
 
 Aug 8, 2020, RR
 - Added a verbose level to surpress unnesssary information.
+
+Aug 3, 2021, RR
+- Fixed a bug that prevented the cells to be marked correctly in the hash table (hashTable[index] == true;)
 */
 
 

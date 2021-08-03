@@ -93,7 +93,7 @@ void Sampling::Uniform( PointCloud& src, PointCloud& dst, SamplingParam param)
         if(hashTable[index] == false)
         {
 			//check if index already in hash table
-			hashTable[index] == true;
+			hashTable[index] = true;
 			//if not, mark it in hashtable adn add to final PC
 			ret.points.push_back(src.points[i]);
 			ret.normals.push_back(src.normals[i]);
@@ -101,14 +101,13 @@ void Sampling::Uniform( PointCloud& src, PointCloud& dst, SamplingParam param)
     }
 
     if(g_verbose && g_verbose_level == 2){
-        cout << "[INFO] - Downsampled fr0m " << src.N << " to " << ret.points.size() << " points. " << endl;
+        cout << "[INFO] - Downsampled from " << src.N << " to " << ret.points.size() << " points. " << endl;
     }
 
     if(g_verbose && g_verbose_level == 1){ 
         cout << "[INFO] Sampling - Sampling successfull; output contains " << ret.points.size() << " points and normals. "  << endl;
     }
 	dst = ret;
-	
 }
 
 
