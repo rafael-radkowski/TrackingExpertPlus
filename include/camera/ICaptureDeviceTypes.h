@@ -18,6 +18,7 @@ typedef enum CaptureDeviceType{
 	IntelRealSense,
 	KinectV2,
 	KinectAzure,
+	AzureKinectMKV, // recording  from mkv file
 	Fotonic,
 	None
 }CaptureDeviceType;

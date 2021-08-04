@@ -25,6 +25,8 @@ int KinectAzureCaptureDevice::getNumberConnectedCameras()
 	KinectAzureCaptureDevice::KinectAzureCaptureDevice()
 	{
 		index = 0;
+		config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
+
 		config.camera_fps = K4A_FRAMES_PER_SECOND_15;
 		config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
 		config.color_resolution = K4A_COLOR_RESOLUTION_720P;
@@ -32,12 +34,14 @@ int KinectAzureCaptureDevice::getNumberConnectedCameras()
 		config.depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
 		config.wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
 
+		
 
 		color_width = 1280;
 		color_height = 720;
 		depth_width = 640; // 1024 x 1024 is WFOV unbinned
 		depth_height = 576;
 
+		cameraRunning = false;
 		
 		//depth_width = 1024; // 1024 x 1024 is WFOV unbinned
 		//depth_height = 1024;

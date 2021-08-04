@@ -2,6 +2,9 @@
 /*
 class PointCloudProducer
 
+Input:
+- Camera of class ICaptureDevice. Note that the depth frame must be provided as CV_32FC1 type.
+
 @brief: 
 
 
@@ -34,6 +37,8 @@ Aug 9, 2020, RR
 
 Aug 27, 2020, RR
 - Removed a copy_if operator and added a loop to copy points. Copy_if return incorrect sized vectors. 
+Aug 4, 2021
+- Fixed a bug when reading camera parameters. The class read the incorrect principle point y-displacement from the camera. 
 
 */
 #include <iostream>

@@ -26,6 +26,8 @@ Last edited:
 Apr 7, 2020, Tyler Ingebrand
 - Added documentation
 
+Aug 3, 2021, RR
+- Fixed some ugly coding-style issues. 
 */
 #pragma once
 
@@ -51,19 +53,20 @@ private: //member variables
 	
 	k4a_device_t *device;
 	char *serial;
-	k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
+	k4a_device_configuration_t config;
 	k4a_capture_t *capture_handle;
 	uint32_t index;
-	bool cameraRunning = false;
+	bool cameraRunning;
 	k4a_record_t *record;;
 
 	//defaults
-	int color_width = 0;
-	int color_height = 0;
-	int depth_width = 0; // 1024 x 1024 is WFOV unbinned
-	int depth_height = 0;
+	int color_width;
+	int color_height;
+	int depth_width; // 1024 x 1024 is WFOV unbinned
+	int depth_height;
 		
 	cv::Mat		_camera_param;
+
 public:
 	/*!
 	Enum for selecting which camera functions to activate.Possible camera functions are RGB, IR, and Depth(D)

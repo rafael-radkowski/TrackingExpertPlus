@@ -24,8 +24,8 @@ PointCloudProducer::PointCloudProducer(ICaptureDevice& capture_device, PointClou
 	_fx_depth = param.at<float>(0,0);
 	_fy_depth = param.at<float>(1,1);
 
-	_cx_depth = 0.0;
-	_cy_depth = 0.0;
+	_cx_depth = param.at<float>(0, 2);
+	_cy_depth = param.at<float>(1, 2);
 
 	_flip_normal_vectors = 1.0; // This value can either be 1.0 or -1.0;
 

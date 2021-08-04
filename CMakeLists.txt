@@ -136,7 +136,8 @@ endif()
 #---------------------------------------------------------------------------------
 # Build with demo tool
 option(TRAKINGX_BUILD_DEMO "TrackingExpert: Build with examples" ON)
-
+option(DEMO_TE1 "TrackingExpert+ registration demo" OFF)
+option(DEMO_TE2 "TrackingExpert+ example app" OFF)
 
 #message(${CMAKE_CURRENT_SOURCE_DIR})
 set( TRACKINGX_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}) 
@@ -155,6 +156,8 @@ option(ENABLE_AZURE_KINECT "Enable Structure Core support" OFF)
 #--------------------------------------------
 # Features toggles
 option(ENABLE_CPF_GPU "Enable CPF GPU support" OFF)
+
+
 
 ################################################################
 add_subdirectory(src)
