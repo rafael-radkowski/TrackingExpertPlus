@@ -28,7 +28,15 @@ Last edits:
 #include <vector>
 #include <fstream>
 #include <strstream>
+#if (_MSC_VER >= 1920 && _MSVC_LANG  == 201703L) || (__GNUC__ >= 8) 
+#include <filesystem>
+#else 
+#define _USE_EXP
+#include <experimental/filesystem>
+#endif
+#ifdef _WIN32
 #include <conio.h>
+#endif
 // Eigen
 #include <Eigen/Dense>
 

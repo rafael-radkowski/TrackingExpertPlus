@@ -44,7 +44,9 @@ void TrackingExpertDemo::init(void)
 	m_render_normals = false;
 	m_current_debug_point = 0;
 	m_current_debug_cluster = 0;
+#ifdef _WITH_PRODUCER
 	m_producers = std::vector<PointCloudProducer>();
+#endif
 	m_enable_tracking = true;
 	m_producer_param.uniform_step = 8;
 	m_update_camera = true;
@@ -154,7 +156,7 @@ bool TrackingExpertDemo::setCamera(CaptureDeviceType type)
 
 	
 #else
-	m_producer = NULL;
+	//	m_producer = NULL;
 #endif
 	
 	if(m_verbose){
@@ -326,8 +328,12 @@ bool TrackingExpertDemo::run(void)
 
 	// init graphics
 	initGfx();
-
+	
+#ifdef _WIN32
 	Sleep(100);
+#else
+	usleep(100000);
+#endif
 
 	// start the viewer
 	m_window->start();
@@ -404,6 +410,8 @@ Update camera data
 */
 void TrackingExpertDemo::updateCamera(void)
 {
+#ifdef _WITH_PRODUCER
+
 	if(m_camera_type == None || m_update_camera == false) return;
 	if(m_producers.size() == 0) return;
 	if (!m_voxel.properConstructorUsed()) return;
@@ -435,7 +443,7 @@ void TrackingExpertDemo::updateCamera(void)
 
 	// the registratin call only starts working if this is set to true. 
 	m_new_scene = true;
-
+#endif // _WITH_PRODUCER
 }
 
 
@@ -445,6 +453,7 @@ Get a single frame from the camera.
 void TrackingExpertDemo::grabSingleFrame(void)
 {
 
+#ifdef _WITH_PRODUCER
 	if(m_camera_type == None ) return;
 	if(m_producers.size() == 0) return;
 	if (!m_voxel.properConstructorUsed()) return;
@@ -468,6 +477,7 @@ void TrackingExpertDemo::grabSingleFrame(void)
 
 	// the registratin call only starts working if this is set to true. 
 	m_new_scene = true;
+#endif // _WITH_PRODUCER
 	
 }
 
@@ -559,7 +569,8 @@ void TrackingExpertDemo::upderRenderPose(void) {
 	}
 
 	glm::mat4 icpmat;
-	m_conv->Matrix4f2Mat4(m_reg->getICPPose(), icpmat);
+	Eigen::Matrix4f curpose=m_reg->getICPPose();
+	m_conv->Matrix4f2Mat4(curpose, icpmat);
 	gl_reference_eval->setModelmatrix(icpmat);
 	//gl_reference_eval->setModelmatrix(m);
 
@@ -815,6 +826,7 @@ bool TrackingExpertDemo::setVerbose(bool verbose)
 	return m_verbose;
 }
 
+#ifdef _WITH_AZURE_KINECT
 void TrackingExpertDemo::generatePoseData(string poseFolderlocation, string fileName)
 {
 	int numCameras = KinectAzureCaptureDevice::getNumberConnectedCameras();
@@ -890,3 +902,4 @@ void TrackingExpertDemo::generatePoseData(string poseFolderlocation, string file
 	// delete all instances.
 	cv::destroyAllWindows();
 }
+#endif // _WITH_AZURE_KINECT

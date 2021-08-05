@@ -89,8 +89,11 @@ endif ()
 # OpenCV Version 3 support
 find_file(__find_version "version.hpp"  PATHS  "${OpenCV_DIR}/modules/core/include/opencv2/core/" 
 												"${OpenCV_DIR}/include/opencv2/core"
-												"${OpenCV_DIR}/build/include/opencv2/core")
-									
+												"${OpenCV_DIR}/build/include/opencv2/core"
+												"${OpenCV_DIR}/include/opencv4/opencv2/core"
+												"${OpenCV_DIR}/build/include/opencv4/opencv2/core"
+												"${OpenCV_DIR}/opencv2/core"
+												"${OpenCV_DIR}/opencv4/opencv2/core")									
 									
 if(__find_version)
 	SET(OPENCV_VERSION_FILE "${__find_version}")
@@ -144,6 +147,8 @@ set(__INCLUDE_DIRS
 	${OpenCV_DIR}/build/include/
 	${OpenCV_DIR}/builds/include/
 	${OpenCV_DIR}/include/
+	${OpenCV_DIR}/include/opencv4
+	${OpenCV_DIR}/
 )
 
 find_path (
@@ -167,6 +172,10 @@ set(__LIBRARY_DIRS
 	${OpenCV_DIR}/builds/lib/Debug
 	${OpenCV_DIR}/build/lib/Release
 	${OpenCV_DIR}/build/lib/Debug
+	${OpenCV_DIR}/build/lib64
+	${OpenCV_DIR}/build/lib
+	${OpenCV_DIR}/lib64
+	${OpenCV_DIR}/lib
 	${OpenCV_DIR}/x64/vc15/lib
 	${OpenCV_DIR}/build/x64/vc15/lib
 )
@@ -175,15 +184,21 @@ set(__LIBRARY_DIRS
 # look for the release lib paths, start with core
 if (NOT OpenCV_LIBRARY_DIR)
 	# looking for opencv_core
-	string(CONCAT _core_lib   "opencv_core" ${OpenCV_LIBVERSION} ".lib" )
+        if (WIN32)
+ 	  string(CONCAT _core_lib   "opencv_core" ${OpenCV_LIBVERSION} ".lib" )
+        else (WIN32)
+ 	  string(CONCAT _core_lib   "libopencv_core.so." ${OPENCV_LIBVERSION} )
+        endif(WIN32)
 	find_file(__find_lib ${_core_lib}  PATHS ${__LIBRARY_DIRS} ) 
 	if(__find_lib)
 		find_path (
 		  OpenCV_LIBRARY_DIR "${_core_lib}"
 		  HINTS ${__LIBRARY_DIRS}
-		  DOC "Directory of opencv_core.lib file."
+		  DOC "Directory of opencv_core.lib or .so file."
 		  NO_DEFAULT_PATH
-		)
+		  		)
+	          message(STATUS "[FindOpenCV] - Found OpenCV_LIBRARY_DIR at " ${OpenCV_LIBRARY_DIR} )
+
 	endif ()
 	unset(__find_lib CACHE)
 endif()
@@ -205,7 +220,8 @@ endif ()
 
 
 # search for the debug lib path. 
-if (NOT OpenCV_DEBUG_LIBRARY_DIR)
+if (WIN32) 
+  if (NOT OpenCV_DEBUG_LIBRARY_DIR)
 	string(CONCAT _core_lib_d   "opencv_core" ${OpenCV_LIBVERSION} "d.lib" )
 	find_file(__find_lib ${_core_lib_d}  PATHS ${__LIBRARY_DIRS} ) 
 	if(__find_lib)
@@ -217,9 +233,9 @@ if (NOT OpenCV_DEBUG_LIBRARY_DIR)
 		)
 	endif ()
 	unset(__find_lib CACHE)
-endif()
+  endif()
 	
-if (NOT OpenCV_DEBUG_LIBRARY_DIR)
+  if (NOT OpenCV_DEBUG_LIBRARY_DIR)
 	string(CONCAT _world_lib   "opencv_world" ${OpenCV_LIBVERSION} "d.lib" )
 	find_file(__find_lib ${_world_lib}  PATHS ${__LIBRARY_DIRS} ) 
 	if(__find_lib)
@@ -231,13 +247,15 @@ if (NOT OpenCV_DEBUG_LIBRARY_DIR)
 		)
 	endif ()
 	unset(__find_lib CACHE)
-endif()
+  endif()
+endif(WIN32)
 
 ##------------------------------------------
 ## Get the libraries
 
-if(${OPENCV_VERSION_MAJOR} EQUAL "3")
-
+if(${OPENCV_VERSION_MAJOR} EQUAL "3" OR ${OPENCV_VERSION_MAJOR} EQUAL "4")
+    if (WIN32)
+  
 	##------------------------------------------
 	## Release libraries
 	if ( OpenCV_LIBRARY_DIR)
@@ -784,8 +802,51 @@ if(${OPENCV_VERSION_MAJOR} EQUAL "3")
 			CACHE PATH "Libraries")
 	endif()
 	set (OpenCV_FOUND TRUE CACHE PATH "Found opencv")
+    else(WIN32)
 
+      list(APPEND OpenCV_Lib_list opencv_calib3d)
+      
+      list(APPEND OpenCV_Lib_list opencv_calib3d)
+      list(APPEND OpenCV_Lib_list opencv_core)
+      #list(APPEND OpenCV_Lib_list opencv_cudev)
+      
+      list(APPEND OpenCV_Lib_list opencv_dnn)
+      list(APPEND OpenCV_Lib_list opencv_features2d)
+      list(APPEND OpenCV_Lib_list opencv_flann)
+      list(APPEND OpenCV_Lib_list opencv_highgui)
+      list(APPEND OpenCV_Lib_list opencv_imgcodecs)
 
+      list(APPEND OpenCV_Lib_list opencv_imgproc)
+      list(APPEND OpenCV_Lib_list opencv_ml)
+      list(APPEND OpenCV_Lib_list opencv_objdetect)
+      list(APPEND OpenCV_Lib_list opencv_photo)
+      list(APPEND OpenCV_Lib_list opencv_shape)
+
+      list(APPEND OpenCV_Lib_list opencv_stitching)
+      list(APPEND OpenCV_Lib_list opencv_superres)
+      list(APPEND OpenCV_Lib_list opencv_video)
+      list(APPEND OpenCV_Lib_list opencv_videoio)
+      list(APPEND OpenCV_Lib_list opencv_videostab)
+      list(APPEND OpenCV_Lib_list opencv_cudaarithm)
+      list(APPEND OpenCV_Lib_list opencv_cudabgsegm)
+	  
+      list(APPEND OpenCV_Lib_list opencv_cudacodec)
+      list(APPEND OpenCV_Lib_list opencv_cudafeatures2d)
+      list(APPEND OpenCV_Lib_list opencv_cudafilters)
+      list(APPEND OpenCV_Lib_list opencv_cudaimgproc )
+      list(APPEND OpenCV_Lib_list opencv_cudalegacy)
+      list(APPEND OpenCV_Lib_list opencv_cudaobjdetect)
+      list(APPEND OpenCV_Lib_list opencv_cudaoptflow)
+      list(APPEND OpenCV_Lib_list opencv_cudastereo)
+      list(APPEND OpenCV_Lib_list opencv_cudawarping)
+      list(APPEND OpenCV_Lib_list opencv_calib3d)
+      
+      set(OpenCV_LIBS ${OpenCV_Lib_list} 
+	CACHE STRING "OpenCV Libraries")
+      
+      set (OpenCV_FOUND TRUE CACHE PATH "Found opencv")
+	
+    endif(WIN32)
 elseif (${OPENCV_VERSION_MAJOR} EQUAL "2")
 
 ##----------------------------------------------------------------------------------------------------
@@ -1120,3 +1181,4 @@ else()
  message("[FindOpenCV] - ERROR Version < 2 is not supported by FindOpenCV.cmake")
  set (OpenCV_FOUND FALSE CACHE PATH "Found opencv")
 endif()
+

@@ -32,6 +32,7 @@ June 3, 2020, RR
 #include <string>
 #include <functional>
 #include <algorithm>
+#include <cmath>
 
 // Eigen 3
 #include <Eigen/Dense>

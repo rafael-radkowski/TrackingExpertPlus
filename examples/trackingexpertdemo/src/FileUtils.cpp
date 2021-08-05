@@ -11,12 +11,12 @@ Check if a file exits.
 bool FileUtils::Exists(string path_and_file)
 {
 
-#ifdef _WIN32
-#if _MSC_VER >= 1920 && _MSVC_LANG  == 201703L 
+#if (_MSC_VER >= 1920 && _MSVC_LANG  == 201703L) || (__GNUC__ >= 8)
 	return std::filesystem::exists(path_and_file);
 #else
 	return std::experimental::filesystem::exists(path_and_file);
 #endif
+	/*
 #else
     int res = access(path_and_file.c_str(), R_OK);
     if (res < 0) {
@@ -32,7 +32,7 @@ bool FileUtils::Exists(string path_and_file)
     }
     return true;
 #endif
-
+	*/
 }
 
 

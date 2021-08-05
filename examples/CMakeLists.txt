@@ -29,7 +29,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-
 # build the gearbox demo
 add_subdirectory(antenna_demo)
 add_subdirectory(gear_demo)

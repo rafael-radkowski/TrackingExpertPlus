@@ -41,7 +41,7 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 # Check for CUDA support
 include(CheckLanguage)
 check_language(CUDA)
-find_package(Cuda REQUIRED)
+find_package(CUDA REQUIRED)
 
 
 #if(WIN32)
@@ -78,11 +78,13 @@ endif()
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(TBB REQUIRED)
-find_package(GLM REQUIRED)
+find_package(glm REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(GLFW3 REQUIRED)
-FIND_PACKAGE(Cuda REQUIRED)
-FIND_PACKAGE(Cub REQUIRED)
+FIND_PACKAGE(CUDA REQUIRED)
+FIND_PACKAGE(CUDAToolkit REQUIRED)
+FIND_PACKAGE(CUB REQUIRED)
+set(OpenGL_GL_PREFERENCE GLVND)
 FIND_PACKAGE(OpenGL REQUIRED)
 
 
@@ -92,7 +94,7 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${TBB_INCLUDE_DIR})
 include_directories(${GLM_INCLUDE_DIR})
 include_directories(${GLFW3_INCLUDE_DIR})
-
+include_directories(${CUDAToolkit_TARGET_DIR}/include)
 
 # local 
 include_directories(${PROJECT_SOURCE_DIR}/include/camera)

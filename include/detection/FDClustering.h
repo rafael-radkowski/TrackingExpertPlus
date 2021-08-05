@@ -29,7 +29,9 @@ March 20, 2019, RR
 #include <vector>
 #include <iostream>
 #include <unordered_map>
+#ifdef _WIN32
 #include <conio.h>
+#endif
 
 // Eigen
 #include <Eigen/Dense>
@@ -37,6 +39,7 @@ March 20, 2019, RR
 
 // local
 #include "FDTypes.h"
+
 
 using namespace std;
 

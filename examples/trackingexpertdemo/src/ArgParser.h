@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace texpert
+namespace texpert_demo   // Define different namespace to avoid conflict with ArgParser build into trackingexpert
 {
 
 typedef struct _Arguments

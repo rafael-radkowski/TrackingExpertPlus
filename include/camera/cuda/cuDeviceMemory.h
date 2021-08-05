@@ -28,14 +28,17 @@ MIT License
 #include <iostream>
 #include <vector>
 #include <algorithm>
+
+#ifdef _WIN32
 #include <conio.h>
+#endif
 
 // cuda
 #include "cuda_runtime.h"
 
 // OpenCV
-#include <opencv2\highgui.hpp>
-#include <opencv2\core.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/core.hpp>
 
 
 namespace texpert

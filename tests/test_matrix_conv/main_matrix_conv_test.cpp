@@ -22,7 +22,7 @@ void print_matrix_general(float* mat)
 	}
 }
 
-bool check_error(float* comp0, float* comp1, static char* func_name)
+bool check_error(float* comp0, float* comp1,  char* func_name)
 {
 	for (int i = 0; i < 16; i++)
 	{
@@ -46,7 +46,7 @@ bool check_error(float* comp0, float* comp1, static char* func_name)
 	return true;
 }
 
-bool check_rot_error(float* comp0, float* comp1, static char* func_name)
+bool check_rot_error(float* comp0, float* comp1, char* func_name)
 {
 	Eigen::Matrix4f ref = Eigen::Matrix4f::Identity();
 
@@ -84,7 +84,7 @@ bool check_rot_error(float* comp0, float* comp1, static char* func_name)
 	return true;
 }
 
-bool check_trans_error(float* comp0, float* comp1, static char* func_name)
+bool check_trans_error(float* comp0, float* comp1,  char* func_name)
 {
 	Eigen::Matrix4f ref = Eigen::Matrix4f::Identity();
 
@@ -122,7 +122,7 @@ bool check_trans_error(float* comp0, float* comp1, static char* func_name)
 	return true;
 }
 
-bool check_trans_vec_error(float* comp0, float* comp1, static char* func_name)
+bool check_trans_vec_error(float* comp0, float* comp1, char* func_name)
 {
 	if (comp1[0] != comp0[12] || comp1[1] != comp0[13] || comp1[2] != comp0[14])
 	{

@@ -252,7 +252,8 @@ cv::Affine3f CamPose::checkerboardPnP(cv::Mat& cboardPic, cv::Mat& cboard3DPts, 
 	//Check if icbX and icbY is larger than 0
 	if (!(icbX > 0 || icbY > 0))
 	{
-		return NULL;
+		cout << "ERROR: icbX and icbY both zero" << endl;
+		return cv::Affine3f(0);
 	}
 
 	//Find the marker corners for reference points
@@ -260,7 +261,7 @@ cv::Affine3f CamPose::checkerboardPnP(cv::Mat& cboardPic, cv::Mat& cboard3DPts, 
 	if (!cv::findChessboardCorners(cboardPic, cv::Size(icbX, icbY), detectedCorners))
 	{
 		cout << "ERROR: Cannnot detect chessboard corners" << endl;
-		return NULL;
+		return cv::Affine3f(0);
 	}
 
 	//Get the camera parameters from the AzureViewer passed into the program

@@ -29,8 +29,12 @@ cmake_minimum_required(VERSION 2.6)
 
 # Note that this line must be added before project. 
 # The cuda compiler will not work properly otherwise. 
-set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 
+if(WIN32)
+  set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
+else(WIN32)
+  set(CMAKE_TRY_COMPILE_TARGET_TYPE) # "STATIC_LIBRARY")
+endif(WIN32)
 
 # enable visual studio folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -41,10 +45,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-
+set(CMAKE_AR "/usr/bin/ar")
 
 # The project name
-project(TrackingExpertPlus CUDA CXX)
+project(TrackingExpertPlus CXX CUDA)
 
 # set policies
 cmake_policy(SET CMP0015 NEW)

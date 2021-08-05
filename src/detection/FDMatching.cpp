@@ -1,5 +1,8 @@
 #include "FDMatching.h"
 
+#ifndef _WIN32
+#define _cprintf printf
+#endif
 
 using namespace texpert;
 

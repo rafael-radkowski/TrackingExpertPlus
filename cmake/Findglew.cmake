@@ -127,7 +127,11 @@ if(GLEW_DIR AND GLEW_DIR_LOCAL_ MATCHES FALSE)
 	
 	set(GLEW_LIBS ${GLEW_LIBS_LIST} CACHE STRING "Glew libs")
 else()
+   if (WIN32)
 	set(GLEW_LIBS ${GLEW_DIR}/lib/glew.lib CACHE STRING "Glew libs")
+   else(WIN32)
+        set(GLEW_LIBS GLEW CACHE STRING "Glew libs")
+   endif(WIN32)
 endif ()
 
 

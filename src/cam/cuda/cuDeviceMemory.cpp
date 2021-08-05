@@ -1,5 +1,8 @@
 #include "cuDeviceMemory.h"
 
+#ifndef _WIN32
+#define _cprintf printf
+#endif
 
 namespace texpert_cuDevMem
 {

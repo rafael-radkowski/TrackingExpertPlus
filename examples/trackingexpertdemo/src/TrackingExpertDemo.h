@@ -11,7 +11,11 @@ Mar 08, 2021, WB
 // STL
 #include <iostream>
 #include <string>
+#ifdef _WIN32
 #include <Windows.h>
+#else
+#include <unistd.h>
+#endif
 #include <fstream>
 #include <algorithm>
 
@@ -23,7 +27,7 @@ Mar 08, 2021, WB
 #include <glm/gtx/quaternion.hpp> // quaternions
 
 // eigen
-#include <Eigen\Dense>
+#include <Eigen/Dense>
 
 // TrackingExpert
 #include "trackingx.h"
@@ -37,10 +41,11 @@ Mar 08, 2021, WB
 #include "FilterTypes.h"
 #include "MatrixConv.h"
 
+#include "GPUvoxelDownsample.h"
+
 #ifdef _WITH_AZURE_KINECT // set via cmake
 #include "KinectAzureCaptureDevice.h"  // the camera
 #include "PointCloudProducer.h"
-#include "GPUvoxelDownsample.h"
 #define _WITH_PRODUCER
 #endif
 

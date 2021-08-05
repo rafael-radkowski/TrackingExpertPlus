@@ -24,8 +24,8 @@ Last edits:
 #include <algorithm>
 #include <math.h>
 
-#include <Eigen\Dense>
-#include <Eigen\Geometry>
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
 
 #include "Types.h"
 #include "CPFTypes.h"

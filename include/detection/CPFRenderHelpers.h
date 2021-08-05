@@ -61,7 +61,7 @@ private:
 	// <model, scene> point ids
 	std::vector< std::pair<int, int> >					vote_pair_ids;
 
-
+	std::pair<int,int> null_return;
 	int _point_size;
 	int _scene_size;
 };

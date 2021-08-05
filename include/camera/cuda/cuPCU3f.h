@@ -43,8 +43,8 @@ Feb 20, 2020, RR
 #include "cuda_runtime.h"
 
 // OpenCV
-#include <opencv2\highgui.hpp>
-#include <opencv2\core.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/core.hpp>
 
 // local
 #include "FilterTypes.h"
