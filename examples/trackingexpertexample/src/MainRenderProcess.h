@@ -48,6 +48,14 @@ class MainRenderProcess
 {
 public:
 
+	typedef enum
+	{
+		PointsScene,
+		PointsRef,
+		NormalsScene,
+		NormalsRef
+	}RenderFeature;
+
 	/*
 	Get an instance of the class.
 	@return Instance of the class
@@ -81,6 +89,14 @@ public:
 	@param fc -  function pointer to the keyboard function. 
 	*/
 	void setKeyboardFcn(std::function<void(int, int)> fc);
+
+
+	/*
+	Enable or disable a render feature such as normal rendering, etc
+	@param f - the feature of type RenderFeature (see the enum for details.)
+	@param enable - true enables the feature, false disables it. 
+	*/
+	void setRenderFeature(RenderFeature f, bool enable);
 
 
 private:

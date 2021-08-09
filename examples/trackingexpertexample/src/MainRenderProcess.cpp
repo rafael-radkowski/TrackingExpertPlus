@@ -64,7 +64,7 @@ void MainRenderProcess::initGfx(void)
 	gl_reference_point_cloud = new	isu_ar::GLPointCloudRenderer(dm->getReferecePC().points, dm->getReferecePC().normals); 
 	gl_reference_point_cloud->setPointColor(glm::vec3(0.0, 1.0, 0.0));
 	gl_reference_point_cloud->setNormalColor(glm::vec3(0.0, 0.8, 0.8));
-	gl_reference_point_cloud->setNormalGfxLength(0.005f);
+	gl_reference_point_cloud->setNormalGfxLength(0.05f);
 
 	// point cloud for evaluation.
 	gl_reference_eval = new	isu_ar::GLPointCloudRenderer(dm->getReferecePC().points, dm->getReferecePC().normals); 
@@ -166,4 +166,32 @@ Add a keyboard function to the existing window.
 void MainRenderProcess::setKeyboardFcn(std::function<void(int, int)> fc)
 {
 	m_window->addKeyboardCallback(fc);
+}
+
+
+/*
+Enable or disable a render feature such as normal rendering, etc
+@param f - the feature of type RenderFeature (see the enum for details.)
+@param enable - true enables the feature, false disables it.
+*/
+void MainRenderProcess::setRenderFeature(RenderFeature f, bool enable)
+{
+
+	switch (f) {
+		case PointsScene:
+			if(gl_camera_point_cloud) gl_camera_point_cloud->enablePointRendering(enable);
+			break;
+		case PointsRef:
+			if (gl_reference_point_cloud) gl_reference_point_cloud->enablePointRendering(enable);
+			break;
+		case NormalsScene:
+			if (gl_camera_point_cloud) gl_camera_point_cloud->enableNormalRendering(enable);
+			break;
+		case NormalsRef:
+			if (gl_reference_point_cloud) gl_reference_point_cloud->enableNormalRendering(enable);
+			break;
+		default:
+			break;
+	}
+	
 }

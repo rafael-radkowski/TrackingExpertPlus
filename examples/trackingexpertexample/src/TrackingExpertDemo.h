@@ -115,6 +115,12 @@ public:
 	*/
 	bool setParams(TEParams params);
 
+
+	/*
+	Reset the reference model to the state as loaded
+	*/
+	void resetReferenceModel(void);
+
 		
 
 private:
@@ -198,9 +204,14 @@ private:
 	// Helper params
 
 	bool				m_verbose;
-	bool				m_enable_tracking;
 	bool				m_update_camera;
 	bool				m_is_running;
+
+	//--------------------------------------------------------------------
+	// keyboard helper params
+	bool				m_render_scene_normals;
+	bool				m_render_ref_normals;
+	bool				m_enable_tracking;
 
 };
 

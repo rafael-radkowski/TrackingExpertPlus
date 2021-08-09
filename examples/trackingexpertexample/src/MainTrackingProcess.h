@@ -61,6 +61,13 @@ Last edits:
 #include "trackingx.h"
 #include "PointCloudManager.h"
 #include "PointCloudProducer.h"
+#include "ICP.h"
+#include "CPFMatchingExp.h"
+#include "CPFMatchingExpGPU.h"
+#include "TrackingExpertParams.h"
+
+
+using namespace texpert;
 
 class MainTrackingProcess
 {
@@ -79,6 +86,8 @@ public:
 	*/
 	void init(texpert::ICaptureDevice* camera = NULL);
 
+
+
 	/*
 	Grab a new frame and process the frame
 	including all tracking steps. 
@@ -92,13 +101,64 @@ public:
 	*/
 	void setSamplingParams(SamplingParam params);
 
+
 	/*
 	Set the parameters for the tracking filter
 	*/
 	void setFilterParams(FilterMethod method, FilterParams params);
 
 
+	/*
+	Enable or disable object tracking functionality.
+	Note that "tracking" refers here to a single-shot function. 
+	Tracking via multiple frames is realized via a Kalman filter. 
+	@param enable - true enables tracking and false disables tracking. 
+	*/
+	void enableTracking(bool enable = true);
+
+
+	/*
+	Return the current pose. 
+	This is the pose for the current frame after running
+	process() once. 
+	*/
+	Eigen::Matrix4f  getCurrentPose(void);
+
+
+
 private:
+
+	/*!
+	Return the poses for a particular model.
+	The function returns the 12 best hits by default. Note that this can be reduced to only 1 or so.
+	@param model_id - the model id of the object to track as int.
+	@param poses - vector with the poses
+	@param pose_votes - vector with the pose votes.
+	*/
+	bool getPose(std::vector<Eigen::Affine3f >& poses);
+
+
+
+	/*!
+	Run the idel state operations;
+	*/
+	void runIdle(void);
+
+	/*!
+	Run the detect state operations;
+	*/
+	void runDetect(void);
+
+	/*!
+	Run the registration state operations;
+	*/
+	void runRegistration(void);
+
+	/*!
+	Run the tracking state operations;
+	*/
+	void runTracking(void);
+
 
 	/*
 	Private constructor
@@ -107,17 +167,53 @@ private:
 
 
 	static MainTrackingProcess* m_instance;
+	
+	//---------------------------------------------------
 
+	// data manager
+	PointCloudManager* _dm;
+
+
+	// the tracking states
+	typedef enum {
+		IDLE,
+		DETECT,
+		REGISTRATION,
+		TRACKING
+	}State;
+
+	State								m_tracking_state;
 
 	//---------------------------------------------------
 
-		// Point cloud producer
+	// Point cloud producer
 	texpert::PointCloudProducer*		m_producer;
 	SamplingParam						m_producer_param;
 	FilterParams						m_filter_param;
 	FilterMethod						m_filter_method;
 
+	
+	//---------------------------------------------------
+	// Tracking and registration.
 
+	bool								m_enable_tracking;
+	// ICP
+	ICP*								m_icp;
+	PointCloud							m_model_pc;
+
+
+
+	// feature detector and matching
+	CPFMatchingWrapper*					m_fd;
+	CPFParams							m_fd_params;
+
+	int									m_model_id;
+	std::vector<int>					m_pose_votes;
+	float								m_rms;
+
+
+	// the global pose of the model 
+	Eigen::Matrix4f						m_model_pose;
 };
 
 MainTrackingProcess* MainTrackingProcess::m_instance = nullptr;
