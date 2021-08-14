@@ -744,7 +744,8 @@ void cuSample3f::CreateRandomSamplePattern(int width, int height, int max_points
 			int x = -1; //int count = 0;
 			//while (!found)
 			{
-				x = (rand()*(RAND_MAX + 1) + rand()) % (width * height);
+				//x = (rand()*(RAND_MAX + 1) + rand()) % (width * height);
+				x = (int)((rand() * (1.0/(RAND_MAX*1.0+1)))*(width*height));
 				//vector<int>::iterator p = std::find(numbers.begin(), numbers.end(), x);
 				//if (p == numbers.end()) {
 				//	found = true;
@@ -752,7 +753,7 @@ void cuSample3f::CreateRandomSamplePattern(int width, int height, int max_points
 				//}
 				//if (count++ > 100000) break; // deadlock prevention
 			}
-			index_list[x] = 1;
+			index_list.at(x) = 1;
 		}
 
 		//_cprintf("\nFound %i samples", numbers.size());
