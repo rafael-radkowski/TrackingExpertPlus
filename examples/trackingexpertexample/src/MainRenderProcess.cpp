@@ -59,7 +59,7 @@ void MainRenderProcess::initGfx(void)
 	gl_camera_point_cloud->setPointColor(glm::vec3(1.0, 0.0, 0.0));
 	gl_camera_point_cloud->setNormalColor(glm::vec3(0.8, 0.5, 0.0));
 	gl_camera_point_cloud->setNormalGfxLength(0.05f);
-	gl_camera_point_cloud->enableAutoUpdate(false);
+	gl_camera_point_cloud->enableAutoUpdate(true);
 	gl_camera_point_cloud->enablePointRendering(true);
 
 	// reference point cloud
