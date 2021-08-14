@@ -44,6 +44,9 @@ Last edits:
 #include "GLLineRenderer.h"
 #include "PointCloudManager.h"
 
+// ToDo: Remove when ready
+#include "DebugSwitches.h"
+
 class MainRenderProcess
 {
 public:

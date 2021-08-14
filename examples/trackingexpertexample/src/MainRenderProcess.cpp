@@ -1,6 +1,11 @@
 #include "MainRenderProcess.h"
 
 
+#ifdef _WITH_AZURE_OUTPUT
+// crude and ugly debug helper. Remove!
+extern texpert::ICaptureDevice* g_camera;
+int g_counter = 0;
+#endif
 
 //static 
 MainRenderProcess* MainRenderProcess::getInstance()
@@ -128,6 +133,31 @@ void MainRenderProcess::render_fcn(glm::mat4 pm, glm::mat4 vm)
 			renderARScene(pm, vm);
 			break;
 	}*/
+
+
+#ifdef _WITH_AZURE_OUTPUT
+	// crude and ugly debug helper. Remove!
+	if (g_camera != NULL)
+	{
+		if (g_counter < 30) {
+			g_counter++;
+			return;
+		}
+		cv::Mat rgb_frame;
+		cv::Mat depth_frame;
+		g_camera->getDepthFrame(depth_frame);
+		cv::Mat img_depth_col = depth_frame.clone();
+		img_depth_col.convertTo(img_depth_col, CV_8U, 255.0 / 5000.0, 0.0);
+		cv::imshow("Depth", img_depth_col);
+		
+
+		g_camera->getRGBFrame(rgb_frame);
+		cv::imshow("RGB", rgb_frame);
+		
+		
+		cv::waitKey(1);
+	}
+#endif
 }
 
 
