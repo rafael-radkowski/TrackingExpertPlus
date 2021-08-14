@@ -316,16 +316,16 @@ set( Utils_SRC
 #  Remove files in the case the cameras are not ebabled.
 
 if(${ENABLE_STRUCTURE_CORE} STREQUAL  OFF )
-	list(REMOVE_ITEM PointCloud_SRC cam/StructureCoreCaptureDevice.cpp)
-	list(REMOVE_ITEM Header_SRC ${PROJECT_SOURCE_DIR}/include/camera/StructureCoreCaptureDevice.h)
+	list(REMOVE_ITEM DataSrc_SRC cam/StructureCoreCaptureDevice.cpp)
+	list(REMOVE_ITEM DataSrc_SRC ${PROJECT_SOURCE_DIR}/include/camera/StructureCoreCaptureDevice.h)
 endif()
 
 
 if(${ENABLE_AZURE_KINECT} STREQUAL  OFF )
-	list(REMOVE_ITEM PointCloud_SRC cam/KinectAzureCaptureDevice.cpp)
-	list(REMOVE_ITEM Header_SRC ${PROJECT_SOURCE_DIR}/include/camera/KinectAzureCaptureDevice.h)
-	list(REMOVE_ITEM PointCloud_SRC cam/AzureKinectFromMKV.cpp)
-	list(REMOVE_ITEM Header_SRC ${PROJECT_SOURCE_DIR}/include/camera/AzureKinectFromMKV.h)
+	list(REMOVE_ITEM DataSrc_SRC cam/KinectAzureCaptureDevice.cpp)
+	list(REMOVE_ITEM DataSrc_SRC ${PROJECT_SOURCE_DIR}/include/camera/KinectAzureCaptureDevice.h)
+	list(REMOVE_ITEM DataSrc_SRC cam/AzureKinectFromMKV.cpp)
+	list(REMOVE_ITEM DataSrc_SRC ${PROJECT_SOURCE_DIR}/include/camera/AzureKinectFromMKV.h)
 endif()
 
 if(${ENABLE_CPF_GPU} STREQUAL  OFF )
