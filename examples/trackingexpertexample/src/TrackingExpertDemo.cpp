@@ -3,6 +3,11 @@
 
 using namespace texpert;
 
+#ifdef _WITH_AZURE_OUTPUT
+// crude and ugly debug helper. Remove!
+texpert::ICaptureDevice* g_camera = NULL;
+#endif
+
 TrackingExpertDemo::TrackingExpertDemo()
 {
 	m_camera_type = None;
@@ -112,6 +117,11 @@ bool TrackingExpertDemo::setSourceCamera(CaptureDeviceType type)
 		system("pause");
 		exit(1);
 	}
+
+#ifdef _WITH_AZURE_OUTPUT
+	// crude and ugly debug helper. Remove!
+	g_camera = m_camera;
+#endif
 
 
 	if (m_verbose) {

@@ -53,6 +53,9 @@ Last edits:
 #include "MainTrackingProcess.h"
 
 
+// ToDo: Remove when ready
+#include "DebugSwitches.h"
+
 
 namespace texpert{
 
