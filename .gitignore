@@ -47,7 +47,6 @@ data/Part_A_reduced_pc.obj
 data/Antenna_Coupler_model.obj
 *.obj
 *.ply
-*.txt
 examples/antenna_demo/src/AntennaDemo.dir
 tests/dev_detection/
 data/test/Bunny_Experiment_1

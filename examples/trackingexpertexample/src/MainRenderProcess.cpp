@@ -1,6 +1,11 @@
 #include "MainRenderProcess.h"
 
 
+#ifdef _WITH_AZURE_OUTPUT
+// crude and ugly debug helper. Remove!
+extern texpert::ICaptureDevice* g_camera;
+int g_counter = 0;
+#endif
 
 MainRenderProcess* MainRenderProcess::m_instance = nullptr;
 
@@ -66,7 +71,7 @@ void MainRenderProcess::initGfx(void)
 	gl_reference_point_cloud = new	isu_ar::GLPointCloudRenderer(dm->getReferecePC().points, dm->getReferecePC().normals); 
 	gl_reference_point_cloud->setPointColor(glm::vec3(0.0, 1.0, 0.0));
 	gl_reference_point_cloud->setNormalColor(glm::vec3(0.0, 0.8, 0.8));
-	gl_reference_point_cloud->setNormalGfxLength(0.005f);
+	gl_reference_point_cloud->setNormalGfxLength(0.05f);
 
 	// point cloud for evaluation.
 	gl_reference_eval = new	isu_ar::GLPointCloudRenderer(dm->getReferecePC().points, dm->getReferecePC().normals); 
@@ -130,6 +135,31 @@ void MainRenderProcess::render_fcn(glm::mat4 pm, glm::mat4 vm)
 			renderARScene(pm, vm);
 			break;
 	}*/
+
+
+#ifdef _WITH_AZURE_OUTPUT
+	// crude and ugly debug helper. Remove!
+	if (g_camera != NULL)
+	{
+		if (g_counter < 30) {
+			g_counter++;
+			return;
+		}
+		cv::Mat rgb_frame;
+		cv::Mat depth_frame;
+		g_camera->getDepthFrame(depth_frame);
+		cv::Mat img_depth_col = depth_frame.clone();
+		img_depth_col.convertTo(img_depth_col, CV_8U, 255.0 / 5000.0, 0.0);
+		cv::imshow("Depth", img_depth_col);
+		
+
+		g_camera->getRGBFrame(rgb_frame);
+		cv::imshow("RGB", rgb_frame);
+		
+		
+		cv::waitKey(1);
+	}
+#endif
 }
 
 
@@ -168,4 +198,32 @@ Add a keyboard function to the existing window.
 void MainRenderProcess::setKeyboardFcn(std::function<void(int, int)> fc)
 {
 	m_window->addKeyboardCallback(fc);
+}
+
+
+/*
+Enable or disable a render feature such as normal rendering, etc
+@param f - the feature of type RenderFeature (see the enum for details.)
+@param enable - true enables the feature, false disables it.
+*/
+void MainRenderProcess::setRenderFeature(RenderFeature f, bool enable)
+{
+
+	switch (f) {
+		case PointsScene:
+			if(gl_camera_point_cloud) gl_camera_point_cloud->enablePointRendering(enable);
+			break;
+		case PointsRef:
+			if (gl_reference_point_cloud) gl_reference_point_cloud->enablePointRendering(enable);
+			break;
+		case NormalsScene:
+			if (gl_camera_point_cloud) gl_camera_point_cloud->enableNormalRendering(enable);
+			break;
+		case NormalsRef:
+			if (gl_reference_point_cloud) gl_reference_point_cloud->enableNormalRendering(enable);
+			break;
+		default:
+			break;
+	}
+	
 }

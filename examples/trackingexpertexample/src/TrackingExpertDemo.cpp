@@ -3,6 +3,11 @@
 
 using namespace texpert;
 
+#ifdef _WITH_AZURE_OUTPUT
+// crude and ugly debug helper. Remove!
+texpert::ICaptureDevice* g_camera = NULL;
+#endif
+
 TrackingExpertDemo::TrackingExpertDemo()
 {
 	m_camera_type = None;
@@ -13,6 +18,11 @@ TrackingExpertDemo::TrackingExpertDemo()
 
 	m_enable_tracking = true;
 	m_update_camera = true;
+
+
+	m_render_scene_normals = false;
+	m_render_ref_normals = false;
+	m_enable_tracking = false;
 
 	init();
 }
@@ -107,6 +117,11 @@ bool TrackingExpertDemo::setSourceCamera(CaptureDeviceType type)
 		system("pause");
 		exit(1);
 	}
+
+#ifdef _WITH_AZURE_OUTPUT
+	// crude and ugly debug helper. Remove!
+	g_camera = m_camera;
+#endif
 
 
 	if (m_verbose) {
@@ -275,6 +290,8 @@ void TrackingExpertDemo::enableTracking(bool enable)
 		else{std::cout << "[INFO] - WARNING, TRACKING IS DISABLED" << std::endl; }
 	}
 	m_enable_tracking = enable;
+
+	_tracking->enableTracking(m_enable_tracking);
 }
 
 
@@ -351,6 +368,25 @@ bool TrackingExpertDemo::setParams(TEParams params)
 
 
 /*
+Reset the reference model to the state as loaded
+*/
+void TrackingExpertDemo::resetReferenceModel(void)
+{
+	// Sample the file
+	Sampling::Run(_dm->getRefereceRawPC(), _dm->getReferecePC(), m_verbose);
+
+	_dm->getReferecePC().centroid0 = PointCloudUtils::CalcCentroid(&_dm->getReferecePC());
+
+	//-----------------------------------------------------------------------
+	// debugging
+	PointCloudManager* m = PointCloudManager::getInstance();
+	Eigen::Vector3f t(0.0, 0.1, 0.500);
+	Eigen::Vector3f R(-45.0, 180.0, 0.0);
+	PointCloudTransform::Transform(&m->getReferecePC(), t, R);
+}
+
+
+/*
 Keyboard callback for the renderer
 */
 void TrackingExpertDemo::keyboard_cb(int key, int action)
@@ -389,7 +425,15 @@ void TrackingExpertDemo::keyboard_cb(int key, int action)
 			}
 		case 83: // s
 			{
-				
+				if(_tracking){
+					if(m_enable_tracking) m_enable_tracking = false;
+					else m_enable_tracking  = true;
+					_tracking->enableTracking(m_enable_tracking);
+
+					if(!m_enable_tracking){
+						resetReferenceModel();
+					}
+				}
 				break;
 			}
 		case 49: // 1
@@ -404,12 +448,29 @@ void TrackingExpertDemo::keyboard_cb(int key, int action)
 			}
 		case 51: // 3
 			{
-				
+				if (_renderer) {
+					if(m_render_scene_normals == false){
+						m_render_scene_normals = true;
+					}else{
+						m_render_scene_normals = false;
+					}
+					_renderer->setRenderFeature(MainRenderProcess::NormalsScene, m_render_scene_normals);
+				}
 				break;
 			}
 		case 52: // 4
 			{
-				
+				if (_renderer) {
+					if (m_render_ref_normals == false) {
+						m_render_ref_normals = true;
+					}
+					else {
+						m_render_ref_normals = false;
+					}
+					_renderer->setRenderFeature(MainRenderProcess::NormalsRef, m_render_ref_normals);
+
+				}
+		
 				break;
 			}
 		case 53: // 5
