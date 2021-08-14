@@ -1,6 +1,8 @@
 #include "MainTrackingProcess.h"
 
 
+MainTrackingProcess* MainTrackingProcess::m_instance = nullptr;
+
 /*
 Get an instance of the class.
 @return Instance of the class

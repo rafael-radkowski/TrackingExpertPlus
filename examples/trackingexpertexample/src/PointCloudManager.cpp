@@ -1,6 +1,8 @@
 #include "PointCloudManager.h"
 
 
+PointCloudManager* PointCloudManager::m_instance = nullptr;
+
 //static 
 PointCloudManager* PointCloudManager::getInstance()
 {

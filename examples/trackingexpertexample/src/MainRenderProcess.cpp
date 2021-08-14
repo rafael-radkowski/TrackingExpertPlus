@@ -2,6 +2,8 @@
 
 
 
+MainRenderProcess* MainRenderProcess::m_instance = nullptr;
+
 //static 
 MainRenderProcess* MainRenderProcess::getInstance()
 {
