@@ -1,4 +1,29 @@
+/*
+@file knn_test.cpp
 
+This file tests the kd-tree and the k-nearest neighbors methods.
+The kd-tree is a cuda implementation. The test compares the cuda implementation (O( n log(n) )
+vs. a naive O(n^2) implementation. 
+
+The test runs multiple times with different random datasets. 
+
+Note that error < 4% can be expected. The cuda version stops to backtrack adjacent 
+branches at one point to increase performance. Also, it uses a Radix sort with integers, 
+and the conversion results in inaccuracies that yield some errors. 
+The kd-tree was develop with point clouds in mind, so the camera tolerances introduce larger errors. 
+
+Rafael Radkowski
+Iowa State University
+rafael@iastate.edu
+January 2020
+MIT License
+-----------------------------------------------------------------------------------------------------------------------------
+Last edited:
+
+July 7, 2020, RR
+- Added a function to test the radius search. 
+
+*/
 
 // STL
 #include <iostream>
@@ -29,7 +54,8 @@
 using namespace texpert;
 
 
-
+//-------------------------------------------------------------
+// The knn tool
 KNN* knn;
 
 PointCloud	cameraPoints0;
@@ -40,6 +66,13 @@ std::vector<MyMatches> matches0;
 std::vector<MyMatches> matches1;
 
 
+/*
+Function to generate random point clouds and normal vectors. Note that the normal vectors are just 
+points. 
+@param pc - reference to the location for the point cloud.
+@param num_points - number of points to generatel
+@param min, max - the minimum and maximum range of the points. 
+*/
 void GenerateRandomPointCloud( PointCloud& pc, int num_points, float min = -2.0, float max = 2.0)
 {
 	pc.points.clear();
@@ -54,14 +87,26 @@ void GenerateRandomPointCloud( PointCloud& pc, int num_points, float min = -2.0,
 	pc.size();
 }
 
-
+/*
+Calculate the distance between two points. 
+@param p0 - the first point as Eigen Vector3f (x, y, z)
+@param p1 - the second point as Eigen Vector3f (x, y, z)
+@return - the distance as float. 
+*/
 float Distance(Eigen::Vector3f p0, Eigen::Vector3f p1) {
 
 	return std::sqrt( std::pow( p0.x() - p1.x(),2)  + std::pow( p0.y() - p1.y(),2) + std::pow( p0.z() - p1.z(),2)); 
 
 }
 
-
+/*
+Find the nearest neighbors between a search point set and a second one. For each point in pc_search, the function output a 
+nearest neighbor from pc_cam. 
+@param pc_search - the search point cloud
+@param pc_cam - the other point clud
+@param k - currently not in use.
+@param matches - a location to store the matches.
+*/
 bool FindKNN_Naive(PointCloud& pc_search, PointCloud& pc_cam, int k, std::vector<MyMatches>& matches)
 {
 
@@ -90,7 +135,13 @@ bool FindKNN_Naive(PointCloud& pc_search, PointCloud& pc_cam, int k, std::vector
 	return true;
 }
 
-
+/*
+Compare two set of matches. For each search point, the naive method and the kd-tree should 
+find the identical match. Thus, the function compares the point indices and reports an error, 
+if the point-pairs do not match. 
+@param matches0 - the location with the first set of matches
+@param matches1 - the location with the second set of matches. 
+*/
 int CompareMatches(std::vector<MyMatches>& matches0, std::vector<MyMatches>& matches1)
 {
 	int s0 = matches0.size();
@@ -104,40 +155,102 @@ int CompareMatches(std::vector<MyMatches>& matches0, std::vector<MyMatches>& mat
 
 	for (int i = 0; i < s0; i++) {
 		if (matches0[i].matches[0].second != matches1[i].matches[0].second) {
-			std::cout << "Found error for i = " << i << " with gpu " << matches0[i].matches[0].second << " and naive " << matches1[i].matches[0].second  << " with distance " << matches0[i].matches[0].distance << " and " << matches1[i].matches[0].distance * matches1[i].matches[0].distance << std::endl;
+			//std::cout << "Found error for i = " << i << " with gpu " << matches0[i].matches[0].second << " and naive " << matches1[i].matches[0].second  << " with distance " << matches0[i].matches[0].distance << " and " << matches1[i].matches[0].distance * matches1[i].matches[0].distance << std::endl;
 			error_count++;
 		}
 	}
 
-	std::cout << "Found " << error_count << " in total (" <<  float(error_count)/float(s0) * 100.0 << "%)" << std::endl;
+	float error_percentage =  float(error_count)/float(s0) * 100.0;
 
+	std::cout << "[INFO] - Found " << error_count << " in total (" << error_percentage << "%)" << std::endl;
+
+	// When working with the kd-tree, some minor errors can be expected. Those are the result of a integer conversion, the tree
+	// works with a Radix search. Also, the tree does not backtrack into adjacent branches indefinitely. 
+	// The error does not matter when working with point cloud data from cameras, since the camera tolerances yield larger variances. 
+	// The error was never larger than 5%. If you encounter a larger error, this requires furter investigation but may not point to a bug, etc. 
+	if (error_percentage > 5.0) {
+		std::cout << "[ERROR] - The last run yielded an error > 5% with " << error_percentage << "%. That is higher than expected." << std::endl;
+	}
 
 
 	return error_count;
 }
 
-
+/*
+Run the test.
+The function runs the test.
+*/
 int RunTest(int num_points, float min_range, float max_range) {
 
 	
-	// generate
+	// generate two set of random point clouds. 
 	GenerateRandomPointCloud( cameraPoints0, num_points, min_range, max_range);
 	GenerateRandomPointCloud( cameraPoints1, num_points, min_range, max_range);
 
 	matches0.clear();
 	matches1.clear();
 
+	// populate the kd-tree
 	knn->reset();
 	knn->populate(cameraPoints0);
 
+	// search for the neaarest neighbors
 	knn->knn(cameraPoints1,1,matches0);
 
-	// naive
+	// run the naive knn method. 
 	FindKNN_Naive(cameraPoints1, cameraPoints0, 1, matches1);
 
-
-	// compare
+	// compare the results
 	return CompareMatches( matches0,  matches1);
+}
+
+
+int RunRadiusTest(int num_points, int num_serach_points, float min_range, float max_range, float search_radius) {
+
+
+	// generate two set of random point clouds. 
+	GenerateRandomPointCloud( cameraPoints0, num_points, min_range, max_range);
+	GenerateRandomPointCloud( cameraPoints1, num_serach_points, min_range, max_range);
+
+	matches0.clear();
+	matches1.clear();
+
+	// populate the kd-tree
+	knn->reset();
+	knn->populate(cameraPoints0);
+
+	// search for the neaarest neighbors
+	knn->radius(cameraPoints1,search_radius,matches0);
+
+	int error_count = 0;
+	int print = 0;
+	for (int i = 0; i < matches0.size(); i++) {
+		
+		MyMatches m = matches0[i];
+
+		for (int j = 0; j < 21; j++) {
+			if( m.matches[j].distance > 0.0){
+				if(m.matches[j].distance > search_radius*search_radius){
+					error_count++;
+					if(print < 100){
+						std::cout  << "[ERROR] " << m.matches[j].second << ": distance: " <<  m.matches[j].distance << std::endl;
+						print++;
+					}
+				}
+			}
+		}
+	}
+	
+
+	if (error_count == 0) {
+		std::cout << "[INFO] - Found " << error_count << ", all distances are within the margin of " << search_radius << "." << std::endl;
+	}
+	else
+	{
+		std::cout << "[ERROR] - Found " << error_count << " points which exceeds the distance of " << search_radius << "." << std::endl;
+	}
+
+	return matches0.size();
 }
 
 
@@ -145,13 +258,23 @@ int RunTest(int num_points, float min_range, float max_range) {
 int main(int argc, char** argv)
 {
 
+	std::cout << "KNN Test.\n" << std::endl;
+	std::cout << "This application implements a k-nearest neighbors test using a kd-tree." << std::endl;
+	std::cout << "The kd-tree uses cuda to construct the tree and to find nearest neighbors. " << std::endl;
+	std::cout << "The test compares the kd-tree solution with a naive solution. \nThe application runs 17 test in 3-stages, using different data set complexities.\n" << std::endl;
+	
+	std::cout << "Rafael Radkowski\nIowa State University\nrafael@iastate.edu" << std::endl;
+	std::cout << "-----------------------------------------------------------------------------------------\n" << std::endl;
+
+
+	// create the knn
 	knn = new KNN();
 
 
 	//-------------------------------------------------
 	// First test round
 
-	std::cout << "1. Testing with the same points." << endl;
+	std::cout << "[Info] 1. Testing with the same points." << endl;
 
 	// generate
 	GenerateRandomPointCloud( cameraPoints0, 100);
@@ -169,7 +292,7 @@ int main(int argc, char** argv)
 	//-------------------------------------------------
 	// Second test round
 
-	std::cout << "\n2. Testing with different points." << endl;
+	std::cout << "\n[Info] 2. Testing with different points." << endl;
 
 	// generate
 	GenerateRandomPointCloud( cameraPoints1, 100);
@@ -186,13 +309,25 @@ int main(int argc, char** argv)
 	//-------------------------------------------------
 	// Third test round
 
-	std::cout << "\n3. Testing with different points and increased point size." << endl;
+	std::cout << "\n[Info] 3. Testing with different points and increased point size." << endl;
 
 	for(int i = 0; i< 15; i++){
 		int k = 10000;
 
 		RunTest( k, -1.0, 1.0);
 	}
+
+	//-------------------------------------------------
+	// Run a radius test
+
+	std::cout << "\n[Info] 4. Run a radius search test." << endl;
+
+	for(int i = 0; i< 15; i++){
+		float radius = 0.1 * i + 0.1;
+		float max = i * 1.0;
+		RunRadiusTest(10000, 2000, -max, max, radius);
+	}
+	RunRadiusTest(10000, 2000, -15.0, 15.0, 1.5);
 
 	delete knn;
 

@@ -26,5 +26,8 @@ It requires the following 3rd party tools:
  * [glm, v0.9.9.3](https://glm.g-truc.net/0.9.9/index.html)
  * [Cuda V 9.2](https://developer.nvidia.com/cuda-92-download-archive)
 
-The code was prepared with Visual Studio 2017. Note that this is only the software the development team uses. 
+The code was prepared with Visual Studio 2019. Note that this is only the software the development team uses. 
 All components should also work with never software veersion.  
+
+### Installation Instructions and Manual
+Follow the link to the [TrackingExpert+ Installation and User Manual](https://docs.google.com/document/d/1IpHlpnFFG5dZNQ4PCa8HabXDFIdaZcVf4GVDytQKIK8/edit?usp=sharing). Please leave comments if you think information is missing, incorrect, or incomplete. 

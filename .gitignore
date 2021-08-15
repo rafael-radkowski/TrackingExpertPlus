@@ -10,6 +10,8 @@ CMakeFiles/
 *.vcxproj
 *.filters
 CMakeCache.txt
+CMakeDoxyfile.in
+CMakeDoxygenDefaults.cmake
 bin/
 lib/
 *.pdb
@@ -36,3 +38,16 @@ tests/test_icp/test_icp.dir/
 tests/test_icp_camera/test_icp_camera.dir/
 data/test/stanford_bunny_desk/
 tests/test_knn/test_knn.dir/
+tests/test_azure_camera/test_Azure_Kinect_camera.dir/
+tests/dev_detection/dev_detection.dir/
+tests/test_matrix_conv/test_matrix_conv.dir/
+examples/trackingexpertdemo/src/TrackingExpertDemo.dir/
+data/Part_A_reduced_pc.ply
+data/Part_A_reduced_pc.obj
+data/Antenna_Coupler_model.obj
+*.obj
+*.ply
+examples/antenna_demo/src/AntennaDemo.dir
+tests/dev_detection/
+data/test/Bunny_Experiment_1
+examples/trackingexpertexample/src/TrackingExpertExample.dir/

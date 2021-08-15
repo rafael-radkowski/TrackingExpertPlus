@@ -21,7 +21,7 @@ using namespace std;
 // This variable limits the number of 
 // matches the code can find. Cuda memory is fixed size. 
 // Thus, one need to pre-define how many points one expects. 
-#define KNN_MATCHES_LENGTH 21
+#define KNN_MATCHES_LENGTH 41
 
 
 class MyPoint

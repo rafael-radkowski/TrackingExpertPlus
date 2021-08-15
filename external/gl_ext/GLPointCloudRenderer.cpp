@@ -2,7 +2,7 @@
 
 
 #define MAX_POINTS 500000
-
+#define _USE_PER_VERTEX_COLOR
 
 namespace nsGLPointCloudRenderer
 {
@@ -15,6 +15,7 @@ namespace nsGLPointCloudRenderer
 		"uniform mat4 modelMatrix;                                          \n"
 		"in vec3 in_Position;                                               \n"
 		"in vec3 in_Normal;                                                  \n"
+		"in vec3 in_Color;                                                  \n"
 		"out vec3 pass_Color;                                               \n"
 		"out vec3 pass_Normal;                                               \n"
 		"out vec2 pass_Texture;												\n"
@@ -28,11 +29,11 @@ namespace nsGLPointCloudRenderer
 		"void main(void)                                                   \n"
 		"{                                                                 \n"
 		"    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(in_Position, 1.0);  \n"
-		"    pass_Color = in_Normal;                                        \n"
+		"    pass_Color = in_Color;                                        \n"
 		"    pass_Normal = in_Normal;                                       \n"
-		"	 gl_PointSize = 4.0;											\n"	
+		"	 gl_PointSize = 8.0;											\n"	
 		"	vertex.normal = in_Normal;  \n"
-		"	vertex.color = in_Normal;  \n"
+		"	vertex.color = in_Color;  \n"
 		"	vertex.pos = in_Position; \n"	
 		"}                                                                 \n";
 
@@ -76,19 +77,41 @@ namespace nsGLPointCloudRenderer
 		"                                                                  \n"
 		"uniform vec3 pointcolor;                                          \n"
 		"in vec2 pass_Texture;												\n"
+		"in vec3 pass_Color;                                               \n"
 		"out vec4 color;                                                    \n"
 		"void main(void)                                                   \n"
 		"{                                                                 \n"
+#ifdef _USE_PER_VERTEX_COLOR
+		"    color = vec4(pass_Color, 1.0);                               \n"
+#else
 		"    color = vec4(pointcolor, 1.0);                               \n"
+#endif
 		"}                                                                 \n";
 
 
-
+			// Fragment shader source code. This determines the colors in the fragment generated in the shader pipeline. In this case, it colors the inside of our triangle specified by our vertex shader.
+	static const string fs_string_410_normals =
+		"#version 410 core                                                 \n"
+		"                                                                  \n"
+		"uniform vec3 pointcolor;                                          \n"
+		"in vec2 pass_Texture;												\n"
+		"in vec3 pass_Color;                                               \n"
+		"out vec4 color;                                                    \n"
+		"void main(void)                                                   \n"
+		"{                                                                 \n"
+#ifdef _USE_PER_VERTEX_COLOR
+		"    color = vec4(pointcolor, 1.0);                               \n"
+#else
+		"    color = vec4(pointcolor, 1.0);                               \n"
+#endif
+		"}																	 \n";
 };
 
 
 using namespace nsGLPointCloudRenderer;
 using namespace isu_ar;
+
+
 
  /*
 Create an point cloud model from a point cloud dataset
@@ -132,6 +155,7 @@ GLPointCloudRenderer::GLPointCloudRenderer(vector<Eigen::Vector3f>& src_points, 
 	modelMatrixLocation = glGetUniformLocation(program, "modelMatrix"); // Get the location of our model matrix in the shader
 	_pos_location = glGetAttribLocation(program, "in_Position");
 	_norm_location = glGetAttribLocation(program, "in_Normal");
+	_color_location = glGetAttribLocation(program, "in_Color");
 
 	// default color
 	glUniform3f(glGetUniformLocation(program, "pointcolor") , (GLfloat)1.0f, (GLfloat)0.0f, (GLfloat)1.0f );
@@ -143,24 +167,28 @@ GLPointCloudRenderer::GLPointCloudRenderer(vector<Eigen::Vector3f>& src_points, 
 
 	for(int i=0; i<size; i++)
 	{
-		   points.push_back( glm::vec3(0.0,0.0, i * 0.01 ) );
+		points.push_back( glm::vec3(0.0,0.0, i * 0.01 ) );
         normals.push_back(glm::vec3(0.0,0.0, i * 0.01 ) );
+		colors.push_back(glm::vec3(0.0,0.0,1.0));
 	}
 	_N = points.size();
 
 
 	// create a vertex buffer object
-	bool data_usage = true;
+	bool data_usage = false;
 	if(_data_usage == texpertgfx::DYNAMIC) data_usage = false;
+#ifdef _USE_PER_VERTEX_COLOR
+	texpertgfx::CreateVertexObjects333(vaoID, vboID, &points[0].x, &normals[0].x, &colors[0].x, _N, data_usage, _pos_location, _norm_location, _color_location );
+#else
 	texpertgfx::CreateVertexObjects33(vaoID, vboID, &points[0].x, &normals[0].x, _N, data_usage, _pos_location, _norm_location );
-
+#endif
     modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 
 	
 
 	//----------------------------------------------------------------
 	// normal vectors
-	program_normals = cs557::CreateShaderProgram(vs_string_410, gs_string_410, fs_string_410);
+	program_normals = cs557::CreateShaderProgram(vs_string_410, gs_string_410, fs_string_410_normals);
 
 	glUseProgram(program_normals);
 	glBindVertexArray(vaoID[0]);
@@ -168,6 +196,7 @@ GLPointCloudRenderer::GLPointCloudRenderer(vector<Eigen::Vector3f>& src_points, 
 	
 	glBindAttribLocation(program_normals, _pos_location, "in_Position");
 	glBindAttribLocation(program_normals, _norm_location, "in_Normal");
+	glBindAttribLocation(program_normals, _color_location, "in_Color");
 
 	program_normals_locations[0]  = glGetUniformLocation(program_normals, "projectionMatrix"); // Get the location of our projection matrix in the shader
 	program_normals_locations[1]  = glGetUniformLocation(program_normals, "viewMatrix"); // Get the location of our view matrix in the shader
@@ -175,7 +204,7 @@ GLPointCloudRenderer::GLPointCloudRenderer(vector<Eigen::Vector3f>& src_points, 
 	program_normals_locations[3]  = glGetAttribLocation(program_normals, "in_Position");
 	program_normals_locations[4]  = glGetAttribLocation(program_normals, "in_Normal");
 	program_normals_locations[5]  = glGetUniformLocation(program_normals, "pointcolor");
-
+	program_normals_locations[6]  = glGetAttribLocation(program_normals, "in_Color");
 
 	// binds the vbos to the shader
 	glBindBuffer(GL_ARRAY_BUFFER, vboID[0]);
@@ -185,12 +214,19 @@ GLPointCloudRenderer::GLPointCloudRenderer(vector<Eigen::Vector3f>& src_points, 
 	glBindBuffer(GL_ARRAY_BUFFER, vboID[1]);
 	glVertexAttribPointer((GLuint)	program_normals_locations[4], 3, GL_FLOAT, GL_FALSE, 0, 0); 
 	glEnableVertexAttribArray(	program_normals_locations[4]);
-	
+
+#ifdef _USE_PER_VERTEX_COLOR
+	glBindBuffer(GL_ARRAY_BUFFER, vboID[2]);
+	glVertexAttribPointer((GLuint)	program_normals_locations[6], 3, GL_FLOAT, GL_FALSE, 0, 0); 
+	glEnableVertexAttribArray(	program_normals_locations[6]);
+#endif	
 	
 	// default color
 	glUniform3fv( program_normals_locations[5], 1, &_normal_color[0]);
 	glUniform1f(  glGetUniformLocation(program_normals, "normal_length"), _normal_length );
-	
+
+	// update the points if points are available.
+	updatePoints();
 }
 
 
@@ -201,9 +237,9 @@ Update the points using the existing references.
 */
 void GLPointCloudRenderer::updatePoints(void)
 {
-	if(!_auto_update)return;
-
+	
 	_N = _points.size();
+	if(_N <= 0) return;
 
 	_block.lock();
 
@@ -231,7 +267,8 @@ Draw the obj model
 void GLPointCloudRenderer::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
 {
 	// update the points
-	updatePoints();
+	if(_auto_update)
+		updatePoints();
 
 	_projectionMatrix = projectionMatrix;
 	_viewMatrix = viewMatrix;
@@ -276,6 +313,7 @@ void GLPointCloudRenderer::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix
 		return;
 	}
 
+	glEnable(GL_LINE_SMOOTH);
 	glUseProgram(program_normals);
 	// this changes the camera location
 	glUniformMatrix4fv(program_normals_locations[1] , 1, GL_FALSE, &viewMatrix[0][0]); // send the view matrix to our shader
@@ -288,7 +326,7 @@ void GLPointCloudRenderer::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix
 	//glBindVertexArray(vaoID[0]);
 
 	//glUseProgram(program_normals);
-	
+	glLineWidth(2.0f);;
 	// Draw the triangles
  	glDrawArrays(GL_POINTS, 0, _N);
 	
@@ -319,8 +357,52 @@ void GLPointCloudRenderer::setPointColor(glm::vec3 color)
 	// the color is used during runtime since the shader pogram is re-used. 
 	_point_color = color;
 
+#ifdef _USE_PER_VERTEX_COLOR
+	int size = MAX_POINTS;
+	for(int i=0; i<size; i++)
+	{
+		colors[i] = color;
+	}
+
+	//Normal vectors
+	glBindBuffer(GL_ARRAY_BUFFER, vboID[2]); // Bind our second Vertex Buffer Object
+	glBufferSubData(GL_ARRAY_BUFFER, 0, (GLsizeiptr)(size * 3* sizeof(GLfloat)), (void*) &colors[0]); // Set the size and data of our VBO and set it to STATIC_DRAW
+
+	glBindVertexArray(0); // Disable our Vertex Buffer Object
+#endif
+
 }
 
+
+
+/*
+Set a color value per vertex.
+Note, this requires to define #define _USE_PER_VERTEX_COLOR in GLPointCloudRenderer.cpp
+@param per_vertex_color - a list with one color per vertex. 
+*/
+void GLPointCloudRenderer::setPointColors(vector<glm::vec3> per_vertex_color)
+{
+#ifdef _USE_PER_VERTEX_COLOR
+	int size = per_vertex_color.size();
+	for(int i=0; i<size; i++)
+	{
+		colors[i] = per_vertex_color[i];
+	}
+
+	if (size != _N) {
+		std::cout << "[ERROR] GLPointCloudRenderer::setPointColors - Number of points does not match number of color elements: " << _N << " p != " << size << " n." << std::endl;
+	}
+
+	//Normal vectors
+	glBindBuffer(GL_ARRAY_BUFFER, vboID[2]); // Bind our second Vertex Buffer Object
+	glBufferSubData(GL_ARRAY_BUFFER, 0, (GLsizeiptr)(_N * 3* sizeof(GLfloat)), (void*) &colors[0]); // Set the size and data of our VBO and set it to STATIC_DRAW
+
+	glBindVertexArray(0); // Disable our Vertex Buffer Object
+#else
+
+	std::cout << "[ERROR] - per vertex color for point cloud rendering is disabled. The function setPointColors(...) has not effect." << std::endl;
+#endif
+}
 
 
 /*

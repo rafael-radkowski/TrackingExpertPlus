@@ -62,6 +62,7 @@ include_directories(${GLM_INCLUDE_DIR})
 include_directories(${GLFW3_INCLUDE_DIR})
 include_directories(${GLEW_INCLUDE_DIR})
 include_directories(${STRUCTURE_INCLUDE_DIR})
+include_directories(${AZUREKINECT_INCLUDE_DIR})
 
 
 # local 
@@ -76,6 +77,7 @@ include_directories(${TRACKINGX_ROOT_DIR}/include/utils)
 include_directories(${TRACKINGX_ROOT_DIR}/external/gl_support/include)
 include_directories(${TRACKINGX_ROOT_DIR}/external/gl_ext)
 include_directories(${TRACKINGX_ROOT_DIR}/external)
+include_directories(${TRACKINGX_ROOT_DIR}/examples/demo_common)
 
 # All output files are copied to bin
 #set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/../../../bin)
@@ -92,6 +94,17 @@ set(Demo_SRC
 	demo_main.cpp
 	DemoScene.h
 	DemoScene.cpp
+	GearBoxRenderer.cpp
+	GearBoxRenderer.h
+	../../demo_common/AssemblySequence.cpp
+	../../demo_common/PartDatabase.cpp
+	../../demo_common/AssemblySequence.h
+	../../demo_common/ProcedureLoader.h
+	../../demo_common/ProcedureLoader.cpp
+	../../demo_common/ProcedureRenderer.h
+	../../demo_common/ProcedureRenderer.cpp
+	../../demo_common/PartDatabase.h
+	../../demo_common/Sequence.h
 )
 
 
@@ -126,6 +139,7 @@ add_dependencies(${ProjectName} GLUtils)
 #message(${TRACKINGX_ROOT_DIR})
 # preporcessor properties
 target_link_libraries(${ProjectName}  ${OpenCV_LIBS})
+target_link_libraries(${ProjectName}  ${AZUREKINECT_LIBRARY})
 target_link_libraries(${ProjectName}  ${TBB_LIBS})
 target_link_libraries(${ProjectName}  ${GLEW_LIBS})
 target_link_libraries(${ProjectName}  ${GLFW3_LIBS})
@@ -140,13 +154,13 @@ target_link_libraries(${ProjectName} ${STRUCTURE_LIBRARY} )
 
 #----------------------------------------------------------------------
 # Pre-processor definitions
+add_compile_definitions( _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING )
 
 # add a "d" to all debug libraries
 SET_TARGET_PROPERTIES(${ProjectName} PROPERTIES  DEBUG_POSTFIX "d")
 SET_TARGET_PROPERTIES(${ProjectName} PROPERTIES LINK_FLAGS_RELEASE " /FORCE:MULTIPLE")
 SET_TARGET_PROPERTIES(${ProjectName} PROPERTIES LINK_FLAGS_DEBUG "/FORCE:MULTIPLE ")
 SET_TARGET_PROPERTIES(${ProjectName} PROPERTIES LINK_FLAGS "/FORCE:MULTIPLE")
-
 
 
 

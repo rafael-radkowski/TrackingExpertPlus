@@ -16,7 +16,8 @@
 #---------------------------------------------------------------------
 #
 # Last edits:
-#
+# 08/02/21, RR 
+#  - Added feature toggle ENABLE_CPF_GPU to add/remove detection GPU support. Runs for a specific cuda version only. 
 # 
 cmake_minimum_required(VERSION 2.6)
 
@@ -83,7 +84,7 @@ find_package(GLFW3 REQUIRED)
 FIND_PACKAGE(Cuda REQUIRED)
 FIND_PACKAGE(Cub REQUIRED)
 FIND_PACKAGE(OpenGL REQUIRED)
-FIND_PACKAGE(Structure REQUIRED)
+
 
 #include dir
 include_directories(${OpenCV_INCLUDE_DIR})
@@ -91,7 +92,7 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${TBB_INCLUDE_DIR})
 include_directories(${GLM_INCLUDE_DIR})
 include_directories(${GLFW3_INCLUDE_DIR})
-include_directories(${STRUCTURE_INCLUDE_DIR})
+
 
 # local 
 include_directories(${PROJECT_SOURCE_DIR}/include/camera)
@@ -102,7 +103,18 @@ include_directories(${PROJECT_SOURCE_DIR}/include/loader)
 include_directories(${PROJECT_SOURCE_DIR}/include/nearest_neighbors)
 include_directories(${PROJECT_SOURCE_DIR}/include/pointcloud)
 include_directories(${PROJECT_SOURCE_DIR}/include/utils)
-include_directories(C:/SDK/StructureSDK/Libraries/Structure/Headers)
+
+
+if(${ENABLE_STRUCTURE_CORE} STREQUAL  ON )
+	FIND_PACKAGE(Structure REQUIRED)
+	include_directories(${STRUCTURE_INCLUDE_DIR})
+	include_directories(C:/SDK/StructureSDK/Libraries/Structure/Headers)
+endif()
+
+if(${ENABLE_AZURE_KINECT} STREQUAL  ON )
+	FIND_PACKAGE(AzureKinect REQUIRED)
+	include_directories(${AZUREKINECT_INCLUDE_DIR})
+endif()
 
 
 
@@ -113,10 +125,7 @@ set("CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG" "${CMAKE_SOURCE_DIR}/bin")
 set("CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE" "${CMAKE_SOURCE_DIR}/bin")
 
 
-#--------------------------------------------
-# Camera options
-option(ENABLE_REAL_SENSE "Enable Intel Real sense support" OFF)
-option(ENABLE_STRUCTURE_CORE "Enable Structure Core support" ON)
+
 
 
 #--------------------------------------------
@@ -142,6 +151,7 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/pointcloud/PointCloudEval.h
 	${PROJECT_SOURCE_DIR}/include/pointcloud/MatrixUtils.h
 	${PROJECT_SOURCE_DIR}/include/pointcloud/Utils.h
+	${PROJECT_SOURCE_DIR}/include/pointcloud/PointCloudTrans.h
 	${PROJECT_SOURCE_DIR}/include/utils/TimeUtils.h
 	${PROJECT_SOURCE_DIR}/include/utils/RandomGenerator.h
 	${PROJECT_SOURCE_DIR}/include/utils/LogTypes.h
@@ -149,6 +159,7 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/utils/ArgParser.h
 	${PROJECT_SOURCE_DIR}/include/utils/FileUtilsX.h
 	${PROJECT_SOURCE_DIR}/include/utils/MSVerCheck.h
+	${PROJECT_SOURCE_DIR}/include/utils/MatrixConv.h
 	${PROJECT_SOURCE_DIR}/include/loader/ReaderWriter.h
 	${PROJECT_SOURCE_DIR}/include/loader/ReaderWriterOBJ.h
 	${PROJECT_SOURCE_DIR}/include/loader/ReaderWriterPLY.h
@@ -157,22 +168,30 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/loader/ImgReaderWriterPNG.h
 	${PROJECT_SOURCE_DIR}/include/loader/DataReaderWriter.h
 	
-
-
-
-#if( ENABLE_STRUCTURE_CORE)
-	${PROJECT_SOURCE_DIR}/include/camera/StructureCoreCaptureDevice.h
-	${PROJECT_SOURCE_DIR}/include/camera/ICaptureDevice.h
-	${PROJECT_SOURCE_DIR}/include/camera/ICaptureDeviceTypes.h
-	${PROJECT_SOURCE_DIR}/include/camera/PointCloudProducer.h
-	${PROJECT_SOURCE_DIR}/include/camera/CameraParameters.h
-
+	
 	
 #endif()
 #if( ENABLE_REAL_SENSE)
 #	${PROJECT_SOURCE_DIR}/include/camera/SensorRealSense.h
 #endif()
 )
+
+set(DataSrc_SRC
+	${PROJECT_SOURCE_DIR}/include/camera/AzureKinectFromMKV.h
+	${PROJECT_SOURCE_DIR}/include/camera/KinectAzureCaptureDevice.h
+	${PROJECT_SOURCE_DIR}/include/camera/StructureCoreCaptureDevice.h
+	${PROJECT_SOURCE_DIR}/include/camera/ICaptureDevice.h
+	${PROJECT_SOURCE_DIR}/include/camera/ICaptureDeviceTypes.h
+	${PROJECT_SOURCE_DIR}/include/camera/PointCloudProducer.h
+	${PROJECT_SOURCE_DIR}/include/camera/CameraParameters.h
+
+	cam/KinectAzureCaptureDevice.cpp
+	cam/StructureCoreCaptureDevice.cpp
+	cam/PointCloudProducer.cpp
+	cam/CameraParameters.cpp
+	cam/AzureKinectFromMKV.cpp
+)
+
 
 
 set( PointCloud_cuda_INC
@@ -183,6 +202,9 @@ set( PointCloud_cuda_INC
 	${PROJECT_SOURCE_DIR}/include/camera/cuda/cuDeviceMemory3f.h
 	${PROJECT_SOURCE_DIR}/include/camera/cuda/cuPCU3f.h
 	${PROJECT_SOURCE_DIR}/include/camera/cuda/cuPCUImpl3f.h
+	${PROJECT_SOURCE_DIR}/include/camera/cuda/cuFilter.h
+	
+	cam/cuda/cuFilter.cu
 )
 
 
@@ -192,6 +214,20 @@ set(Detection_SRC
 	detection/FDMatching.cpp
 	detection/FDClustering.cpp
 	detection/PCRegistration.cpp
+
+	detection/CPFMatchingExp.cpp
+	${PROJECT_SOURCE_DIR}/include/detection/CPFMatchingExp.h
+	detection/CPFTools.cpp
+	${PROJECT_SOURCE_DIR}/include/detection/CPFTools.h
+	${PROJECT_SOURCE_DIR}/include/detection/CPFToolsGPU.h
+	detection/CPFToolsGPU.cu
+	${PROJECT_SOURCE_DIR}/include/detection/CPFMatchingExpGPU.h
+	detection/CPFMatchingExpGPU.cpp
+	${PROJECT_SOURCE_DIR}/include/detection/CPFTypes.h
+
+	${PROJECT_SOURCE_DIR}/include/detection/CPFRenderHelpers.h
+	detection/CPFRenderHelpers.cpp
+
 )
 
 set(Cuda_kdtree_SRC
@@ -200,12 +236,14 @@ set(Cuda_kdtree_SRC
 	kdtree/CudaErrorCheck.cu
 	kdtree/Cuda_KdTree.cu
 	kdtree/Cuda_Helpers.cpp
+	
 	${PROJECT_SOURCE_DIR}/include/kdtree/sort.h
 	${PROJECT_SOURCE_DIR}/include/kdtree/dequeue.h
 	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_KdTree.h
 	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Helpers.h
 	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Common.h
 	${PROJECT_SOURCE_DIR}/include/kdtree/Cuda_Types.h
+	
 )
 
 set(Loader_SRC
@@ -234,6 +272,9 @@ set(NN_SRC
 	nearest_neighbors/ICPReject.cpp
 	nearest_neighbors/cuICP.cu
 	nearest_neighbors/cuICPMemory.cpp
+	${PROJECT_SOURCE_DIR}/include/kdtree/ResourceManager.h
+	kdtree/ResourceManager.cpp
+
 )
 
 set( PointCloud_SRC
@@ -241,10 +282,7 @@ set( PointCloud_SRC
 	point_cloud/PointCloudTransform.cpp
 	point_cloud/PointCloudEval.cpp
 	point_cloud/MatrixUtils.cpp
-#if( ENABLE_STRUCTURE_CORE)
-	cam/StructureCoreCaptureDevice.cpp
-	cam/PointCloudProducer.cpp
-	cam/CameraParameters.cpp
+
 #endif()
 #if( ENABLE_REAL_SENSE)
 #	cam/SensorRealSense.cpp
@@ -274,13 +312,40 @@ set( Utils_SRC
 	utils/LogReaderWriter.cpp
 	utils/ArgParser.cpp
 	utils/FileUtilsX.cpp
+	utils/MatrixConv.cpp
 )
+
+
+
+#-----------------------------------------------------------------
+#  Remove files in the case the cameras are not ebabled.
+
+if(${ENABLE_STRUCTURE_CORE} STREQUAL  OFF )
+	list(REMOVE_ITEM DataSrc_SRC cam/StructureCoreCaptureDevice.cpp)
+	list(REMOVE_ITEM DataSrc_SRC ${PROJECT_SOURCE_DIR}/include/camera/StructureCoreCaptureDevice.h)
+endif()
+
+
+if(${ENABLE_AZURE_KINECT} STREQUAL  OFF )
+	list(REMOVE_ITEM DataSrc_SRC cam/KinectAzureCaptureDevice.cpp)
+	list(REMOVE_ITEM DataSrc_SRC ${PROJECT_SOURCE_DIR}/include/camera/KinectAzureCaptureDevice.h)
+	list(REMOVE_ITEM DataSrc_SRC cam/AzureKinectFromMKV.cpp)
+	list(REMOVE_ITEM DataSrc_SRC ${PROJECT_SOURCE_DIR}/include/camera/AzureKinectFromMKV.h)
+endif()
+
+if(${ENABLE_CPF_GPU} STREQUAL  OFF )
+	list(REMOVE_ITEM Detection_SRC detection/CPFToolsGPU.cu)
+	list(REMOVE_ITEM Detection_SRC ${PROJECT_SOURCE_DIR}/include/detection/CPFToolsGPU.h)
+	list(REMOVE_ITEM Detection_SRC ${PROJECT_SOURCE_DIR}/include/detection/CPFMatchingExpGPU.h)
+	list(REMOVE_ITEM Detection_SRC detection/CPFMatchingExpGPU.cpp)
+endif()
 
 
 
 #-----------------------------------------------------------------
 #  SRC Groups, organize the tree
 
+source_group(Inputs FILES ${DataSrc_SRC})
 source_group(Detection FILES ${Detection_SRC})
 source_group(kdtree FILES ${Cuda_kdtree_SRC})
 source_group(Loader FILES ${Loader_SRC})
@@ -288,8 +353,11 @@ source_group(ICP FILES ${NN_SRC})
 source_group(PointCloud FILES ${PointCloud_SRC})
 source_group(Shader FILES ${Shader_SRC})
 source_group(Utils FILES ${Utils_SRC})
-source_group("PointCloud/Cuda" FILES ${PointCloud_cuda_SRC} )
-source_group(Cuda FILES ${PointCloud_cuda_INC})
+source_group("Cuda/PointCloud" FILES ${PointCloud_cuda_SRC} ${PointCloud_cuda_INC})
+
+
+
+#source_group(Cuda FILES ${PointCloud_cuda_INC})
 #----------------------------------------------------------------------
 # Compiler standards
 
@@ -309,6 +377,7 @@ add_library(trackingx
 	${Utils_SRC}
 	${PointCloud_cuda_SRC}
 	${PointCloud_cuda_INC}
+	${DataSrc_SRC}
 )
 
 # preporcessor properties
@@ -318,7 +387,13 @@ target_link_libraries(trackingx  ${TBB_LIBS})
 target_link_libraries(trackingx  ${GLEW_LIBS})
 target_link_libraries(trackingx  ${GLFW3_LIBS})
 
-target_link_libraries(trackingx  "C:/SDK/StructureSDK/Libraries/Structure/Windows/x86_64/Structure.lib")
+if(${ENABLE_STRUCTURE_CORE} STREQUAL  ON )
+	target_link_libraries(trackingx  "C:/SDK/StructureSDK/Libraries/Structure/Windows/x86_64/Structure.lib")
+endif()
+
+if(${ENABLE_AZURE_KINECT} STREQUAL  ON )
+	target_link_libraries(trackingx  ${AZUREKINECT_LIBRARY})
+endif()
 
 
 #----------------------------------------------------------------------

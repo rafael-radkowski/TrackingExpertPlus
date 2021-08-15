@@ -6,8 +6,8 @@ using namespace texpert;
 
 FDClustering::FDClustering()
 {
-	_translation_threshold = 0.05;
-	_rotation_threshold = 0.2;
+	_translation_threshold = 0.05f;
+	_rotation_threshold = 0.2f;
 	_invert = false;
 }
 
@@ -122,7 +122,7 @@ void FDClustering::setTranslationThreshold(float value)
 void FDClustering::setRotationThreshold(float value)
 {
 	if (value > 0) {
-		_rotation_threshold = value / 180.0 * 3.14159265359;
+		_rotation_threshold = value / 180.0f * 3.14159265359f;
 	}
 }
 

@@ -19,7 +19,9 @@
 # Oct 22, 2019, RR
 # - Added the CMAKE_TRY_COMPILE_TARGET_TYPE compiler option. 
 # Feb 5, 2020, RR
-# - Added submodule support for glGLutils
+# - Added submodule support for glGLutils4
+# 08/02/21, 
+# - RR: Added feature toggle ENABLE_CPF_GPU to add/remove detection GPU support. Runs for a specific cuda version only. 
 # 
 
 
@@ -134,7 +136,8 @@ endif()
 #---------------------------------------------------------------------------------
 # Build with demo tool
 option(TRAKINGX_BUILD_DEMO "TrackingExpert: Build with examples" ON)
-
+option(DEMO_TE1 "TrackingExpert+ registration demo" OFF)
+option(DEMO_TE2 "TrackingExpert+ example app" OFF)
 
 #message(${CMAKE_CURRENT_SOURCE_DIR})
 set( TRACKINGX_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}) 
@@ -142,6 +145,19 @@ set( TRACKINGX_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/tests/Test.cmd
      DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/bin/)
+	 
+
+#--------------------------------------------
+# Camera options
+option(ENABLE_REAL_SENSE "Enable Intel Real sense support" OFF)
+option(ENABLE_STRUCTURE_CORE "Enable Structure Core support" OFF)
+option(ENABLE_AZURE_KINECT "Enable Structure Core support" OFF)
+
+#--------------------------------------------
+# Features toggles
+option(ENABLE_CPF_GPU "Enable CPF GPU support" OFF)
+
+
 
 ################################################################
 add_subdirectory(src)

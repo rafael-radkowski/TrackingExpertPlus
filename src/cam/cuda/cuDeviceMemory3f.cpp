@@ -9,6 +9,11 @@ namespace cuDevMem3f_cuDeviceMemory3f
 	float* g_cu_image_dev = NULL;
 
 
+	// Memory for temporary image data, e.g., filter image 
+	// data and others. 
+	float* g_cu_temp_image_dev = NULL;
+
+
 	// Memory for a float3 array for all points as P = {p0, p1, p2, ..., pN} with pi = {x, y, z}
 	float3* g_cu_point_output_dev = NULL;
 
@@ -30,9 +35,12 @@ namespace cuDevMem3f_cuDeviceMemory3f
 	int g_cu_width = -1;
 	int g_cu_height = -1;
 
-	const int allocations = 7;
+	const int allocations = 8;
 
-	int allocate_counter = 0;
+	// keeps track of the allocated memory in bytes
+	unsigned int allocate_counter = 0;
+
+	int g_memory_counter = 0;
 }
 
 
@@ -57,6 +65,8 @@ void cuDevMem3f::AllocateDeviceMemory(int width, int height, int channels)
 		allocate_counter++;
 	}
 
+	g_memory_counter = 0;
+
 	int input_size = width* height* channels * sizeof(float);
 	int output_size = width* height * 3 * sizeof(float);  // three channels
 
@@ -67,31 +77,55 @@ void cuDevMem3f::AllocateDeviceMemory(int width, int height, int channels)
 	if (g_cu_image_dev == NULL)
 	{
 		cudaError err = cudaMalloc((void **)&g_cu_image_dev, (unsigned int)(input_size));
-		if (err != 0) { std::cout << "\n[cuDevMem] - cudaMalloc error.\n"; }
-		else allocate_counter++;
+		if (err != 0) { std::cout << "\n[cuDevMem] - cudaMalloc error (g_cu_image_dev).\n"; }
+		else { 
+			allocate_counter++;
+			g_memory_counter += (unsigned int)(input_size);
+		}
 	}
+
+
+	if (g_cu_temp_image_dev == NULL)
+	{
+		cudaError err = cudaMalloc((void **)&g_cu_temp_image_dev, (unsigned int)(input_size));
+		if (err != 0) { std::cout << "\n[cuDevMem] - cudaMalloc error (g_cu_temp_image_dev).\n"; }
+		else{
+			allocate_counter++;
+			g_memory_counter += (unsigned int)(input_size);
+		}
+	}
+	
 
 	// an output array where each array element A(i) = {p0, p1, p2, p3, ......, pN} stores a point p_i = {x,y,z} as float3
 	if (g_cu_point_output_dev == NULL)
 	{
 		cudaError err = cudaMalloc((void **)&g_cu_point_output_dev, (unsigned int)(output_size));
-		if (err != 0) { std::cout << "\n[cuDevMem] - cudaMalloc error.\n"; }
-		else allocate_counter++;
+		if (err != 0) { std::cout << "\n[cuDevMem] - cudaMalloc error (g_cu_point_output_dev).\n"; }
+		else{ 
+			allocate_counter++;
+			g_memory_counter += (unsigned int)(output_size);
+		}
 	}
 
 	// an output array where each array element A(i) = {n0, n1, n2, ...., nN } stores a nomral vector n_i = {nx, ny, nz} as float3
 	if (g_cu_normals_output_dev == NULL)
 	{
 		cudaError err = cudaMalloc((void **)&g_cu_normals_output_dev, (unsigned int)(output_size));
-		if (err != 0) { std::cout << "\n[cuDevMem] - cudaMalloc error.\n"; }
-		else allocate_counter++;
+		if (err != 0) { std::cout << "\n[cuDevMem] - cudaMalloc error (g_cu_normals_output_dev).\n"; }
+		else{
+			allocate_counter++;
+			g_memory_counter += (unsigned int)(output_size);
+		}
 	}
 
 	if (g_cu_cutting_plane_params == NULL)
 	{
 		cudaError err = cudaMalloc((void **)&g_cu_cutting_plane_params, (unsigned int)(5 * sizeof(float)));
-		if (err != 0) { std::cout << "\n[cuDevMem] - cudaMalloc error.\n"; }
-		else allocate_counter++;
+		if (err != 0) { std::cout << "\n[cuDevMem] - cudaMalloc error (g_cu_cutting_plane_params).\n"; }
+		else{
+			allocate_counter++;
+			g_memory_counter += (unsigned int)(5 * sizeof(float));
+		}
 	}
 
 	// an output image array where each array element A(i) stores a point's components p ={x, y, z} -> x or y or z, the position of the point as float.
@@ -99,8 +133,11 @@ void cuDevMem3f::AllocateDeviceMemory(int width, int height, int channels)
 	if (g_cu_image_output_dev == NULL)
 	{
 		cudaError err = cudaMalloc((void **)&g_cu_image_output_dev, (unsigned int)(output_size));
-		if (err != 0) { std::cout << "\n[cuDevMem] - cudaMalloc error.\n"; }
-		else allocate_counter++;
+		if (err != 0) { std::cout << "\n[cuDevMem] - cudaMalloc error (g_cu_image_output_dev).\n"; }
+		else{
+			allocate_counter++;
+			g_memory_counter += (unsigned int)(output_size);
+		}
 	}
 
 
@@ -109,8 +146,11 @@ void cuDevMem3f::AllocateDeviceMemory(int width, int height, int channels)
 	if (g_cu_image_normals_out_dev == NULL)
 	{
 		cudaError err = cudaMalloc((void **)&g_cu_image_normals_out_dev, (unsigned int)(output_size));
-		if (err != 0) { std::cout << "\n[cuDevMem] - cudaMalloc error.\n"; }
-		else allocate_counter++;
+		if (err != 0) { std::cout << "\n[cuDevMem] - cudaMalloc error (g_cu_image_normals_out_dev).\n"; }
+		else{
+			allocate_counter++;
+			g_memory_counter += (unsigned int)(output_size);
+		}
 	}
 
 
@@ -134,6 +174,9 @@ void cuDevMem3f::FreeAll(void)
 {
 	if(g_cu_image_dev != NULL)
 		cudaFree(g_cu_image_dev);
+
+	if (g_cu_temp_image_dev != NULL)
+		cudaFree(g_cu_temp_image_dev);
 	
 	if (g_cu_point_output_dev != NULL)
 		cudaFree(g_cu_point_output_dev);
@@ -153,7 +196,7 @@ void cuDevMem3f::FreeAll(void)
 
 	g_cu_width = -1;
 	g_cu_height = -1;
-
+	g_memory_counter = 0;
 	allocate_counter = 0;
 }
 
@@ -167,6 +210,16 @@ Return the pointer to the input image memory;
 float* cuDevMem3f::DevInImagePtr(void)
 {
 	return g_cu_image_dev;
+}
+
+
+/*
+Return the pointer to temporary image memory. 
+*/
+//static 
+float* cuDevMem3f::DevTempImagePtr(void)
+{
+	return g_cu_temp_image_dev;
 }
 
 /*
@@ -213,4 +266,15 @@ An array for different parameters which are required on the device
 float* cuDevMem3f::DevParamsPtr(void)
 {
 	return g_cu_cutting_plane_params;
+}
+
+
+/*
+Return the amount of allocated cuda memory in bytes. 
+@return allocated cuda memory in bytes as unsigned int. 
+*/
+//static 
+unsigned int cuDevMem3f::GetMemoryCount(void)
+{
+	return g_memory_counter;
 }

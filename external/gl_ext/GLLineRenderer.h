@@ -36,6 +36,8 @@ Last edits:
 June 11, 2020, RR
 - Update the function updatePoints, to pass the latest points to the gpu. 
 
+Aug 7, 2020, RR
+- Bugfix: the function updatePoints(...) used the wrong point variable. 
 */
 
 // stl include
@@ -133,6 +135,11 @@ public:
 	void setLineColor(glm::vec3 color);
 
 
+	/*
+	Set the line width for the renderer
+	*/
+	void setLineWidth(float line_width);
+
 
 
 private:
@@ -170,6 +177,8 @@ private:
 	int projMatrixLocation;
 
 	bool _draw_lines;
+
+	float	_line_width;
 
 	int _pos_location;
 	int _norm_location;
