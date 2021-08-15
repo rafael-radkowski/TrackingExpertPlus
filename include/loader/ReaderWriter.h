@@ -23,6 +23,7 @@ Feb 22, 2020, RR
 #include <strstream>
 #include <algorithm>
 #include <locale>
+#include <cctype>
 
 // Eigen
 #include <Eigen/Dense>
@@ -38,7 +39,8 @@ public:
 	@param loadedNormals = The output location of the loaded normals
 	@return cloud = The output of the loaded point cloud object
 	*/
-	virtual bool Read(const std::string file, std::vector<Eigen::Vector3f>& dst_points, std::vector<Eigen::Vector3f>& dst_normals, const bool normalize = false, const bool invert_z = false) = 0;
+        // Methods commented here because they are changed to static in a subclass and virtual static methods do not make any sense
+        //virtual bool Read(const std::string file, std::vector<Eigen::Vector3f>& dst_points, std::vector<Eigen::Vector3f>& dst_normals, const bool normalize = false, const bool invert_z = false) = 0;
 
 
 	/*
@@ -48,7 +50,8 @@ public:
 	@param dst_normals - vector of vector3f normal vectors index-aligned to the points.
 	@param scale_points - float value > 0.0 that scales all points and normal vectors. 
 	*/
-	virtual bool Write(std::string file, std::vector<Eigen::Vector3f>& dst_points, std::vector<Eigen::Vector3f>& dst_normals, const float scale_points = 1.0f) = 0;
+        // Methods commented here because they are changed to static in a subclass and virtual static methods do not make any sense
+	//virtual bool Write(std::string file, std::vector<Eigen::Vector3f>& dst_points, std::vector<Eigen::Vector3f>& dst_normals, const float scale_points = 1.0f) = 0;
 
 
 protected:
@@ -66,7 +69,7 @@ protected:
 		std::string t = path_and_file.substr(idx0+1, path_and_file.size() - idx0 - 1);
 
 		// remove space
-		t.erase(remove_if(t.begin(), t.end(), isspace), t.end());
+		t.erase(remove_if(t.begin(), t.end(), ::isspace), t.end());
 
 		// convert to lower case
 		std::for_each(t.begin(), t.end(), [](char & c) {

@@ -5,6 +5,8 @@ CPFRenderHelpers::CPFRenderHelpers()
 {
 	_point_size = 0;
 	_scene_size = 0;
+
+	null_return = std::make_pair<int,int>(-1,-1);
 }
 
 
@@ -66,6 +68,6 @@ bool CPFRenderHelpers::getVotePairs(const int point_id, std::vector< std::pair<i
 
  std::pair<int, int>& CPFRenderHelpers::getVotePair(const int point_id)
  {
-	if(point_id >= vote_pair_ids.size() ) return std::make_pair(-1,-1);
+	if(point_id >= vote_pair_ids.size() ) return null_return; //std::make_pair(-1,-1);
 	return vote_pair_ids[point_id];
  }

@@ -67,7 +67,7 @@ July 23, 2020, William Blanchard
 
 //local
 #include "CameraParameters.h"
-#include "KinectAzureCaptureDevice.h"
+//#include "KinectAzureCaptureDevice.h"
 
 
 

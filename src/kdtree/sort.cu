@@ -3,7 +3,10 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 //#include <device_functions.h>
+
+#ifdef _WIN32
 #include <conio.h>
+#endif
 
 //local
 #include "sort.h"

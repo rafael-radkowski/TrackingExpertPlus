@@ -53,7 +53,7 @@ namespace isu_gfx {
 		@param viewMatrix - a view matrix object
 		@param modelMatrix - a model matrix object.
 		*/
-		void GLVideoCanvas::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix, glm::mat4 modelMatrix);
+		void draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix, glm::mat4 modelMatrix);
 
 
 		/*

@@ -13,7 +13,9 @@ Aug 6, 2020, RR
 // STL
 #include <iostream>
 #include <string>
+#ifdef _WIN32
 #include <Windows.h>
+#endif
 #include <fstream>
 #include <thread>
 #include <mutex>
@@ -27,7 +29,7 @@ Aug 6, 2020, RR
 #include <glm/gtx/quaternion.hpp> // quaternions
 
 // eigen
-#include <Eigen\Dense>
+#include <Eigen/Dense>
 
 // TrackingExpert
 #include "CPFMatchingExp.h"

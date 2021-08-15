@@ -116,30 +116,35 @@ if ( TBB_INCLUDE_DIR)
 endif( TBB_INCLUDE_DIR) 
 
 
-find_path (TBB_LIBRARY_DIR NAMES intel64/${_TBB_COMPILER}/tbb.lib
+if (WIN32)
+  find_path (TBB_LIBRARY_DIR NAMES intel64/${_TBB_COMPILER}/tbb.lib
 		PATHS ${TBB_DIR}/lib
 		PATH_SUFFIXES include )
 
 
-find_library(TBB_MALLOC_LIBRARY_DEBUG ${_TBB_LIB_MALLOC_DEBUG_NAME} 
+  find_library(TBB_MALLOC_LIBRARY_DEBUG ${_TBB_LIB_MALLOC_DEBUG_NAME} 
 		PATHS ${TBB_DIR}/lib/intel64/${_TBB_COMPILER}
-)
+  )
 
 
-find_library(TBB_MALLOC_LIBRARY ${_TBB_LIB_MALLOC_NAME} 
+  find_library(TBB_MALLOC_LIBRARY ${_TBB_LIB_MALLOC_NAME} 
+  		PATHS ${TBB_DIR}/lib/intel64/${_TBB_COMPILER}
+  )
+
+
+  find_library(TBB_LIBRARY_DEBUG ${_TBB_LIB_DEBUG_NAME} 
+  		PATHS ${TBB_DIR}/lib/intel64/${_TBB_COMPILER}
+  )
+
+  find_library(TBB_LIBRARY ${_TBB_LIB_NAME} 
 		PATHS ${TBB_DIR}/lib/intel64/${_TBB_COMPILER}
-)
-
-
-find_library(TBB_LIBRARY_DEBUG ${_TBB_LIB_DEBUG_NAME} 
-		PATHS ${TBB_DIR}/lib/intel64/${_TBB_COMPILER}
-)
-
-find_library(TBB_LIBRARY ${_TBB_LIB_NAME} 
-		PATHS ${TBB_DIR}/lib/intel64/${_TBB_COMPILER}
-)
-
-
+  )
+else(WIN32)
+  set(TBB_LIBRARY tbb)
+  set(TBB_LIBRARY_DEBUG tbb)
+  set(TBB_MALLOC_LIBRARY tbbmalloc)
+  set(TBB_MALLOC_LIBRARY_DEBUG tbbmalloc)
+endif(WIN32)
 
 
 set(TBB_LIBS 

@@ -25,6 +25,8 @@ find_path(
     PATHS "C:/SDK/cub-1.8.0"
 		  "D:/SDK_RC/cub-1.8.0"
           "D:/SDK/cub-1.8.0"
+          "/usr/local/src/cub-1.8.0"
+          "/usr/local/cub-1.8.0"
 )
 
 mark_as_advanced(

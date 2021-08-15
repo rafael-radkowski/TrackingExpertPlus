@@ -38,8 +38,8 @@ MIT License
 #include "cuda_runtime.h"
 
 // OpenCV
-#include <opencv2\highgui.hpp>
-#include <opencv2\core.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/core.hpp>
 
 
 
