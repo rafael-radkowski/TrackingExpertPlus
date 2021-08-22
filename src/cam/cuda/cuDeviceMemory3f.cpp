@@ -1,5 +1,8 @@
 #include "cuDeviceMemory3f.h"
 
+#ifndef _WIN32
+#define _cprintf printf
+#endif
 
 namespace cuDevMem3f_cuDeviceMemory3f
 {

@@ -297,7 +297,9 @@ Matrix4f ICP::Rt(void){
 
 	Eigen::Vector3f centroid = ICPTransform::CalculateCentroid(_testPoints.points);
 
-	PointCloudTrans::getTransformFromPosition(t(), R(), centroid, _Rt_affine, finalRt);
+	Eigen::Vector3f tval=t();
+	Eigen::Matrix3f Rval=R();
+	PointCloudTrans::getTransformFromPosition(tval, Rval, centroid, _Rt_affine, finalRt);
 
 	return finalRt;
 }

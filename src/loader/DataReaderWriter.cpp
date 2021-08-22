@@ -17,7 +17,7 @@ bool DataReaderWriter::Write(std::string path, std::string name, PointCloud& poi
 
 	if (!ret) {
 		//static 
-		#if _MSC_VER >= 1920 && _MSVC_LANG  == 201703L 
+                #if (_MSC_VER >= 1920 && _MSVC_LANG  == 201703L) || (__GNUC__ >= 8) 
 			return std::filesystem::create_directories(path);
 		#else
 			return std::experimental::filesystem::create_directories(path);

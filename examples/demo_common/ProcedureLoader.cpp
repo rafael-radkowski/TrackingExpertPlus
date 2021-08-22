@@ -27,7 +27,7 @@ bool ProcedureLoader::loadProcedure(const std::string& path, Procedure& _procedu
 		std::unordered_map<std::string, cs557::OBJModel>* temp_models = new std::unordered_map<std::string, cs557::OBJModel>();
 
 		//Load models
-		for (auto& m : fs["models"])
+		for (auto&& m : fs["models"])
 		{
 			cs557::OBJModel model = cs557::OBJModel();
 			model.create(m["path"].string());
@@ -37,16 +37,16 @@ bool ProcedureLoader::loadProcedure(const std::string& path, Procedure& _procedu
 		_procedure.models = temp_models;
 
 		//Load procedures
-		for (auto& proc : fs["procedures"])
+		for (auto&& proc : fs["procedures"])
 		{
 			//Procedure temp_proc = Procedure();
 			//temp_proc.models = temp_models;
 			//temp_proc.name = proc["id"];
 
-			for (auto& s : proc["instructions"])
+			for (auto&& s : proc["instructions"])
 			{
 				std::vector<std::string> prereqs = std::vector<std::string>();
-				for (auto& prereq : s["prerequisites"])
+				for (auto&& prereq : s["prerequisites"])
 				{
 					prereqs.push_back(prereq.string());
 				}

@@ -1,16 +1,16 @@
 #include "ArgParser.h"
 
 
-using namespace texpert;
+//using namespace texpert;
 
 
-namespace ArgParserTypes{
+namespace texpert_demo::ArgParserTypes{
 
-	Arguments opt;
+        texpert_demo::Arguments opt;
 	int error_count = 0;
 }
 
-using namespace ArgParserTypes;
+using namespace texpert_demo::ArgParserTypes;
 
 
 /*
@@ -19,7 +19,7 @@ Parse the arguments
 @param argv - the argument line
 @return struct with arguments
 */
-Arguments ArgParser::Parse(int& argc, char** argv)
+texpert_demo::Arguments texpert_demo::ArgParser::Parse(int& argc, char** argv)
 {
 	//cout << argc << endl;
 	//cout << argv[0] << endl;
@@ -148,7 +148,7 @@ Arguments ArgParser::Parse(int& argc, char** argv)
 Display help
 */
 //static
-void ArgParser::Help(void)
+void texpert_demo::ArgParser::Help(void)
 {
 	cout << "[ERROR] - Missing parameters\nUsage:" << endl;
 	cout << "setforge_r [3d model path and filename] " << endl;
@@ -183,7 +183,7 @@ void ArgParser::Help(void)
 Display all arguments
 */
 //static 
-void ArgParser::Display(void)
+void texpert_demo::ArgParser::Display(void)
 {
 	std::cout << "\nParameters:\n--------------------------------------------------------------------------" << endl;
 	std::cout << "Camera type: \t\t" << opt.camera_type << std::endl;
@@ -230,7 +230,7 @@ void ArgParser::Display(void)
 Extract the current path
 */
 //static 
-void ArgParser::Path(char* path)
+void texpert_demo::ArgParser::Path(char* path)
 {
 	string str(path);
 
@@ -245,7 +245,7 @@ void ArgParser::Path(char* path)
 Extract the current path
 */
 //static 
-void ArgParser::ParamError(string option)
+void texpert_demo::ArgParser::ParamError(string option)
 {
 	cout << "[ERROR] - Parameter for option " << option << " is missing or invalid." << endl;
 	error_count++;

@@ -30,8 +30,9 @@ Latest edits
 #include <tchar.h>
 #include <stdio.h>
 #include <conio.h>
+#endif 
 
-#if _MSC_VER >= 1920 && _MSVC_LANG  == 201703L 
+#if (_MSC_VER >= 1920 && _MSVC_LANG  == 201703L) || (__GNUC__ >= 8)
 #include <filesystem>
 #else
 #define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
@@ -39,10 +40,10 @@ Latest edits
 #endif
 
 
-#else
-#include <dirent.h>
-#include <unistd.h>
-#endif
+//#else
+//#include <dirent.h>
+//#include <unistd.h>
+//#endif
 
 
 using namespace std;

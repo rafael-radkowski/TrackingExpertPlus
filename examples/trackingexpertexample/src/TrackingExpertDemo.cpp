@@ -260,8 +260,12 @@ bool TrackingExpertDemo::run(void)
 
 	Sleep(100);
 
+#ifdef _WITH_SEQUENTIAL
+	_renderer->addRenderFunction(std::bind(&TrackingExpertDemo::autoProcessFrame, this));
+#else
 	// assign the camera update to a new thread
 	m_camera_updates = std::thread(std::bind(&TrackingExpertDemo::autoProcessFrame, this));
+#endif
 
 	// blocking function
 	_renderer->start();
@@ -301,8 +305,11 @@ void TrackingExpertDemo::autoProcessFrame(void)
 
 	m_is_running = true;
 
+#ifdef _WITH_SEQUENTIAL
+	if (m_is_running) {
+#else
 	while(m_is_running){
-
+#endif
 		// fetches a new camera image and update the data for all cameras. 
 		// process this frame
 		_tracking->process();

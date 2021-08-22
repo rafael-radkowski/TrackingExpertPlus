@@ -3,18 +3,20 @@
 // STL
 #include <iostream>
 #include <string>
+#ifdef _WIN32
 #include <Windows.h>
+#endif
 #include <fstream>
 #include <unordered_map>
 #include <algorithm>    
 #include <vector>   
 
 // Eigen 3
-#include <Eigen\Dense>
-#include <Eigen\Geometry>
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
 
 // glm
-#include <glm\glm.hpp>
+#include <glm/glm.hpp>
 
 // local
 //#include "CPFTypes.h"

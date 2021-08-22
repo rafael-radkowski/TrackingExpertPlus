@@ -10,7 +10,7 @@
 using namespace texpert;
 
 
-TEParams populateParams(Arguments params)
+TEParams populateParams(texpert_demo::Arguments params)
 {
 	TEParams p;
 
@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
 	displayKeyboard(); 
 
 	// parse the command line arguments
-	Arguments params = ArgParser::Parse(argc, argv);
+	texpert_demo::Arguments params = texpert_demo::ArgParser::Parse(argc, argv);
 
 	CaptureDeviceType type = CaptureDeviceType::None;
 	if (params.camera_type.compare("AzureKinect") == 0) type = KinectAzure;

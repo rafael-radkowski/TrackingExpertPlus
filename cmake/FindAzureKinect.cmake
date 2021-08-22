@@ -65,7 +65,8 @@ set( _azurekinect_DEFAULT_SEARCH_DIRS
   
   
 # 1. Search in the default search dirs
-if(${AZUREKINECT_FOUND} MATCHES FALSE)
+if(NOT ${AZUREKINECT_DIR})
+  if(${AZUREKINECT_FOUND} MATCHES FALSE)
 	find_path(AZUREKINECT_DIR 
 		NAMES /sdk/include/k4a/k4a.h 
 		HINTS ${_azurekinect_DEFAULT_SEARCH_DIRS}
@@ -77,8 +78,10 @@ if(${AZUREKINECT_FOUND} MATCHES FALSE)
 		message(STATUS "[FindAzureKinect] - Found kinect dir (1) " ${AZUREKINECT_DIR})
 	endif()
 	
-endif() # if(NOT AZUREKINECT_FOUND)
-
+  endif() # if(NOT AZUREKINECT_FOUND)
+else()
+  set(AZUREKINECT_FOUND TRUE)
+endif()
 
 # 2. Search using the environment variable
 if(${AZUREKINECT_FOUND} MATCHES FALSE)
@@ -143,11 +146,12 @@ find_path(AZUREKINECT_INCLUDE_DIR
 	NAMES k4a/k4a.h 
 	HINTS
 	${AZUREKINECT_DIR}/sdk/include/
+	${AZUREKINECT_DIR}/include/
 	PATH_SUFFIXES k4a
 )
 endif() # if(NOT STRUCTURE_INCLUDE_DIR)
 
-#message (STATUS "Include dir: " ${AZUREKINECT_INCLUDE_DIR})
+#message (STATUS "Azure Kinect Include dir: " ${AZUREKINECT_INCLUDE_DIR})
 
 
 
@@ -159,10 +163,13 @@ endif() # if(NOT STRUCTURE_INCLUDE_DIR)
 if(NOT AZUREKINECT_LIBRARY_k4a AND AZUREKINECT_DIR)
 
 	find_file(AZUREKINECT_LIBRARY_k4a
-		NAMES k4a.lib
+		NAMES k4a.lib libk4a.so
 		PATHS 
 		${AZUREKINECT_DIR}/sdk/windows-desktop/amd64/release/lib
+		${AZUREKINECT_DIR}/lib
+		${AZUREKINECT_DIR}/lib64
 	)
+        message(STATUS "[FindAzureKinect] - Found kinect library (1) " ${AZUREKINECT_LIBRARY_k4a})
 	mark_as_internal(AZUREKINECT_LIBRARY_k4a)
 	
 endif()
@@ -170,10 +177,14 @@ endif()
 if(NOT AZUREKINECT_LIBRARY_k4arecord AND AZUREKINECT_DIR)
 
 	find_file(AZUREKINECT_LIBRARY_k4arecord
-		NAMES k4arecord.lib
+		NAMES k4arecord.lib libk4arecord.so
 		PATHS 
 		${AZUREKINECT_DIR}/sdk/windows-desktop/amd64/release/lib
+		${AZUREKINECT_DIR}/lib
+		${AZUREKINECT_DIR}/lib64
 	)
+        message(STATUS "[FindAzureKinect] - Found kinect recording library (1) " ${AZUREKINECT_LIBRARY_k4arecord})
+
 	mark_as_internal(AZUREKINECT_LIBRARY_k4arecord)
 	
 endif()

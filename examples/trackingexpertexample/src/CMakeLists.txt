@@ -107,6 +107,7 @@ set(Demo_SRC
 	MainRenderProcess.cpp
 	MainTrackingProcess.h
 	MainTrackingProcess.cpp
+	DebugSwitches.h
 )
 
 

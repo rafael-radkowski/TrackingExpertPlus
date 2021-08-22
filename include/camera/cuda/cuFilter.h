@@ -43,8 +43,8 @@ Aug 7, 2020, RR
 #include "cuda_runtime.h"
 
 // OpenCV
-#include <opencv2\highgui.hpp>
-#include <opencv2\core.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/core.hpp>
 
 
 namespace texpert

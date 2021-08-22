@@ -6,8 +6,9 @@
 #include <iostream>
 #include <vector>
 #include <cassert>
+#ifdef _WIN32
 #include <conio.h>
-
+#endif
 // Define this to turn on error checking
 #if _DEBUG
 #define CUDA_ERROR_CHECK
@@ -29,8 +30,10 @@ __device__ __host__ inline void __cudaSafeCall(cudaError err, const char *file, 
 	#else
 		fprintf(stderr, "cudaSafeCall() failed at %s:%i : %s\n",
 			file, line, cudaGetErrorString(err));
+	#ifdef _WIN32
 		_cprintf( "cudaSafeCall() failed at %s:%i : %s\n",
 			file, line, cudaGetErrorString(err));
+	#endif // _WIN32
 	#endif
 	}
 #endif
