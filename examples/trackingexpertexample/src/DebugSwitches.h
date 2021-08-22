@@ -32,3 +32,11 @@ It may just work for a few seconds. But the only purpose is to visually
 check if we have the right camera images. 
 */
 //#define _WITH_AZURE_OUTPUT
+
+
+/*
+Sequential Processing
+Processes the camera updates & tracking and the render loop sequentially. 
+Removing this switch runs the process in parallel. 
+*/
+//#define _WITH_SEQUENTIAL
