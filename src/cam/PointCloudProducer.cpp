@@ -27,6 +27,11 @@ PointCloudProducer::PointCloudProducer(ICaptureDevice& capture_device, PointClou
 	_cx_depth = param.at<float>(0, 2);
 	_cy_depth = param.at<float>(1, 2);
 
+	// ToDo: Check the camera model (backtracking). 
+	// Some changes may have affect the principle point handling. 
+	_cx_depth = 0.0;
+	_cy_depth = 0.0;
+
 	_flip_normal_vectors = 1.0; // This value can either be 1.0 or -1.0;
 
 

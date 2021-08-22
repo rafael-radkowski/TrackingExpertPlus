@@ -275,6 +275,7 @@ set(NN_SRC
 set( PointCloud_SRC
 	point_cloud/PointCloudUtils.cpp
 	point_cloud/PointCloudTransform.cpp
+	point_cloud/PointCloudTrans.cpp
 	point_cloud/PointCloudEval.cpp
 	point_cloud/MatrixUtils.cpp
 
