@@ -358,7 +358,7 @@ source_group("Cuda/PointCloud" FILES ${PointCloud_cuda_SRC} ${PointCloud_cuda_IN
 #----------------------------------------------------------------------
 # Compiler standards
 
-add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
+add_compile_definitions(GLM_ENABLE_EXPERIMENTAL _SILENCE_EXPERIMENTAL_DEPRECATION_WARNING)
 
 
 # Create the tracking expert library

@@ -30,7 +30,6 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 
-
 if(DEMO_TE2)
 	# build the antenna and gearbox demos if the Azure Kinect (which they use unconditionally) is available
 	if (ENABLE_AZURE_KINECT)

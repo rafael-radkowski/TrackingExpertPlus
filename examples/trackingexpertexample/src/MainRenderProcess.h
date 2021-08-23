@@ -27,7 +27,11 @@ Last edits:
 // STL
 #include <iostream>
 #include <string>
+#ifdef _WIN32
 #include <Windows.h>
+#else
+#include <unistd.h>
+#endif
 #include <fstream>
 #include <algorithm>
 #include <functional>
@@ -164,5 +168,3 @@ private:
 	std::vector<std::function<void(void)> > _render_callbacks;
 #endif
 };
-
-MainRenderProcess* MainRenderProcess::m_instance = nullptr;
