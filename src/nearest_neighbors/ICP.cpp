@@ -1,6 +1,6 @@
 #include "ICP.h"
 
-#define _WITH_CUDAICP
+//#define _WITH_CUDAICP
 
 using namespace  texpert;
 
@@ -8,7 +8,7 @@ ICP::ICP() {
 
 
 	_max_error = 0.0001;
-	_max_iterations = 20;
+	_max_iterations = 10;
 
 
 	_verbose = true;
@@ -29,7 +29,7 @@ ICP::ICP() {
 
 	_conv = MatrixConv::getInstance();
 
->>>>>>> master
+
 }
 
 ICP::~ICP(){
@@ -133,7 +133,6 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 	// search for nearest neighbors
 	
 	float overall_time = 0;
-
 	for (int i = 0; i < _max_iterations; i++)
 	{
 
@@ -186,7 +185,7 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 
 		auto stop = std::chrono::high_resolution_clock::now();
 		auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-		cout << "[CUDA] " << elapsed.count() << " ms" << endl;
+		//cout << "[CUDA] " << elapsed.count() << " ms" << endl;
 
 #endif
 		
@@ -222,6 +221,19 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 		result(9) = R_inv(7);
 		result(10) = R_inv(8);
 
+		/*
+		result(0) = 1;
+		result(1) = 0;
+		result(2) = 0;
+
+		result(4) = 0;
+		result(5) = 1;
+		result(6) = 0;
+
+		result(8) = 0;
+		result(9) = 0;
+		result(10) = 1;
+		*/
 		result(12) = t.x();
 		result(13) = t.y();
 		result(14) = t.z();
@@ -282,7 +294,7 @@ bool  ICP::compute(PointCloud& pc, Pose initial_pose, Eigen::Matrix4f& result_po
 		cout << "[INFO] - ICP terminated with RMS: " << rms << " with " << itr << " interations." << endl;
 
 
-	cout << "[CUDA - ALL] " << overall_time  << " ms" << endl;
+	//cout << "[CUDA - ALL] " << overall_time  << " ms" << endl;
 
 	return true;
 
@@ -597,6 +609,7 @@ void ICP::setMaxIterations(int max_iterations)
 	if(max_iterations > 1000) std::cout << "[ERROR] - ICP iterations > 1000 is not permitted. Value set to 1000." << std::endl;
 	if(max_iterations < 1) std::cout << "[ERROR] - ICP iterations < 1 is not permitted. Value set to 1." << std::endl;
 	_max_iterations = std::min(1000, std::max(1, max_iterations));
+	std::cout << "[INFO] - Set ICP max iterations to " << _max_iterations << "." << std::endl;
 }
 
 

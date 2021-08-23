@@ -215,6 +215,10 @@ private:
 	bool				m_render_scene_normals;
 	bool				m_render_ref_normals;
 	bool				m_enable_tracking;
+	bool				m_render_ref_points;
+	bool				m_render_scene_points;
+	bool				m_render_eval_points;
+
 
 };
 

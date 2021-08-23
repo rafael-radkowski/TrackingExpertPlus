@@ -118,6 +118,11 @@ public:
 
 
 	/*
+	Process one step only
+	*/
+	void step(void);
+
+	/*
 	Return the current pose. 
 	This is the pose for the current frame after running
 	process() once. 
@@ -171,7 +176,7 @@ private:
 	//---------------------------------------------------
 
 	// data manager
-	PointCloudManager* _dm;
+	PointCloudManager*					_dm;
 
 
 	// the tracking states

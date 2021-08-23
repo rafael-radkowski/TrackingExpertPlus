@@ -74,6 +74,23 @@ public:
 	Clear the reference point clouds
 	*/
 	void clearReferencePC(void);
+
+
+	//ToDo: updatePose and getUpdatePose are not necessary.
+	// Both are here to debug some code and can be remove later. 
+
+	/*
+	Indicate a pose update
+	*/
+	void updatePose(void);
+
+
+	/*
+	Query the pose update variable
+	*/
+	bool getUpdatePose(void);
+
+
 	
 private:
 
@@ -103,6 +120,9 @@ private:
 	PointCloud					pc_ref;
 	std::mutex					pc_ref_as_loaded_mutex;
 	PointCloud					pc_ref_as_loaded;
+
+
+	bool						pc_update;
 
 };
 

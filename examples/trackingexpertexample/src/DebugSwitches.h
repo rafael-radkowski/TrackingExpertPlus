@@ -16,7 +16,7 @@ radkowski.dev@google.com
 /*
 Enable or disable registration features. 
 */
-//#define _WITH_REGISTRATION
+#define _WITH_REGISTRATION
 
 
 /*

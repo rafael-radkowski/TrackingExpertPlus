@@ -21,7 +21,7 @@ Public constructor
 */
 PointCloudManager::PointCloudManager()
 {
-
+	pc_update = false;
 }
 
 
@@ -81,4 +81,26 @@ void PointCloudManager::clearReferencePC(void)
 		pc_ref_as_loaded.points.clear();
 		pc_ref_as_loaded.normals.clear();
 	}
+}
+
+
+/*
+Indicate a pose update
+*/
+void PointCloudManager::updatePose(void)
+{
+	pc_update = true;
+}
+
+
+/*
+Query the pose update variable
+*/
+bool PointCloudManager::getUpdatePose(void)
+{
+	bool ret = pc_update;
+	if(pc_update)
+		pc_update = false;
+
+	return ret;
 }

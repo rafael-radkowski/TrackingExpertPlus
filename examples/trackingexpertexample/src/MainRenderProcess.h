@@ -43,6 +43,7 @@ Last edits:
 #include "graphicsx.h"
 #include "GLLineRenderer.h"
 #include "PointCloudManager.h"
+#include "MatrixConv.h"
 
 // ToDo: Remove when ready
 #include "DebugSwitches.h"
@@ -163,6 +164,12 @@ private:
 #ifdef _WITH_SEQUENTIAL
 	std::vector<std::function<void(void)> > _render_callbacks;
 #endif
+
+
+	// data manager
+	PointCloudManager* _dm;
+
 };
 
 MainRenderProcess* MainRenderProcess::m_instance = nullptr;
+

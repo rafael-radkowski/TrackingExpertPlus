@@ -23,6 +23,9 @@ TrackingExpertDemo::TrackingExpertDemo()
 	m_render_scene_normals = false;
 	m_render_ref_normals = false;
 	m_enable_tracking = false;
+	m_render_ref_points = true;
+	m_render_scene_points = true;
+	m_render_eval_points = false;
 
 	init();
 }
@@ -317,6 +320,9 @@ void TrackingExpertDemo::autoProcessFrame(void)
 		// set the renderer to update
 		_renderer->setUpdate();
 
+
+		
+
 		Sleep(30);
 
 	}
@@ -376,13 +382,20 @@ void TrackingExpertDemo::resetReferenceModel(void)
 
 	_dm->getReferecePC().centroid0 = PointCloudUtils::CalcCentroid(&_dm->getReferecePC());
 
+	
+#ifdef _WITH_REGISTRATION
 	//-----------------------------------------------------------------------
 	// debugging
 	PointCloudManager* m = PointCloudManager::getInstance();
 	Eigen::Vector3f t(0.0, 0.1, 0.500);
 	Eigen::Vector3f R(-45.0, 180.0, 0.0);
 	PointCloudTransform::Transform(&m->getReferecePC(), t, R);
+#endif
+
 }
+
+
+
 
 
 /*
@@ -390,7 +403,7 @@ Keyboard callback for the renderer
 */
 void TrackingExpertDemo::keyboard_cb(int key, int action)
 {
-	cout << key << " : " << action << endl;
+	//cout << key << " : " << action << endl;
 	switch (action) {
 	case 0:  // key up
 	
@@ -419,7 +432,7 @@ void TrackingExpertDemo::keyboard_cb(int key, int action)
 			}
 		case 65: // a
 			{
-				
+			_tracking->step();
 				break;
 			}
 		case 83: // s
@@ -437,12 +450,28 @@ void TrackingExpertDemo::keyboard_cb(int key, int action)
 			}
 		case 49: // 1
 			{
-				
+				if (_renderer) {
+					if (m_render_scene_points == false) {
+						m_render_scene_points = true;
+					}
+					else {
+						m_render_scene_points = false;
+					}
+					_renderer->setRenderFeature(MainRenderProcess::PointsScene, m_render_scene_points);
+				}
 				break;
 			}
 		case 50: // 2
 			{
-				
+				if (_renderer) {
+					if (m_render_ref_points == false) {
+						m_render_ref_points = true;
+					}
+					else {
+						m_render_ref_points = false;
+					}
+					_renderer->setRenderFeature(MainRenderProcess::PointsRef, m_render_ref_points);
+				}
 				break;
 			}
 		case 51: // 3
@@ -504,6 +533,12 @@ void TrackingExpertDemo::keyboard_cb(int key, int action)
 				
 				break;
 			}	
+
+		case 82: // r
+			{
+				resetReferenceModel();
+			}
+
 
 		}
 		break;

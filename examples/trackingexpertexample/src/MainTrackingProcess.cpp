@@ -64,15 +64,14 @@ void MainTrackingProcess::init(texpert::ICaptureDevice* camera)
 	m_icp = new ICP();
 	m_icp->setMinError(0.0001);
 	m_icp->setMaxIterations(10);
-	m_icp->setVerbose(true, 0);
-	m_icp->setRejectMaxAngle(45.0);
+	m_icp->setVerbose(false, 0);
+	m_icp->setRejectMaxAngle(25.0);
 	m_icp->setRejectMaxDistance(0.1);
 	m_icp->setRejectionMethod(ICPReject::DIST_ANG);
 	
 	
 	// create an ICP and feature descriptor instance. 
 	m_fd = new CPFMatchingExp();
-	m_icp = new ICP();
 
 	// set the default params.
 	m_fd_params.search_radius = 0.1;
@@ -232,7 +231,6 @@ Run the registration state operations;
 void MainTrackingProcess::runRegistration(void)
 {
 
-
 	Pose pose;
 	pose.t = Eigen::Affine3f::Identity();
 	// for test results. 
@@ -242,6 +240,14 @@ void MainTrackingProcess::runRegistration(void)
 	// run icp
 	m_icp->setCameraData(_dm->getCameraPC());
 	m_icp->compute(_dm->getReferecePC(), pose, pose_result, rms);
+	pose_result = m_icp->Rt();
+	//cout << pose_result << endl;
+
+
+	PointCloudTransform::Transform(&_dm->getReferecePC(), pose_result, false);
+
+	_dm->getReferecePC().pose = pose_result;
+	_dm->updatePose();
 }
 
 /*!
@@ -287,4 +293,13 @@ Eigen::Matrix4f  MainTrackingProcess::getCurrentPose(void)
 
 	return m_model_pose;
 
+}
+
+
+/*
+	Process one step only
+	*/
+void MainTrackingProcess::step(void)
+{
+	runRegistration();
 }

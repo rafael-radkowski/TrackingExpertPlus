@@ -93,6 +93,12 @@ int main(int argc, char** argv) {
 	demo->setSourceCamera(type);
 	demo->loadReferenceModel(params.model_file, "model");
 
+
+#ifdef _WITH_REGISTRATION
+	// for debugging
+	demo->resetReferenceModel();
+#endif
+
 	// Blocking function. 
 	demo->run();
 

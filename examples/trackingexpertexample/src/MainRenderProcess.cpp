@@ -43,6 +43,9 @@ MainRenderProcess::MainRenderProcess()
 	m_window->setClearColor(glm::vec4(0, 0, 0, 1));
 
 	m_update_camera_pc = false;
+
+
+	_dm = PointCloudManager::getInstance();
 }
 
 
@@ -119,6 +122,17 @@ void MainRenderProcess::render_fcn(glm::mat4 pm, glm::mat4 vm)
 	if (m_update_camera_pc) {
 		m_update_camera_pc = false;
 		gl_camera_point_cloud->updatePoints();
+	}
+
+
+	if(_dm->getUpdatePose()){
+		Eigen::Matrix4f pose = _dm->getReferecePC().pose;
+		glm::mat4 glm_out;
+		MatrixConv* mc = MatrixConv::getInstance();
+		mc->Matrix4f2Mat4(pose, glm_out);
+		//gl_reference_eval->setModelmatrix(glm_out);
+
+		gl_reference_point_cloud->updatePoints();
 	}
 
 
