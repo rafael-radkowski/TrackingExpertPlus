@@ -106,6 +106,12 @@ public:
 	void setRenderFeature(RenderFeature f, bool enable);
 
 
+#ifdef _WITH_SEQUENTIAL
+	void addRenderFunction(std::function<void(void)> f);
+#endif
+
+
+
 private:
 
 	/*
@@ -158,4 +164,7 @@ private:
 	int						m_window_width;
 	int						m_window_height;
 
+#ifdef _WITH_SEQUENTIAL
+	std::vector<std::function<void(void)> > _render_callbacks;
+#endif
 };

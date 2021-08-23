@@ -41,7 +41,6 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 include(CheckLanguage)
 check_language(CUDA)
 find_package(CUDA REQUIRED)
-find_package(CUDAToolkit REQUIRED)
 
 
 

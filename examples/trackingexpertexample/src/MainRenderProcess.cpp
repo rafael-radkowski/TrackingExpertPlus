@@ -168,6 +168,12 @@ Render the point cloud sceen and show the point cloud content
 */
 void MainRenderProcess::renderPointCloudScene(glm::mat4 pm, glm::mat4 vm)
 {
+#ifdef _WITH_SEQUENTIAL
+	for (auto a : _render_callbacks) {
+		a();
+	}
+#endif
+
 	// draw the camera point cloud
 	gl_camera_point_cloud->draw(pm, vm);
 	gl_reference_point_cloud->draw(pm, vm);
@@ -227,3 +233,10 @@ void MainRenderProcess::setRenderFeature(RenderFeature f, bool enable)
 	}
 	
 }
+
+#ifdef _WITH_SEQUENTIAL
+void MainRenderProcess::addRenderFunction(std::function<void(void)> f)
+{
+	_render_callbacks.push_back(f);
+}
+#endif
