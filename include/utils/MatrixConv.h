@@ -24,6 +24,9 @@ Last edited:
 
 March 18, 2021, WB
 - Added documentation
+
+Aug 27, 2021, RR
+- Added Rt2Affine3f
 */
 
 //std
@@ -161,4 +164,25 @@ public:
 		@param eigen_out - the output eigen matrix
 	*/
 	void Mat42Affine3fRot(glm::mat4& glm_in, Eigen::Affine3f& eigen_out);
+
+
+	/*
+		Convert a set of Euler angles and a translation into a 4x4 matrix of type Affine3f
+		@param R - a vector 3 with three Euler angles (Rx, Ry, Rz)
+		@param t - a vector 3 with three translations x, y, z.
+		@return a affine3f matrix with the pose. 
+	*/
+	Eigen::Affine3f Rt2Affine3f(Eigen::Vector3f R, Eigen::Vector3f t);
+
+private:
+
+
+	/*
+	Create a rotation matrix from Euler angles
+
+	*/
+	Eigen::Affine3f createRotationMatrix(float ax, float ay, float az);
+
+
+	
 };

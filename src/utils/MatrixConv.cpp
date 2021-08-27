@@ -141,3 +141,31 @@ void MatrixConv::Mat42Affine3fRot(glm::mat4& glm_in, Eigen::Affine3f& eigen_out)
 		eigen_out(row, col) = glm_in[col][row];
 	}
 }
+
+
+
+Eigen::Affine3f MatrixConv::createRotationMatrix(float ax, float ay, float az)
+{
+	Eigen::Affine3f rx = Eigen::Affine3f(Eigen::AngleAxisf(ax, Eigen::Vector3f(1, 0, 0)));
+	Eigen::Affine3f ry = Eigen::Affine3f(Eigen::AngleAxisf(ay, Eigen::Vector3f(0, 1, 0)));
+	Eigen::Affine3f rz = Eigen::Affine3f(Eigen::AngleAxisf(az, Eigen::Vector3f(0, 0, 1)));
+
+	return rz * ry * rx;
+}
+
+
+Eigen::Affine3f MatrixConv::Rt2Affine3f(Eigen::Vector3f R, Eigen::Vector3f t)
+{
+
+	Eigen::Affine3f r_out = createRotationMatrix(R.x(), R.y(), R.z());
+	Eigen::Affine3f t_out(Eigen::Translation3f(t));
+
+	//Eigen::Matrix4f m = (t_out * r_out).matrix(); // Option 1
+
+	Eigen::Matrix4f m = Eigen::Matrix4f::Identity();
+	m *= r_out.matrix();
+	m.block<3, 1>(0, 3) = t;
+	
+
+	return Eigen::Affine3f(m);
+}
