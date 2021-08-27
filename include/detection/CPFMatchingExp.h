@@ -47,7 +47,7 @@ Oct 30, 2020, William Blanchard
 
 namespace texpert{
 
-class CPFMatchingExp : public CPFMatchingWrapper
+class CPFMatchingExp : public ICPFMatching
 {
 private:
 

@@ -1,6 +1,9 @@
 #include "MainRenderProcess.h"
 
 
+MainRenderProcess* MainRenderProcess::m_instance = nullptr;
+
+
 #ifdef _WITH_AZURE_OUTPUT
 // crude and ugly debug helper. Remove!
 extern texpert::ICaptureDevice* g_camera;
@@ -19,6 +22,7 @@ MainRenderProcess* MainRenderProcess::getInstance()
 
 MainRenderProcess::~MainRenderProcess()
 {
+	delete _helper;
 	delete gl_camera_point_cloud;
 	delete gl_reference_point_cloud;
 	delete gl_reference_eval;
@@ -46,6 +50,7 @@ MainRenderProcess::MainRenderProcess()
 
 
 	_dm = PointCloudManager::getInstance();
+	_helper = new DebugHelpers();
 }
 
 
@@ -137,16 +142,10 @@ void MainRenderProcess::render_fcn(glm::mat4 pm, glm::mat4 vm)
 
 
 	// update the poses if a new scene model is available.
-	//trackObject();
+
+	renderAndUpdateHelpers( pm, vm);
 	renderPointCloudScene(pm, vm);
-	/*switch (m_scene_type) {
-		case PC:
-			renderPointCloudScene(pm, vm);
-			break;
-		case AR:
-			renderARScene(pm, vm);
-			break;
-	}*/
+
 
 
 #ifdef _WITH_AZURE_OUTPUT
@@ -199,9 +198,22 @@ void MainRenderProcess::renderPointCloudScene(glm::mat4 pm, glm::mat4 vm)
 }
 
 
+
 /*
-	Update the data for the renderer
-	*/
+The function renders all graphical helpers in the scene.
+*/
+void MainRenderProcess::renderAndUpdateHelpers(glm::mat4 pm, glm::mat4 vm)
+{
+	assert(_helper != NULL);
+
+	_helper->renderCameraCurvatures(gl_camera_point_cloud);
+}
+
+
+
+/*
+Update the data for the renderer
+*/
 void MainRenderProcess::setUpdate(void)
 {
 	m_update_camera_pc = true;

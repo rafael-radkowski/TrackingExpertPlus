@@ -49,6 +49,7 @@ Last edits:
 #include <fstream>
 #include <algorithm>
 #include <functional>
+#include <cassert>
 
 // GLM include files
 #define GLM_FORCE_INLINE
@@ -65,6 +66,9 @@ Last edits:
 #include "CPFMatchingExp.h"
 #include "CPFMatchingExpGPU.h"
 #include "TrackingExpertParams.h"
+#include "CPFDetect.h"
+
+#include "DebugSwitches.h"
 
 
 using namespace texpert;
@@ -87,6 +91,13 @@ public:
 	void init(texpert::ICaptureDevice* camera = NULL);
 
 
+	/*
+		Add a reference model to be detected and tracked.
+		@param model - a point cloud reference model of type PointCloud
+		@param label - a string containing the label. 
+		@return true, if the model was set correctly. 
+	*/
+	bool addReferenceModel(PointCloud& model, std::string label);
 
 	/*
 	Grab a new frame and process the frame
@@ -166,6 +177,12 @@ private:
 
 
 	/*
+	Update all debug helpers if those are enabled. 
+	*/
+	void updateHelpers(void);
+
+
+	/*
 	Private constructor
 	*/
 	MainTrackingProcess();
@@ -209,8 +226,10 @@ private:
 
 
 	// feature detector and matching
-	CPFMatchingWrapper*					m_fd;
-	CPFParams							m_fd_params;
+	//ICPFMatching*						m_fd;
+	//CPFParams							m_fd_params;
+
+	CPFDetect*							m_detect;
 
 	int									m_model_id;
 	std::vector<int>					m_pose_votes;
@@ -221,4 +240,4 @@ private:
 	Eigen::Matrix4f						m_model_pose;
 };
 
-MainTrackingProcess* MainTrackingProcess::m_instance = nullptr;
+
