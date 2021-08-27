@@ -84,8 +84,6 @@ include_directories(gl_ext)
 include_directories(gl_support/include)
 
 
-
-
 file(GLOB GLUtils_SRC
     "gl_support/src/*.cpp"
 	"gl_ext/*.cpp"
@@ -94,11 +92,13 @@ file(GLOB GLUtils_SRC
 file(GLOB GLUtils_INC
     "gl_support/include/*.h"
     "gl_ext/*.h"
+	
 )
 
 
-source_group(src FILES ${GLUtils_SRC} )
-source_group(include FILES ${GLUtils_INC} )
+source_group(src FILES ${GLUtils_SRC} ${GLUtils_INC})
+#source_group(include FILES ${GLUtils_INC} )
+
 
 
 add_definitions(-DWITH_EXPORT)

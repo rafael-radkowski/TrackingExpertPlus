@@ -34,7 +34,7 @@ int CPFMatchingExp::addModel(PointCloud& points, std::string label)
 	if(points.size() == 0) return -1;
 
 	if (points.points.size() != points.normals.size()) {
-		std::cout << "[ERROR] - CPFMatchingExp: points size " << points.points.size() << " != "  << points.normals.size() << " for " << label << std::endl;
+		std::cout << "[ERROR] - CPFMatchingExp: points size " << points.points.size() << " != "  << points.normals.size() << " for " << label << ".\n" << std::endl;
 		return -1;
 	}
 

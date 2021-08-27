@@ -23,7 +23,7 @@ Last edits:
 #include "CPFTypes.h"
 
 namespace texpert {
-	class CPFMatchingWrapper
+	class ICPFMatching
 	{
 	public:
 		/*!

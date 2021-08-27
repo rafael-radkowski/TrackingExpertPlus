@@ -215,6 +215,15 @@ set(Detection_SRC
 	detection/FDMatching.cpp
 	detection/FDClustering.cpp
 	detection/PCRegistration.cpp
+	detection/CPFMatching.cpp
+	detection/CPFDetect.cpp
+	detection/CPFData.cpp
+	detection/CPFClustering.cpp
+	${PROJECT_SOURCE_DIR}/include/detection/CPFMatching.h
+	${PROJECT_SOURCE_DIR}/include/detection/CPFDetect.h
+	${PROJECT_SOURCE_DIR}/include/detection/CPFData.h
+	${PROJECT_SOURCE_DIR}/include/detection/CPFClustering.h
+
 
 	detection/CPFMatchingExp.cpp
 	${PROJECT_SOURCE_DIR}/include/detection/CPFMatchingExp.h
@@ -229,6 +238,10 @@ set(Detection_SRC
 	${PROJECT_SOURCE_DIR}/include/detection/CPFRenderHelpers.h
 	detection/CPFRenderHelpers.cpp
 
+	${PROJECT_SOURCE_DIR}/include/detection/CPFMatchingWrapper.h
+	
+	
+	
 )
 
 set(Cuda_kdtree_SRC

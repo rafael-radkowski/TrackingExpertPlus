@@ -1,6 +1,8 @@
 #include "MainTrackingProcess.h"
 
 
+MainTrackingProcess* MainTrackingProcess::m_instance = nullptr;
+
 /*
 Get an instance of the class.
 @return Instance of the class
@@ -71,19 +73,40 @@ void MainTrackingProcess::init(texpert::ICaptureDevice* camera)
 	
 	
 	// create an ICP and feature descriptor instance. 
-	m_fd = new CPFMatchingExp();
+	//m_fd = new CPFMatchingExp();
+	m_detect = new CPFDetect();
 
 	// set the default params.
-	m_fd_params.search_radius = 0.1;
-	m_fd_params.angle_step = 12.0;
-	m_fd->setParams(m_fd_params);
+	//m_fd_params.search_radius = 0.1;
+	//m_fd_params.angle_step = 12.0;
+	//m_fd->setParams(m_fd_params);
 
 
+
+}
+
+
+
+/*
+Add a reference model to be detected and tracked.
+@param model - a point cloud reference model of type PointCloud
+@param label - a string containing the label.
+@return true, if the model was set correctly.
+*/
+bool MainTrackingProcess::addReferenceModel(PointCloud& model, std::string label)
+{
+	assert(_dm);
 
 	// add a reference model to the point cloud
-	m_model_id = m_fd->addModel(_dm->getReferecePC(), "reference_test");
+	//m_model_id = m_fd->addModel(_dm->getReferecePC(), label);
+	m_model_id = m_detect->addModel(_dm->getReferecePC(), label);
 
 	m_model_pc = _dm->getReferecePC();
+
+	if(m_model_id != -1)
+		return true;
+
+	return false;
 }
 
 
@@ -118,6 +141,9 @@ void MainTrackingProcess::process(void)
 		default:
 			runIdle();
 	}
+
+	// update the helper elements. 
+	updateHelpers();
 
 }
 
@@ -162,7 +188,15 @@ void MainTrackingProcess::enableTracking(bool enable)
 {
 	m_enable_tracking = enable;
 	if(m_enable_tracking){
+#ifdef _WITH_REGISTRATION
 		m_tracking_state = REGISTRATION;
+		#ifdef _WITH_DETECTION
+			#undef _WITH_DETECTION
+		#endif
+#endif
+#ifdef _WITH_DETECTION
+		m_tracking_state = DETECT;
+#endif
 		std::cout << "[INFO] - TRACKING ENABLED" << std::endl;
 	}
 	else{
@@ -187,9 +221,15 @@ Run the detect state operations;
 void MainTrackingProcess::runDetect(void)
 {
 	// update the camera point cloud
-	m_fd->setScene(_dm->getCameraPC());
+	//m_fd->setScene(_dm->getCameraPC());
+	m_detect->setScene(_dm->getCameraPC());
 
-	int ret = m_fd->match(m_model_id);
+	//int ret = m_fd->match(m_model_id);
+	int ret = m_detect->match(0);
+
+
+	cout << "DONE --- " << endl;
+	//m_fd->getPose()
 
 	// positive match
 	if (ret) {
@@ -200,29 +240,34 @@ void MainTrackingProcess::runDetect(void)
 		m_icp->setCameraData(_dm->getCameraPC());
 
 		std::vector<Eigen::Affine3f > pose;
-		getPose(pose);
+		//getPose(pose);
 
-		if (pose.size() <= 0) {
-			return ;
-		}
+	//	if (pose.size() <= 0) {
+		//	return ;
+	//	}
 
-		texpert::Pose Rt;
-		Rt.t = pose[0];
 
-		Eigen::Matrix4f out_Rt;
-		//float rms = 0.0;
+	//	Eigen::Matrix4f m;
+	//	m = pose[0].matrix();
+		//Eigen::Vector3f R = m.eulerAngles(0,1,2);
+		//Eigen::Vector3f t = pose[0].translation();
 
-		// ICP works internally with a copy of m_model_pc
-		m_icp->compute(m_model_pc, Rt, out_Rt, m_rms);
+	//	Eigen::Vector3f t(0.0, 0.1, 0.500);
+	//	Eigen::Vector3f R(-45.0, 180.0, 0.0);
+	//	PointCloudTransform::Transform(&_dm->getReferecePC(), t, R);
 
+		// run the registration process
+	//	runRegistration();
 
 		// return the pose
-		m_model_pose = m_icp->Rt();
+	//	m_model_pose = m_icp->Rt();
 
 
 	}
 
 
+	// switch to registration only
+	m_tracking_state = IDLE;
 }
 
 /*!
@@ -243,7 +288,7 @@ void MainTrackingProcess::runRegistration(void)
 	pose_result = m_icp->Rt();
 	//cout << pose_result << endl;
 
-
+	
 	PointCloudTransform::Transform(&_dm->getReferecePC(), pose_result, false);
 
 	_dm->getReferecePC().pose = pose_result;
@@ -269,17 +314,29 @@ The function returns the 12 best hits by default. Note that this can be reduced 
 bool MainTrackingProcess::getPose(std::vector<Eigen::Affine3f >& poses)
 {
 	
-	assert(m_fd != NULL);
+	//assert(m_fd != NULL);
 
 	m_pose_votes.clear();
 
-	m_fd->getPose(m_model_id, poses, m_pose_votes);
+	//m_fd->getPose(m_model_id, poses, m_pose_votes);
 
 	return true;
 	
 
 }
 
+
+/*
+Update all debug helpers if those are enabled.
+*/
+void MainTrackingProcess::updateHelpers(void)
+{
+	//assert(m_fd);
+
+	_dm->getCameraCurvatures().clear();
+	//m_fd->getSceneCurvature(_dm->getCameraCurvatures());
+
+}
 
 
 
@@ -301,5 +358,14 @@ Eigen::Matrix4f  MainTrackingProcess::getCurrentPose(void)
 	*/
 void MainTrackingProcess::step(void)
 {
+#ifdef _WITH_REGISTRATION
 	runRegistration();
+	#ifdef _WITH_DETECTION
+		#undef _WITH_DETECTION
+	#endif
+#endif
+#ifdef _WITH_DETECTION
+	runDetect();
+#endif
+	
 }

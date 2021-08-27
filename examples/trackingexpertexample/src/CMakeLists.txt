@@ -108,6 +108,8 @@ set(Demo_SRC
 	MainTrackingProcess.h
 	MainTrackingProcess.cpp
 	DebugSwitches.h
+	DebugHelpers.h
+	DebugHelpers.cpp
 )
 
 

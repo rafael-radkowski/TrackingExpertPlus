@@ -55,6 +55,9 @@ typedef struct _CPFDiscreet
 
 }CPFDiscreet;
 
+
+typedef std::vector<CPFDiscreet>  CPFDiscreetVec;
+
 }
 
 // Map for all ppfs 
@@ -87,3 +90,8 @@ typedef struct CPFParams
 
 // to be backward compatible with the old name
 typedef CPFParams CPFToolsParams;
+
+
+
+
+typedef std::vector<uint32_t> CPFCurvatureVec;

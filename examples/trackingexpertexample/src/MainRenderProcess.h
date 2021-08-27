@@ -47,6 +47,8 @@ Last edits:
 
 // ToDo: Remove when ready
 #include "DebugSwitches.h"
+#include "DebugHelpers.h"
+
 
 class MainRenderProcess
 {
@@ -134,6 +136,12 @@ private:
 	void renderPointCloudScene(glm::mat4 pm, glm::mat4 vm);
 
 
+	/*
+	The function renders all graphical helpers in the scene. 
+	*/
+	void renderAndUpdateHelpers(glm::mat4 pm, glm::mat4 vm);
+
+
 	//--------------------------------------------------------------------
 	// Graphics stuff
 
@@ -169,7 +177,10 @@ private:
 	// data manager
 	PointCloudManager* _dm;
 
+	// renders debug visualizations. 
+	DebugHelpers*	   _helper;
+
 };
 
-MainRenderProcess* MainRenderProcess::m_instance = nullptr;
+
 

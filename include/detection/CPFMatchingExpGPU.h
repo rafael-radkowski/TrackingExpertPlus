@@ -44,7 +44,7 @@ Last edits:
 
 namespace texpert {
 
-	class CPFMatchingExpGPU : public CPFMatchingWrapper
+	class CPFMatchingExpGPU : public ICPFMatching
 	{
 	private:
 

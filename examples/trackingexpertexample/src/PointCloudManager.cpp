@@ -1,6 +1,8 @@
 #include "PointCloudManager.h"
 
 
+PointCloudManager* PointCloudManager::m_instance = nullptr;
+
 //static 
 PointCloudManager* PointCloudManager::getInstance()
 {
@@ -103,4 +105,13 @@ bool PointCloudManager::getUpdatePose(void)
 		pc_update = false;
 
 	return ret;
+}
+
+
+/*
+Return the storage for the camera curvatures.
+*/
+std::vector<uint32_t>& PointCloudManager::getCameraCurvatures(void)
+{
+	return m_camera_cu;
 }

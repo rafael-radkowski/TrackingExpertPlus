@@ -245,6 +245,10 @@ bool TrackingExpertDemo::loadReferenceModel(std::string pc_path_and_filename, st
 
 	_dm->getReferecePC().centroid0 = PointCloudUtils::CalcCentroid(&_dm->getReferecePC());
 
+
+	//pass model to tracking process
+	_tracking->addReferenceModel(_dm->getReferecePC(), "ref_model");
+
 	return true;
 
 }
