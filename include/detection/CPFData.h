@@ -36,7 +36,9 @@ Last edited:
 
 class CPFModelData
 {
-public:
+protected:
+	
+	friend class CPFDataDB;
 
 	/*
 	Constructor
@@ -49,10 +51,12 @@ public:
 	*/
 	CPFModelData(PointCloud& points, std::string label);
 
+public:
 	/*
 	Destructor
 	*/
 	~CPFModelData();
+
 
 
 	/*
@@ -164,5 +168,71 @@ private:
 	// the winner poses
 	std::vector< Eigen::Affine3f >					m_poses;
 	std::vector<int >								m_poses_votes;
+
+};
+
+
+
+
+class CPFDataDB{
+private:
+
+	// private constructor
+	CPFDataDB();
+
+public:
+
+	/*
+	Get an instance of the class
+	*/
+	static CPFDataDB* GetInstance(void);
+
+
+	/*
+	Destructor	
+	*/
+	~CPFDataDB();
+
+
+	/*
+	Create a model instance.
+	Note that the function returns an existing instance if one with the same name already exists. 
+	@param points - point cloud reference of type PointCloud
+	@param label - name for this point cloud.
+	@param instance of CPFModelData
+	*/
+	CPFModelData* createModelInstance(PointCloud& points, std::string label);
+
+	/*
+	Create a sceene instance
+	@param points - point cloud reference of type PointCloud
+	@param instance of CPFModelData
+	*/
+	CPFSceneData* createSceneInstance(PointCloud& points);
+
+
+	/*
+	Return model data by name
+	@param label - string containing the label of the model
+	@return pointer to the model data. 
+	*/
+	CPFModelData* getModelData(std::string label);
+	
+	/*
+	Return model data by name
+	@return pointer to the scene data.
+	*/
+	CPFModelData* getSceneData(void);
+
+private:
+
+	// storage for all model data <model label, data>
+	std::unordered_map< std::string, CPFModelData*>	model_data;
+
+	// storage for the scene data
+	CPFSceneData*		scene_data;
+
+
+	static CPFDataDB*	m_instance;
 
 };

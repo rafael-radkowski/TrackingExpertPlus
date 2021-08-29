@@ -59,7 +59,9 @@ public:
 		PointsScene,
 		PointsRef,
 		NormalsScene,
-		NormalsRef
+		NormalsRef,
+		CurvScene,
+		CurvRef
 	}RenderFeature;
 
 	/*

@@ -252,6 +252,9 @@ void MainRenderProcess::setRenderFeature(RenderFeature f, bool enable)
 		case NormalsRef:
 			if (gl_reference_point_cloud) gl_reference_point_cloud->enableNormalRendering(enable);
 			break;
+		case CurvScene:
+			if (gl_reference_point_cloud) _helper->enableRenderer(DebugHelpers::CAM_CURVATURE, enable);
+			break;
 		default:
 			break;
 	}

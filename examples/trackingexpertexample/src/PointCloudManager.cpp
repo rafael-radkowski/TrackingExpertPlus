@@ -108,10 +108,3 @@ bool PointCloudManager::getUpdatePose(void)
 }
 
 
-/*
-Return the storage for the camera curvatures.
-*/
-std::vector<uint32_t>& PointCloudManager::getCameraCurvatures(void)
-{
-	return m_camera_cu;
-}

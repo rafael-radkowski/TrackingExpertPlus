@@ -38,8 +38,8 @@ int CPFDetect::addModel(PointCloud& points, std::string label)
 		return -1;
 	}
 
-
-	m_model_data = new CPFModelData(points, label);
+	// create a new model instance. 
+	m_model_data =  CPFDataDB::GetInstance()->createModelInstance(points, label);
 
 	if (m_verbose) {
 		std::cout << "[INFO] - CPFMatchingExp: start extracting descriptors from " << label << " with " << points.size() << " points." << std::endl;
@@ -75,7 +75,11 @@ bool CPFDetect::setScene(PointCloud& points)
 	}
 
 	// dataset to store the scene data. 
-	m_scene_data = new CPFSceneData(points, "scene data");
+	// note that the scene data instance stores the reference to the point cloud and is automatically "up-to-date"
+	// since it points to the same memory for points. 
+	if(m_scene_data == NULL)
+		m_scene_data = CPFDataDB::GetInstance()->createSceneInstance(points); // create a new instance if none is available
+
 
 	if (m_verbose && m_verbose_level == 2) {
 		std::cout << "[INFO] - CPFMatchingExp: start extracting scene descriptors for " << points.size() << " points." << std::endl;

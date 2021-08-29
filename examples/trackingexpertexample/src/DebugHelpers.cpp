@@ -52,19 +52,30 @@ bool DebugHelpers::renderCameraCurvatures(isu_ar::GLPointCloudRenderer* gl_camer
 	if(gl_camera_point_cloud == NULL)
 		return false;
 
-	if(_render_cam_curvatures)
+	if(!_render_cam_curvatures)
 		return true;
 
-	PointCloudManager* pcm = PointCloudManager::getInstance();
+	// get the data db
+	CPFDataDB* db = CPFDataDB::GetInstance();
+
+	// grab the scene data instance
+	CPFSceneData* sd =  db->getSceneData();
 	
-	if(pcm->getCameraCurvatures().size() == 0)
-		return false;
+	// check that valid. 
+	if(sd != NULL){
+		if (db->getSceneData()->size() == 0)
+			return false;
 
-	std::vector<glm::vec3> colors;
+		std::vector<glm::vec3> colors;
 
-	GLColorCoder::CPF2Color(pcm->getCameraCurvatures(), colors);
+		// convert the curvatures to colors 
+		GLColorCoder::CPF2Color(sd->getCurvature(), colors);
 
-	gl_camera_point_cloud->setPointColors(colors);
+		// set the colors for all points. 
+		gl_camera_point_cloud->setPointColors(colors);
+	}
+	
+	
 
 
 	return true;

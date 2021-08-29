@@ -76,6 +76,10 @@ void CPFMatching::CalculateDescriptors(CPFModelData& data, CPFMatchingParams par
 			if (matches[i].matches[j].distance > 0.0) {
 
 				int id = matches[i].matches[j].second;
+
+				// ToDo: Check this. Id cannot be larger than c.size(). Perhaps old data. 
+				if(id>=c.size()) continue;
+				
 				uint32_t cur2 = c[id];
 
 				// Move the point p1 into the coordinate frame of the point p0

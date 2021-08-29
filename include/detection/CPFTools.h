@@ -55,8 +55,22 @@ public:
 	static Eigen::Affine3f GetRefFrame(Eigen::Vector3f& p, Eigen::Vector3f& n);
 
 	/*!
+	Calculate discrete curvature values for each point. 
+	@param p1 - the point for which the curvature is required. 
+	@param n1 - the normal vector of this point
+	@param pc - a reference to all point cloud data.
+	@param matches - the knn matches for p1 indicating the nearest neighbors 
+	@param range - a scaling factor to numerically increase the value if curvatures are numerically too small. 
+	@return a curvature value a uint32_t
 	*/
 	static uint32_t DiscretizeCurvature(const Eigen::Vector3f& p1, const Eigen::Vector3f& n1, const PointCloud& pc, const MyMatches& matches, const float range = 10.0);
+
+
+	
+	/*
+	Test process to get the discretized curvatures for the point set. 
+	*/
+	static uint32_t DiscretizeCurvatureDev(const Eigen::Vector3f& p1, const Eigen::Vector3f& n1, const PointCloud& pc, const MyMatches& matches, const float range = 10.0);
 
 	/*!
 	*/

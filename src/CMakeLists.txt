@@ -219,10 +219,15 @@ set(Detection_SRC
 	detection/CPFDetect.cpp
 	detection/CPFData.cpp
 	detection/CPFClustering.cpp
+	detection/CPFProjection.cpp
 	${PROJECT_SOURCE_DIR}/include/detection/CPFMatching.h
 	${PROJECT_SOURCE_DIR}/include/detection/CPFDetect.h
 	${PROJECT_SOURCE_DIR}/include/detection/CPFData.h
 	${PROJECT_SOURCE_DIR}/include/detection/CPFClustering.h
+	${PROJECT_SOURCE_DIR}/include/detection/CPFProjection.h
+	
+
+	
 
 
 	detection/CPFMatchingExp.cpp

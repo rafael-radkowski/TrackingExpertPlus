@@ -120,6 +120,11 @@ void MainTrackingProcess::process(void)
 	// Only required if a producer is available, means if a camera is available. 
 	if(m_producer) m_producer->process();
 
+	// add the scene point cloud to the detector. 
+	// note that this sets the scene data only once. 
+	// But the function also triggers camera data processing. 
+	// ToDo: split camera data processing and memory init at one point. 
+	m_detect->setScene(_dm->getCameraPC());
 
 	// stop here if tracking is disabled.
 	if(!m_enable_tracking) return;
@@ -223,12 +228,12 @@ void MainTrackingProcess::runDetect(void)
 	// update the camera point cloud
 	//m_fd->setScene(_dm->getCameraPC());
 	m_detect->setScene(_dm->getCameraPC());
-
+	return;
 	//int ret = m_fd->match(m_model_id);
 	int ret = m_detect->match(0);
 
 
-	cout << "DONE --- " << endl;
+	//cout << "DONE --- " << endl;
 	//m_fd->getPose()
 
 	// positive match
@@ -267,7 +272,7 @@ void MainTrackingProcess::runDetect(void)
 
 
 	// switch to registration only
-	m_tracking_state = IDLE;
+	//m_tracking_state = IDLE;
 }
 
 /*!
@@ -333,7 +338,7 @@ void MainTrackingProcess::updateHelpers(void)
 {
 	//assert(m_fd);
 
-	_dm->getCameraCurvatures().clear();
+	//_dm->getCameraCurvatures().clear();
 	//m_fd->getSceneCurvature(_dm->getCameraCurvatures());
 
 }

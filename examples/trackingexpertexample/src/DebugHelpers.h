@@ -35,6 +35,9 @@ Last edited:
 #include "PointCloudManager.h"
 #include "MatrixConv.h"
 
+// feature detector data
+#include "CPFData.h"
+
 // ToDo: Remove when ready
 #include "DebugSwitches.h"
 

@@ -71,6 +71,16 @@ uint32_t CPFTools::DiscretizeCurvature(const Eigen::Vector3f& p1, const Eigen::V
 }
 
 
+/*
+Test process to get the discretized curvatures for the point set.
+*/
+static uint32_t DiscretizeCurvatureDev(const Eigen::Vector3f& p1, const Eigen::Vector3f& n1, const PointCloud& pc, const MyMatches& matches, const float range)
+{
+
+
+}
+
+
 float max_ang_value = 0.0;
 float min_ang_value = 10000000.0;
 

@@ -69,13 +69,6 @@ public:
 	*/
 	PointCloud& getReferecePC(void);
 
-
-	/*
-	Return the storage for the camera curvatures. 
-	*/
-	std::vector<uint32_t>& getCameraCurvatures(void);
-
-	
 	/*
 	Clear the reference point clouds
 	*/
@@ -130,9 +123,6 @@ private:
 
 	bool						pc_update;
 
-
-	// camera curvatures
-	std::vector<uint32_t>		m_camera_cu;
 
 };
 

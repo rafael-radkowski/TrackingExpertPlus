@@ -26,6 +26,7 @@ TrackingExpertDemo::TrackingExpertDemo()
 	m_render_ref_points = true;
 	m_render_scene_points = true;
 	m_render_eval_points = false;
+	m_enable_curvature_renderer  = false;
 
 	init();
 }
@@ -529,7 +530,12 @@ void TrackingExpertDemo::keyboard_cb(int key, int action)
 			}	
 		case 67://c
 			{
+				if(m_enable_curvature_renderer)
+					m_enable_curvature_renderer = false;
+				else
+					m_enable_curvature_renderer = true;
 
+				_renderer->setRenderFeature(MainRenderProcess::CurvScene, m_enable_curvature_renderer);
 				break;
 			}	
 		case 70:// f
