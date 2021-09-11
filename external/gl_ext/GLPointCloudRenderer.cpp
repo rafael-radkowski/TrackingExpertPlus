@@ -390,7 +390,7 @@ void GLPointCloudRenderer::setPointColors(vector<glm::vec3> per_vertex_color)
 	}
 
 	if (size != _N) {
-		std::cout << "[ERROR] GLPointCloudRenderer::setPointColors - Number of points does not match number of color elements: " << _N << " p != " << size << " n." << std::endl;
+	//	std::cout << "[ERROR] GLPointCloudRenderer::setPointColors - Number of points does not match number of color elements: " << _N << " color != " << size << " points." << std::endl;
 	}
 
 	//Normal vectors

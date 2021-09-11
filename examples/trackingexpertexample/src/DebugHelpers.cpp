@@ -52,8 +52,10 @@ bool DebugHelpers::renderCameraCurvatures(isu_ar::GLPointCloudRenderer* gl_camer
 	if(gl_camera_point_cloud == NULL)
 		return false;
 
-	if(!_render_cam_curvatures)
+	if(!_render_cam_curvatures){
+		gl_camera_point_cloud->setPointColor(glm::vec3(1.0,0.0,0.0));
 		return true;
+	}
 
 	// get the data db
 	CPFDataDB* db = CPFDataDB::GetInstance();
@@ -76,6 +78,49 @@ bool DebugHelpers::renderCameraCurvatures(isu_ar::GLPointCloudRenderer* gl_camer
 	}
 	
 	
+
+
+	return true;
+}
+
+
+
+/*
+Render the curvatures of the reference model.
+@param gl_model_point_cloud - a pointer to the gl render model.
+*/
+bool DebugHelpers::renderModelCurvatures(isu_ar::GLPointCloudRenderer* gl_model_point_cloud)
+{
+
+	if (gl_model_point_cloud == NULL)
+		return false;
+
+	if (!_render_model_curvature) {
+		gl_model_point_cloud->setPointColor(glm::vec3(0.0, 1.0, 0.0));
+		return true;
+	}
+
+	// get the data db
+	CPFDataDB* db = CPFDataDB::GetInstance();
+
+	// grab the scene data instance
+	CPFModelData* sd = db->getModelData("ref_model");
+
+	// check that valid. 
+	if (sd != NULL) {
+		if (sd->size() == 0)
+			return false;
+
+		std::vector<glm::vec3> colors;
+
+		// convert the curvatures to colors 
+		GLColorCoder::CPF2Color(sd->getCurvature(), colors);
+
+		// set the colors for all points. 
+		gl_model_point_cloud->setPointColors(colors);
+	}
+
+
 
 
 	return true;

@@ -206,7 +206,11 @@ void MainRenderProcess::renderAndUpdateHelpers(glm::mat4 pm, glm::mat4 vm)
 {
 	assert(_helper != NULL);
 
+	// render the scene curvataures
 	_helper->renderCameraCurvatures(gl_camera_point_cloud);
+
+	// render the reference model curvatures
+	_helper->renderModelCurvatures(gl_reference_point_cloud);
 }
 
 
@@ -253,7 +257,10 @@ void MainRenderProcess::setRenderFeature(RenderFeature f, bool enable)
 			if (gl_reference_point_cloud) gl_reference_point_cloud->enableNormalRendering(enable);
 			break;
 		case CurvScene:
-			if (gl_reference_point_cloud) _helper->enableRenderer(DebugHelpers::CAM_CURVATURE, enable);
+			if (gl_camera_point_cloud) _helper->enableRenderer(DebugHelpers::CAM_CURVATURE, enable);
+			break;
+		case CurvRef:
+			if (gl_reference_point_cloud) _helper->enableRenderer(DebugHelpers::MODEL_CURVATURE, enable);
 			break;
 		default:
 			break;

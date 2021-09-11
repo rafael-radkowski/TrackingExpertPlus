@@ -27,6 +27,7 @@ TrackingExpertDemo::TrackingExpertDemo()
 	m_render_scene_points = true;
 	m_render_eval_points = false;
 	m_enable_curvature_renderer  = false;
+	m_enable_model_curvature_renderer = false;
 
 	init();
 }
@@ -249,6 +250,7 @@ bool TrackingExpertDemo::loadReferenceModel(std::string pc_path_and_filename, st
 
 	//pass model to tracking process
 	_tracking->addReferenceModel(_dm->getReferecePC(), "ref_model");
+	
 
 	return true;
 
@@ -453,6 +455,18 @@ void TrackingExpertDemo::keyboard_cb(int key, int action)
 				}
 				break;
 			}
+		case 86: //v
+			{
+				if (m_enable_model_curvature_renderer) {
+					m_enable_model_curvature_renderer = false;
+				}
+				else {
+					m_enable_model_curvature_renderer = true;
+				}
+
+				_renderer->setRenderFeature(MainRenderProcess::CurvRef, m_enable_model_curvature_renderer);
+				break;
+			}
 		case 49: // 1
 			{
 				if (_renderer) {
@@ -518,7 +532,7 @@ void TrackingExpertDemo::keyboard_cb(int key, int action)
 			}
 		case 88: // x
 			{
-
+				
 				break;
 			}
 		case 66://b
@@ -530,10 +544,12 @@ void TrackingExpertDemo::keyboard_cb(int key, int action)
 			}	
 		case 67://c
 			{
-				if(m_enable_curvature_renderer)
+				if(m_enable_curvature_renderer){
 					m_enable_curvature_renderer = false;
-				else
+				}
+				else{
 					m_enable_curvature_renderer = true;
+				}
 
 				_renderer->setRenderFeature(MainRenderProcess::CurvScene, m_enable_curvature_renderer);
 				break;

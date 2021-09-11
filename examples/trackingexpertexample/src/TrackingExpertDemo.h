@@ -219,6 +219,7 @@ private:
 	bool				m_render_scene_points;
 	bool				m_render_eval_points;
 	bool				m_enable_curvature_renderer;
+	bool				m_enable_model_curvature_renderer;
 
 };
 

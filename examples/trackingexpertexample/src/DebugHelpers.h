@@ -77,9 +77,16 @@ public:
 	/*
 	Render the curvature values as false colors. 
 	The function access the curvature values stored in the point cloud manager and renders those. 
-	@paraem gl_camera_point_cloud - pointer to the camera point cloud. 
+	@param gl_camera_point_cloud - pointer to the camera point cloud. 
 	*/
 	bool renderCameraCurvatures(isu_ar::GLPointCloudRenderer* gl_camera_point_cloud);
+
+
+	/*
+	Render the curvatures of the reference model. 
+	@param gl_model_point_cloud - a pointer to the gl render model. 
+	*/
+	bool renderModelCurvatures(isu_ar::GLPointCloudRenderer* gl_model_point_cloud);
 
 private:
 

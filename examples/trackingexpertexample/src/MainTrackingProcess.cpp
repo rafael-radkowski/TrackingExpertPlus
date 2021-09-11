@@ -110,6 +110,8 @@ bool MainTrackingProcess::addReferenceModel(PointCloud& model, std::string label
 }
 
 
+
+int count2 = 0;
 /*
 Grab a new frame and process the frame
 including all tracking steps.
@@ -118,7 +120,10 @@ void MainTrackingProcess::process(void)
 {
 	// grab the next camera image and process it. 
 	// Only required if a producer is available, means if a camera is available. 
-	if(m_producer) m_producer->process();
+	if(count2 < 10){
+		if(m_producer) m_producer->process();
+		count2++;
+	}
 
 	// add the scene point cloud to the detector. 
 	// note that this sets the scene data only once. 

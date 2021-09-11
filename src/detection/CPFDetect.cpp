@@ -1,6 +1,6 @@
 #include "CPFDetect.h"
 
-
+#define _TESTING_NAIVE
 /*
 Constructor
 */
@@ -48,9 +48,11 @@ int CPFDetect::addModel(PointCloud& points, std::string label)
 
 	//--------------------------------------------------------
 	// Start calculating descriptors
-
+#ifdef _TESTING_NAIVE
+	CPFMatching::CalculateDescriptorsNaive(*m_model_data, m_params);
+#else
 	CPFMatching::CalculateDescriptors(*m_model_data, m_params);
-
+#endif
 
 	if (m_verbose) {
 		std::cout << "[INFO] - CPFMatchingExp: finished extraction of " << m_model_data->getDescriptor().size() << " descriptors for  " << label << "." << std::endl;
@@ -87,8 +89,11 @@ bool CPFDetect::setScene(PointCloud& points)
 
 	//--------------------------------------------------------
 	// Start calculating descriptors
-
+#ifdef _TESTING_NAIVE
+	CPFMatching::CalculateDescriptorsNaive(*m_scene_data, m_params);
+#else
 	CPFMatching::CalculateDescriptors(*m_scene_data, m_params);
+#endif
 	
 
 	if (m_verbose && m_verbose_level == 2) {
@@ -122,7 +127,13 @@ bool CPFDetect::match(int model_id)
 
 
 	// matching
+
+#ifdef _TESTING_NAIVE
+	CPFMatching::MatchDescriptorsNaive(*m_model_data, *m_scene_data, m_matching_results, m_params);
+#else
 	CPFMatching::MatchDescriptors(*m_model_data, *m_scene_data, m_matching_results, m_params);
+#endif
+
 
 
 	// clustering

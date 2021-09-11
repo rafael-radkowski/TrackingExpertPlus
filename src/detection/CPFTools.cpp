@@ -1,4 +1,5 @@
 #include "CPFTools.h"
+#include "CPFProjection.h"
 
 #define M_PI 3.14159265359
 
@@ -22,7 +23,7 @@ float CPFTools::AngleBetween(const Eigen::Vector3f& a, const Eigen::Vector3f& b)
 
 
 //static 
-Eigen::Affine3f CPFTools::GetRefFrame(Eigen::Vector3f& p, Eigen::Vector3f& n)
+Eigen::Affine3f CPFTools::GetRefFrame(const Eigen::Vector3f& p, const Eigen::Vector3f& n)
 {
 
 	Eigen::Vector3f axis = n.cross(Eigen::Vector3f::UnitX());
@@ -124,4 +125,55 @@ void CPFTools::Reset(void)
 void CPFTools::SetParam(CPFParam& param)
 {
 	angle_bins = param.angle_bins;
+}
+
+
+
+/*
+Test process to get the discretized curvatures for the point set.
+This is a naive implementation to verify the "optimized" implementation
+*/
+//static 
+uint32_t CPFTools::DiscretizeCurvatureNaive(const Eigen::Vector3f& p1, const Eigen::Vector3f& n1, const PointCloud& pc, const MyMatches& matches, const float range)
+{
+
+	int count = 0;
+	float angle_global = 0;
+
+	Eigen::Matrix3f tpt, transform;
+	CPFProjection::GetTangentPlaneTransform(n1, tpt, transform);
+
+	Eigen::Affine3f frame =  CPFTools::GetRefFrame( p1, n1);
+	Eigen::Matrix3f rot = frame.rotation();
+	
+	
+	float cx = 0.0f;
+	float cy = 0.0f;
+
+	for (int i = 0; i < 21; i++) {
+		if (matches.matches[i].distance > 0.0) {
+			int id = matches.matches[i].second;
+			float d = sqrt(matches.matches[i].distance) *  100000.0f;
+			//angle_global += AngleBetween(n1, pc.normals[id]) * range;
+
+			Eigen::Vector3f proj = CPFProjection::ProjectVectorToPlane(pc.normals[id], tpt);
+
+			Eigen::Vector3f projection_local = transform * proj;
+
+			Eigen::Vector3f xproj = CPFProjection::ProjectVectorToVector(proj, Eigen::Vector3f(rot(0), rot(1), rot(2)));
+			Eigen::Vector3f yproj = CPFProjection::ProjectVectorToVector(proj, Eigen::Vector3f(rot(3), rot(4), rot(5)));
+
+			cx += (xproj.norm() * d);
+			cy += (yproj.norm() * d);  // * 100.0f to get from m to mm
+
+			count++;
+			//if(count == 10)break;
+		}
+
+	}
+	float c = std::sqrt(cx*cx+cy*cy) * 10.0f;
+	 
+	uint32_t cc = static_cast<uint32_t>(c / count);
+
+	return cc;
 }

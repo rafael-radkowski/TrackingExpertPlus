@@ -58,10 +58,10 @@ typedef struct CPFMatchingParams {
 
 	CPFMatchingParams()
 	{
-		knn_serach_radius = 0.1;
+		knn_serach_radius = 0.1f;
 
 		cpf_angle_bins = 12;
-		cpf_multiplier = 10.0;
+		cpf_multiplier = 10.0f;
 		verbose = false;
 	}
 }CPFMatchingParams;
@@ -83,6 +83,12 @@ public:
 	static void CalculateDescriptors(CPFModelData& data, CPFMatchingParams params );
 
 
+	/*
+	Naive implementation of the descriptor calculator. 
+	@param data - CPF model data
+	@param params - a parameter set.
+	*/
+	static void CalculateDescriptorsNaive(CPFModelData& data, CPFMatchingParams params);
 
 
 	/*
@@ -95,6 +101,17 @@ public:
 	*/
 	static void  MatchDescriptors(CPFModelData& model_data, CPFSceneData& scene_data,  CPFMatchingData& results, CPFMatchingParams params);
 
+
+
+	/*
+	Match a set of reference descriptors with a swet of scene descriptors.
+	The result is a list of associations between scenen and reference points with similar descriptors.
+	@param model_data - a data set containing curvatures and decriptors of model data of type CPFModelData
+	@param scene_data - a data set containing curvatures and decriptors of model data of type CPFSceneData
+	@param results - matching point pairs.
+	@param params - parameter for the process.
+	*/
+	static void  MatchDescriptorsNaive(CPFModelData& model_data, CPFSceneData& scene_data, CPFMatchingData& results, CPFMatchingParams params);
 
 private:
 

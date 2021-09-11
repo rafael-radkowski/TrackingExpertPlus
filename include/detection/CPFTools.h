@@ -52,7 +52,7 @@ public:
 
 	/*!
 	*/
-	static Eigen::Affine3f GetRefFrame(Eigen::Vector3f& p, Eigen::Vector3f& n);
+	static Eigen::Affine3f GetRefFrame(const Eigen::Vector3f& p, const Eigen::Vector3f& n);
 
 	/*!
 	Calculate discrete curvature values for each point. 
@@ -69,8 +69,9 @@ public:
 	
 	/*
 	Test process to get the discretized curvatures for the point set. 
+	This is a naive implementation to verify the "optimized" implementation
 	*/
-	static uint32_t DiscretizeCurvatureDev(const Eigen::Vector3f& p1, const Eigen::Vector3f& n1, const PointCloud& pc, const MyMatches& matches, const float range = 10.0);
+	static uint32_t DiscretizeCurvatureNaive(const Eigen::Vector3f& p1, const Eigen::Vector3f& n1, const PointCloud& pc, const MyMatches& matches, const float range = 10.0);
 
 	/*!
 	*/
