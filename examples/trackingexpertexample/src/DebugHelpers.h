@@ -88,6 +88,12 @@ public:
 	*/
 	bool renderModelCurvatures(isu_ar::GLPointCloudRenderer* gl_model_point_cloud);
 
+
+	/*
+	Update lines between the individual points. 
+	*/
+	bool renderMatches(isu_ar::GLLineRenderer* gl_line_renderer);
+
 private:
 
 

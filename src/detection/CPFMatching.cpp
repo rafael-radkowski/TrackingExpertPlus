@@ -291,6 +291,14 @@ void CPFMatching::CalculateDescriptorsNaive(CPFModelData& data, CPFMatchingParam
 	}
 
 
+
+	//----------------------------------------------------------------------------------------------------------
+	// Search a second time
+	matches.clear();
+
+	knn->radius(data.getPointCloud(), params.knn_serach_radius * 4.0, matches);
+
+
 	//----------------------------------------------------------------------------------------------------------
 	// Calculate the descriptor
 	d.clear();
@@ -347,6 +355,7 @@ The result is a list of associations between scenen and reference points with si
 //static 
 void CPFMatching::MatchDescriptorsNaive(CPFModelData& model_data, CPFSceneData& scene_data, CPFMatchingData& results, CPFMatchingParams params)
 {
+	params.verbose = true;
 	if (params.verbose) {
 		std::cout << "[INFO] - CPFMatchingExp: Start matching descriptors." << std::endl;
 	}
@@ -366,6 +375,10 @@ void CPFMatching::MatchDescriptorsNaive(CPFModelData& model_data, CPFSceneData& 
 
 	int angle_bins = params.cpf_angle_bins;
 
+
+	std::vector<std::pair<int, int>>& pairs = results.getMatchingPairs();
+	pairs.clear();
+	std::cout << "matches in: " << results.getMatchingPairs().size() << std::endl;
 
 	for (int i = 0; i < model_point_size; i++) {
 
@@ -403,11 +416,16 @@ void CPFMatching::MatchDescriptorsNaive(CPFModelData& model_data, CPFSceneData& 
 					// store the output vote pair
 					results.getVotePairVec().push_back(make_pair(i, alpha));
 
+					// save the matching point pairs
+					pairs.push_back(std::make_pair(src.point_idx, dst.point_idx));
 
+					
 				}
 			}
 
 		}
+
+		
 
 		// -------------------------------------------------------------------
 		// Find the voting winner
@@ -466,6 +484,9 @@ void CPFMatching::MatchDescriptorsNaive(CPFModelData& model_data, CPFSceneData& 
 		}
 
 	}
+
+
+	std::cout << "matches: " << results.getMatchingPairs().size() << std::endl;
 
 	if (params.verbose) {
 		std::cout << "[INFO] - CPFMatchingExp: Found " << results.getPoseCandidatesVotes().size() << " pose candidates." << std::endl;

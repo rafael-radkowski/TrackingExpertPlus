@@ -125,3 +125,20 @@ bool DebugHelpers::renderModelCurvatures(isu_ar::GLPointCloudRenderer* gl_model_
 
 	return true;
 }
+
+
+/*
+Update lines between the individual points.
+*/
+bool DebugHelpers::renderMatches(isu_ar::GLLineRenderer* gl_line_renderer)
+{
+	if (gl_line_renderer == NULL)
+		return false;
+
+	// get the data db
+	CPFDataDB* db = CPFDataDB::GetInstance();
+
+
+	gl_line_renderer->updateMatches(db->GetMatchingData()->getMatchingPairs());
+
+}

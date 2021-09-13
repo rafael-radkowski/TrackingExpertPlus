@@ -81,6 +81,7 @@ CPFCurvatureVec& CPFModelData::getCurvature(void)
 
 
 
+
 CPFMatchingData::CPFMatchingData()
 {
 
@@ -134,6 +135,12 @@ vector<int>& CPFMatchingData::getPoseCandidatesVotes(void)
 }
 
 
+std::vector<std::pair<int, int>>& CPFMatchingData::getMatchingPairs(void)
+{
+	return m_matching_pairs;
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // CPFDataDB 
@@ -144,6 +151,7 @@ CPFDataDB * CPFDataDB::m_instance = nullptr;
 CPFDataDB::CPFDataDB()
 {
 	scene_data = NULL;
+	matching_data = NULL;
 }
 
 
@@ -232,3 +240,25 @@ CPFModelData* CPFDataDB::getSceneData(void)
 	}
 	return scene_data;
 }
+
+
+
+
+/*
+	Return a matching data instance.
+	*/
+CPFMatchingData* CPFDataDB::GetMatchingData(void)
+{
+	if(matching_data == NULL){
+		matching_data = new CPFMatchingData();
+	} 
+	return matching_data;
+	
+}
+
+
+
+
+
+//-----------------------------------------------------------------------------------------------------
+//

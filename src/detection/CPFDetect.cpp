@@ -10,6 +10,8 @@ CPFDetect::CPFDetect()
 	m_scene_data = NULL;
 	m_verbose = true;
 	m_verbose_level = 1;
+
+	m_matching_results = NULL;
 }
 
 /*
@@ -57,6 +59,12 @@ int CPFDetect::addModel(PointCloud& points, std::string label)
 	if (m_verbose) {
 		std::cout << "[INFO] - CPFMatchingExp: finished extraction of " << m_model_data->getDescriptor().size() << " descriptors for  " << label << "." << std::endl;
 	}
+
+
+	// get a matching data instace.
+	// note that the function currently only supports matching data for one object. 
+	// CFPDataDB requires some updates to maintain an instance per model label. 
+	m_matching_results = CPFDataDB::GetInstance()->GetMatchingData();
 
 	return 0;
 }
@@ -127,14 +135,11 @@ bool CPFDetect::match(int model_id)
 
 
 	// matching
-
 #ifdef _TESTING_NAIVE
-	CPFMatching::MatchDescriptorsNaive(*m_model_data, *m_scene_data, m_matching_results, m_params);
+	CPFMatching::MatchDescriptorsNaive(*m_model_data, *m_scene_data, *m_matching_results, m_params);
 #else
-	CPFMatching::MatchDescriptors(*m_model_data, *m_scene_data, m_matching_results, m_params);
+	CPFMatching::MatchDescriptors(*m_model_data, *m_scene_data, *m_matching_results, m_params);
 #endif
-
-
 
 	// clustering
 

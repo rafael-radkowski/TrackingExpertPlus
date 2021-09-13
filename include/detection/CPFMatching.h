@@ -58,10 +58,10 @@ typedef struct CPFMatchingParams {
 
 	CPFMatchingParams()
 	{
-		knn_serach_radius = 0.1f;
+		knn_serach_radius = 0.05f;
 
 		cpf_angle_bins = 12;
-		cpf_multiplier = 10.0f;
+		cpf_multiplier = 100.0f;
 		verbose = false;
 	}
 }CPFMatchingParams;

@@ -148,6 +148,8 @@ void MainRenderProcess::render_fcn(glm::mat4 pm, glm::mat4 vm)
 
 
 
+
+
 #ifdef _WITH_AZURE_OUTPUT
 	// crude and ugly debug helper. Remove!
 	if (g_camera != NULL)
@@ -191,9 +193,9 @@ void MainRenderProcess::renderPointCloudScene(glm::mat4 pm, glm::mat4 vm)
 	gl_reference_eval->draw(pm, vm);
 
 	// render lines between matches
-	//gl_matches->draw(pm, vm);
+	gl_matches->draw(pm, vm);
 	//gl_best_votes->draw(pm, vm);
-	gl_best_pose->draw(pm, vm);
+	//gl_best_pose->draw(pm, vm);
 //
 }
 
@@ -211,6 +213,10 @@ void MainRenderProcess::renderAndUpdateHelpers(glm::mat4 pm, glm::mat4 vm)
 
 	// render the reference model curvatures
 	_helper->renderModelCurvatures(gl_reference_point_cloud);
+
+
+	// render matching lines between the data sets. 
+	_helper->renderMatches(gl_matches);
 }
 
 

@@ -134,10 +134,16 @@ Update the points using the existing references.
 void GLLineRenderer::updatePoints(void)
 {
 
+	if(_src_points0.size() == 0 || _src_points1.size() == 0) {
+		std::cout << "[GLLineRenderer]  - ERROR: insufficient points" << std::endl;
+		return;
+	}
+		
+
 	// update the points
 	int size = _knn_matches.size();
 
-	cout << "[GLLineRenderer] Info - update " << size << " valid matches" << endl;
+	//cout << "[GLLineRenderer] Info - update " << size << " valid matches" << endl;
 
 	if (size > MAX_LINES) {
 		size = MAX_LINES;
@@ -191,6 +197,10 @@ void GLLineRenderer::updatePoints(vector<Eigen::Vector3f>& src_points0, vector<E
 	int size = knn_matches.size();
 	if(size == 0) return;
 
+
+	//_src_points0 = src_points0;
+	//_src_points1 = src_points1;
+
 	//cout << "[GLLineRenderer] Info - update " << size << " valid matches" << endl;
 
 	if (size > MAX_LINES) {
@@ -233,6 +243,14 @@ void GLLineRenderer::updatePoints(vector<Eigen::Vector3f>& src_points0, vector<E
 	glUseProgram(_program);
 	
  	_block.unlock();
+}
+
+
+void GLLineRenderer::updateMatches(std::vector<std::pair<int, int>>& knn_matches)
+{
+	_knn_matches = knn_matches;
+
+	updatePoints();
 }
 
 

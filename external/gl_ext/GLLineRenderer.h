@@ -105,6 +105,11 @@ public:
 	void updatePoints(vector<Eigen::Vector3f>& src_points0, vector<Eigen::Vector3f>& src_points1, std::vector<std::pair<int, int>>& knn_matches);
 
 
+	
+	void updateMatches(std::vector<std::pair<int, int>>& knn_matches);
+
+
+
 	/*
 	Draw the obj model
 	@param viewMatrix - a view matrix object
@@ -152,8 +157,8 @@ private:
 
 	// the point cloud. Note that these are the original points. 
 	// the gl points are re-organized depending on the lines to draw. 
-	vector<Eigen::Vector3f>					_src_points0;
-	vector<Eigen::Vector3f>					_src_points1;
+	vector<Eigen::Vector3f>&				_src_points0;
+	vector<Eigen::Vector3f>&				_src_points1;
 
 	// reference that stores the links between the point clouds. 
 	// The container contains a list with indices pointing from _src_points0 to _src_points1

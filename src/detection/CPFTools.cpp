@@ -90,7 +90,9 @@ CPFDiscreet CPFTools::DiscretizeCPF(const std::uint32_t& c0, const std::uint32_t
 {
 	CPFDiscreet cpf;
 	Eigen::Vector3f p01;
-	float ang =  p0.normalized().dot(p1.normalized()); // [-1,1]
+	//float ang =  p0.normalized().dot(p1.normalized()); // [-1,1]
+	float ang = AngleBetween(p0,p1);
+
 	float ang_deg =  (ang +M_PI);
 	cpf[0] = c0;
 	cpf[1] = c1;
@@ -163,15 +165,15 @@ uint32_t CPFTools::DiscretizeCurvatureNaive(const Eigen::Vector3f& p1, const Eig
 			Eigen::Vector3f xproj = CPFProjection::ProjectVectorToVector(proj, Eigen::Vector3f(rot(0), rot(1), rot(2)));
 			Eigen::Vector3f yproj = CPFProjection::ProjectVectorToVector(proj, Eigen::Vector3f(rot(3), rot(4), rot(5)));
 
-			cx += (xproj.norm() * d);
-			cy += (yproj.norm() * d);  // * 100.0f to get from m to mm
+			cx += (xproj.norm());
+			cy += (yproj.norm() );  // * 100.0f to get from m to mm
 
 			count++;
 			//if(count == 10)break;
 		}
 
 	}
-	float c = std::sqrt(cx*cx+cy*cy) * 10.0f;
+	float c = std::max(cx, cy) * range;
 	 
 	uint32_t cc = static_cast<uint32_t>(c / count);
 

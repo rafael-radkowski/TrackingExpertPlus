@@ -233,7 +233,7 @@ void MainTrackingProcess::runDetect(void)
 	// update the camera point cloud
 	//m_fd->setScene(_dm->getCameraPC());
 	m_detect->setScene(_dm->getCameraPC());
-	return;
+
 	//int ret = m_fd->match(m_model_id);
 	int ret = m_detect->match(0);
 

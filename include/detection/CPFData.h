@@ -113,7 +113,6 @@ using CPFSceneData = CPFModelData;
 
 
 
-
 /*
 @class CPFMatchingData
 
@@ -149,7 +148,15 @@ public:
 
 	vector<int>& getPoseCandidatesVotes(void);
 
+
+	std::vector<std::pair<int, int>>& getMatchingPairs(void);
+
 private:
+	//----------------------------------------------------------------
+	// Matching pairs
+	std::vector<std::pair<int, int>>				m_matching_pairs; // point ids src -> dst of all points with matching descriptors. 
+	
+
 	//----------------------------------------------------------------
 	// Pose candidates and vote pairs for one model
 	std::vector<Eigen::Affine3f >					m_pose_candidates; // stores the pose candidates as Eigen affine matrix. 
@@ -224,6 +231,14 @@ public:
 	*/
 	CPFModelData* getSceneData(void);
 
+
+
+	/*
+	Return a matching data instance. 
+	*/
+	CPFMatchingData*	GetMatchingData(void);
+
+
 private:
 
 	// storage for all model data <model label, data>
@@ -231,6 +246,10 @@ private:
 
 	// storage for the scene data
 	CPFSceneData*		scene_data;
+
+
+	// matching data between the scene and the model
+	CPFMatchingData*	matching_data;
 
 
 	static CPFDataDB*	m_instance;

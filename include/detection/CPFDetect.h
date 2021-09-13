@@ -112,5 +112,5 @@ private:
 
 
 	// stores the matching, voting, and clustering results per object. 
-	CPFMatchingData		m_matching_results;
+	CPFMatchingData*	m_matching_results;
 };
