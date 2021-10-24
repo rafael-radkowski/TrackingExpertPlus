@@ -136,9 +136,9 @@ bool DebugHelpers::renderMatches(isu_ar::GLLineRenderer* gl_line_renderer)
 		return false;
 
 	// get the data db
-	CPFDataDB* db = CPFDataDB::GetInstance();
+	//CPFDataDB* db = CPFDataDB::GetInstance();
 
 
-	gl_line_renderer->updateMatches(db->GetMatchingData()->getMatchingPairs());
+	//gl_line_renderer->updateMatches(db->GetMatchingData()->getMatchingPairs());
 
 }

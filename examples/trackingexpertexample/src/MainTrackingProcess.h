@@ -72,6 +72,7 @@ Last edits:
 
 
 using namespace texpert;
+using namespace texpert_experimental;
 
 class MainTrackingProcess
 {

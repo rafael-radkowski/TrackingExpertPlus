@@ -1,6 +1,8 @@
 #include "CPFData.h"
 
 
+using namespace texpert_experimental;
+
 /*
 Constructor
 */
@@ -75,6 +77,17 @@ CPFCurvatureVec& CPFModelData::getCurvature(void)
 }
 
 
+Eigen::Affine3f CPFModelData::getPose(void)
+{
+	return m_pose;
+}
+
+
+void CPFModelData::setPose(Eigen::Affine3f pose)
+{
+	m_pose = pose;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -106,11 +119,11 @@ void CPFMatchingData::voting_clear(void) {
 
 // function to clear all clusters
 void CPFMatchingData::cluster_clear(void) {
-	m_pose_clusters.clear();
-	m_pose_cluster_votes.clear();
-	m_debug_pose_candidates_id.clear();
-	m_poses.clear();
-	m_poses_votes.clear();
+	//m_pose_clusters.clear();
+//	m_pose_cluster_votes.clear();
+//	m_debug_pose_candidates_id.clear();
+//	m_poses.clear();
+//	m_poses_votes.clear();
 
 }
 
@@ -141,6 +154,71 @@ std::vector<std::pair<int, int>>& CPFMatchingData::getMatchingPairs(void)
 }
 
 
+
+std::vector<Eigen::Affine3f >& CPFMatchingData::getPoseCandidates()
+{
+	return m_pose_candidates;
+}
+
+//std::vector< std::vector<Eigen::Affine3f> >& CPFMatchingData::getPoseCluster(void)
+//{
+//	return m_pose_clusters;
+//}
+//
+//
+//std::vector< std::pair<int, int> > & CPFMatchingData::getPoseClusterVotes(void)
+//{
+//	return m_pose_cluster_votes;
+//}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// CPFClusteringData
+
+CPFClusteringData::CPFClusteringData()
+{
+
+}
+
+
+CPFClusteringData::~CPFClusteringData()
+{
+
+}
+
+std::vector< std::vector<Eigen::Affine3f> >& CPFClusteringData::getPoseCluster(void)
+{
+	return m_pose_clusters;
+}
+
+
+std::vector< std::pair<int, int> >& CPFClusteringData::getPoseClusterVotes(void)
+{
+	return m_pose_cluster_votes;
+}
+
+
+std::vector< Eigen::Affine3f >& CPFClusteringData::getPoses(void)
+{
+	return m_poses;
+}
+
+
+std::vector<int >& CPFClusteringData::getPoseVotes(void)
+{
+	return m_poses_votes;
+}
+
+
+void CPFClusteringData::clear(void)
+{
+	m_pose_clusters.clear();
+	m_pose_cluster_votes.clear();
+	m_poses.clear();
+	m_poses_votes.clear();
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // CPFDataDB 
@@ -152,6 +230,7 @@ CPFDataDB::CPFDataDB()
 {
 	scene_data = NULL;
 	matching_data = NULL;
+	clustring_data = NULL;
 }
 
 
@@ -180,6 +259,10 @@ CPFDataDB::~CPFDataDB()
 
 	if(scene_data != NULL)
 		delete scene_data;
+
+	if (clustring_data != NULL) {
+		delete clustring_data;
+	}
 }
 
 
@@ -256,6 +339,16 @@ CPFMatchingData* CPFDataDB::GetMatchingData(void)
 	
 }
 
+/*
+	Return a pointer to all clusterin data.
+	*/
+CPFClusteringData* CPFDataDB::GetClusteringData(void)
+{
+	if (clustring_data == NULL) {
+		clustring_data = new CPFClusteringData();
+	}
+	return clustring_data;
+}
 
 
 

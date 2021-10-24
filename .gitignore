@@ -51,3 +51,4 @@ examples/antenna_demo/src/AntennaDemo.dir
 tests/dev_detection/
 data/test/Bunny_Experiment_1
 examples/trackingexpertexample/src/TrackingExpertExample.dir/
+tests/test_cpf/test_cpf.dir/

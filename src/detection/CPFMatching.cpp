@@ -3,6 +3,9 @@
 
 #define M_PI 3.14159265359
 
+
+using namespace texpert_experimental;
+
 namespace ns_CPFMatching
 {
 

@@ -44,79 +44,85 @@ Last edited:
 
 #include "CPFData.h"
 
-/*
-Search parameters.
-*/
-typedef struct CPFMatchingParams {
-	float knn_serach_radius; // the radius curvature extractor search radius. 
 
-	int cpf_angle_bins; // the number of histogram bins. 
-	float cpf_multiplier; // value to magnify the curvautures, e.g., x 10 to increase the numerical value. 
-
-
-	bool verbose;
-
-	CPFMatchingParams()
-	{
-		knn_serach_radius = 0.05f;
-
-		cpf_angle_bins = 12;
-		cpf_multiplier = 100.0f;
-		verbose = false;
-	}
-}CPFMatchingParams;
-
-
-
-class CPFMatching
+namespace texpert_experimental
 {
-public:
-	
-	
 
 	/*
-	The class calculates descriptors for the reference model(s). 
-	It uses the point cloud as stored in data, and populates the variables 'descriptors' and 'curvatures'
-	@param data - CPF model data
-	@param params - a parameter set.
+	Search parameters.
 	*/
-	static void CalculateDescriptors(CPFModelData& data, CPFMatchingParams params );
+	typedef struct CPFMatchingParams {
+		float knn_serach_radius; // the radius curvature extractor search radius. 
+
+		int cpf_angle_bins; // the number of histogram bins. 
+		float cpf_multiplier; // value to magnify the curvautures, e.g., x 10 to increase the numerical value. 
 
 
-	/*
-	Naive implementation of the descriptor calculator. 
-	@param data - CPF model data
-	@param params - a parameter set.
-	*/
-	static void CalculateDescriptorsNaive(CPFModelData& data, CPFMatchingParams params);
+		bool verbose;
 
+		CPFMatchingParams()
+		{
+			knn_serach_radius = 0.05f;
 
-	/*
-	Match a set of reference descriptors with a swet of scene descriptors. 
-	The result is a list of associations between scenen and reference points with similar descriptors. 
-	@param model_data - a data set containing curvatures and decriptors of model data of type CPFModelData
-	@param scene_data - a data set containing curvatures and decriptors of model data of type CPFSceneData
-	@param results - matching point pairs. 
-	@param params - parameter for the process. 
-	*/
-	static void  MatchDescriptors(CPFModelData& model_data, CPFSceneData& scene_data,  CPFMatchingData& results, CPFMatchingParams params);
+			cpf_angle_bins = 12;
+			cpf_multiplier = 100.0f;
+			verbose = false;
+
+		}
+	}CPFMatchingParams;
 
 
 
-	/*
-	Match a set of reference descriptors with a swet of scene descriptors.
-	The result is a list of associations between scenen and reference points with similar descriptors.
-	@param model_data - a data set containing curvatures and decriptors of model data of type CPFModelData
-	@param scene_data - a data set containing curvatures and decriptors of model data of type CPFSceneData
-	@param results - matching point pairs.
-	@param params - parameter for the process.
-	*/
-	static void  MatchDescriptorsNaive(CPFModelData& model_data, CPFSceneData& scene_data, CPFMatchingData& results, CPFMatchingParams params);
+	class CPFMatching
+	{
+	public:
 
-private:
 
-	
-	
 
-};
+		/*
+		The class calculates descriptors for the reference model(s).
+		It uses the point cloud as stored in data, and populates the variables 'descriptors' and 'curvatures'
+		@param data - CPF model data
+		@param params - a parameter set.
+		*/
+		static void CalculateDescriptors(CPFModelData& data, CPFMatchingParams params);
 
+
+		/*
+		Naive implementation of the descriptor calculator.
+		@param data - CPF model data
+		@param params - a parameter set.
+		*/
+		static void CalculateDescriptorsNaive(CPFModelData& data, CPFMatchingParams params);
+
+
+		/*
+		Match a set of reference descriptors with a swet of scene descriptors.
+		The result is a list of associations between scenen and reference points with similar descriptors.
+		@param model_data - a data set containing curvatures and decriptors of model data of type CPFModelData
+		@param scene_data - a data set containing curvatures and decriptors of model data of type CPFSceneData
+		@param results - matching point pairs.
+		@param params - parameter for the process.
+		*/
+		static void  MatchDescriptors(CPFModelData& model_data, CPFSceneData& scene_data, CPFMatchingData& results, CPFMatchingParams params);
+
+
+
+		/*
+		Match a set of reference descriptors with a swet of scene descriptors.
+		The result is a list of associations between scenen and reference points with similar descriptors.
+		@param model_data - a data set containing curvatures and decriptors of model data of type CPFModelData
+		@param scene_data - a data set containing curvatures and decriptors of model data of type CPFSceneData
+		@param results - matching point pairs.
+		@param params - parameter for the process.
+		*/
+		static void  MatchDescriptorsNaive(CPFModelData& model_data, CPFSceneData& scene_data, CPFMatchingData& results, CPFMatchingParams params);
+
+	private:
+
+
+
+
+	};
+
+}//namespace texpert::experimental

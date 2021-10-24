@@ -50,67 +50,75 @@ Last edited:
 
 #include "CPFData.h"
 #include "CPFMatching.h"
+#include "CPFClustering.h"
+
+namespace texpert_experimental {
+
+	class CPFDetect
+	{
+	public:
+
+		/*
+		Constructor
+		*/
+		CPFDetect();
+
+		/*
+		Destructor
+		*/
+		~CPFDetect();
 
 
-class CPFDetect
-{
-public:
-
-	/*
-	Constructor
-	*/
-	CPFDetect();
-
-	/*
-	Destructor
-	*/
-	~CPFDetect();
+		/*!
+		Add the reference point set, a point cloud model of an object to detect and track.
+		Note that adding the model will also start the descriptor extraction process.
+		@param points - a reference to a point cloud model containing points and normal vectors.
+		@param label - an object label.
+		@return an model id as integer or -1 if the model was rejected.
+		*/
+		int addModel(PointCloud& points, std::string label);
 
 
-	/*!
-	Add the reference point set, a point cloud model of an object to detect and track.
-	Note that adding the model will also start the descriptor extraction process.
-	@param points - a reference to a point cloud model containing points and normal vectors.
-	@param label - an object label.
-	@return an model id as integer or -1 if the model was rejected.
-	*/
-	int addModel(PointCloud& points, std::string label);
+		/*!
+		Set a scene model or a point cloud from a camera as PointCloud object.
+		Note that adding the model will also start the descriptor extraction process.
+		@param points - point and normal vectors.
+		@return true if the scene was accepted.
+		*/
+		bool setScene(PointCloud& points);
 
 
-	/*!
-	Set a scene model or a point cloud from a camera as PointCloud object.
-	Note that adding the model will also start the descriptor extraction process.
-	@param points - point and normal vectors.
-	@return true if the scene was accepted.
-	*/
-	bool setScene(PointCloud& points);
+		/*!
+		Start the detection and pose estimation process for a model with the id model_id.
+		Invoking this function will start descriptor matching for model_id, voting, and pose clustering.
+		@para model_id - the id of the model to be detected (the int returned from addModel().
+		*/
+		bool match(int model_id);
 
 
-	/*!
-	Start the detection and pose estimation process for a model with the id model_id.
-	Invoking this function will start descriptor matching for model_id, voting, and pose clustering.
-	@para model_id - the id of the model to be detected (the int returned from addModel().
-	*/
-	bool match(int model_id);
+	private:
+
+		// enable text output
+		bool				m_verbose;
+		int					m_verbose_level;
+
+		//TODO: extend to a vector. 
+		// data for one model
+		CPFModelData* m_model_data;
+
+		// dataset to store the scene data. 
+		CPFSceneData* m_scene_data;
+
+		// parameters for descriptor and curvature extraction and matching. 
+		CPFMatchingParams	m_params;
 
 
-private:
-
-	// enable text output
-	bool				m_verbose;
-	int					m_verbose_level;
-
-	//TODO: extend to a vector. 
-	// data for one model
-	CPFModelData*		m_model_data;
-
-	// dataset to store the scene data. 
-	CPFSceneData*		m_scene_data;
-
-	// parameters for descriptor and curvature extraction and matching. 
-	CPFMatchingParams	m_params;
+		// stores the matching and voting results per object. 
+		CPFMatchingData* m_matching_results;
 
 
-	// stores the matching, voting, and clustering results per object. 
-	CPFMatchingData*	m_matching_results;
-};
+		CPFClusteringData* m_clustering_results;
+		CPFClusteringParam	m_cluster_param;
+	};
+
+}

@@ -1,6 +1,10 @@
 #include "CPFDetect.h"
 
 #define _TESTING_NAIVE
+
+
+using namespace texpert_experimental;
+
 /*
 Constructor
 */
@@ -65,7 +69,7 @@ int CPFDetect::addModel(PointCloud& points, std::string label)
 	// note that the function currently only supports matching data for one object. 
 	// CFPDataDB requires some updates to maintain an instance per model label. 
 	m_matching_results = CPFDataDB::GetInstance()->GetMatchingData();
-
+	m_clustering_results = CPFDataDB::GetInstance()->GetClusteringData();
 	return 0;
 }
 
@@ -142,10 +146,16 @@ bool CPFDetect::match(int model_id)
 #endif
 
 	// clustering
-
+	CPFClustering::Clustering(*m_matching_results, *m_clustering_results, m_cluster_param);
 
 	// align and update pose
+	CPFClustering::GetBest(*m_clustering_results, m_cluster_param);
 
+	if (m_clustering_results->getPoses().size() == 0)
+		return false;
+
+
+	m_model_data->setPose(m_clustering_results->getPoses()[0]);
 
 	return true;
 }

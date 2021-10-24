@@ -44,6 +44,8 @@ Last edited:
 // curvature color encoder
 #include "GLColorCoder.h"
 
+using namespace texpert;
+using namespace texpert_experimental;
 
 class DebugHelpers
 {
