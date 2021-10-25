@@ -10,8 +10,6 @@ extern texpert::ICaptureDevice* g_camera;
 int g_counter = 0;
 #endif
 
-MainRenderProcess* MainRenderProcess::m_instance = nullptr;
-
 //static 
 MainRenderProcess* MainRenderProcess::getInstance()
 {
