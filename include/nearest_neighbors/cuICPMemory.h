@@ -9,7 +9,7 @@
 
 // cuda
 #include <curand.h>
-#include <curand_kernel.h>
+//#include <curand_kernel.h>
 
 // local
 #include "Cuda_Types.h"
