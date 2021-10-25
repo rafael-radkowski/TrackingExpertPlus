@@ -268,7 +268,11 @@ bool TrackingExpertDemo::run(void)
 	// init graphics
 	_renderer->initGfx();
 
+#ifdef WIN32
 	Sleep(100);
+#else
+	usleep(100000);
+#endif
 
 #ifdef _WITH_SEQUENTIAL
 	_renderer->addRenderFunction(std::bind(&TrackingExpertDemo::autoProcessFrame, this));
@@ -327,10 +331,11 @@ void TrackingExpertDemo::autoProcessFrame(void)
 		// set the renderer to update
 		_renderer->setUpdate();
 
-
-		
-
-		Sleep(30);
+#ifdef _WIN32
+	        Sleep(30);
+#else
+	        usleep(30000);
+#endif
 
 	}
 

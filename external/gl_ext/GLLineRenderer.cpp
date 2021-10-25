@@ -94,7 +94,10 @@ void GLLineRenderer::init(void)
 	_program = cs557::CreateShaderProgram(vs_string_410, fs_string_410);
 
 	glUseProgram(_program);
-	glBindVertexArray(_vaoID[0]);
+
+
+
+	//glBindVertexArray(_vaoID[0]); (Can't bind vertex array now because vertex array not defined until after CreateVertexObjects33() call, below)
 
 
 	_pos_location = glGetAttribLocation(_program, "in_Position");

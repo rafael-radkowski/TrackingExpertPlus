@@ -47,11 +47,11 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(TBB REQUIRED)
-find_package(GLM REQUIRED)
+find_package(glm REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(GLFW3 REQUIRED)
-FIND_PACKAGE(Cuda REQUIRED)
-FIND_PACKAGE(Cub REQUIRED)
+FIND_PACKAGE(CUDA REQUIRED)
+FIND_PACKAGE(CUB REQUIRED)
 FIND_PACKAGE(OpenGL REQUIRED)
 
 if(${ENABLE_AZURE_KINECT} STREQUAL  ON )
@@ -123,9 +123,9 @@ source_group(src FILES ${Demo_SRC})
 #----------------------------------------------------------------------
 # Compiler standards
 
-add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
+add_compile_definitions(GLM_ENABLE_EXPERIMENTAL _SILENCE_EXPERIMENTAL_DEPRECATION_WARNING)
 
-
+link_directories(BEFORE ${OpenCV_LIBRARY_DIR})
 
 # Create the executable
 add_executable(${ProjectName}
@@ -147,14 +147,22 @@ target_link_libraries(${ProjectName}  ${OpenCV_LIBS})
 target_link_libraries(${ProjectName}  ${TBB_LIBS})
 target_link_libraries(${ProjectName}  ${GLEW_LIBS})
 target_link_libraries(${ProjectName}  ${GLFW3_LIBS})
-target_link_libraries(${ProjectName} optimized ${TRACKINGX_ROOT_DIR}/lib/trackingx.lib)
-target_link_libraries(${ProjectName} debug ${TRACKINGX_ROOT_DIR}/lib/trackingxd.lib)
-target_link_libraries(${ProjectName} debug  ${TRACKINGX_ROOT_DIR}/lib/GLUtilsd.lib )
-target_link_libraries(${ProjectName} optimized  ${TRACKINGX_ROOT_DIR}/lib/GLUtils.lib )
-target_link_libraries(${ProjectName} optimized  cudart.lib )
-target_link_libraries(${ProjectName} debug  cudart.lib )
+if (WIN32) 
+	target_link_libraries(${ProjectName} optimized ${TRACKINGX_ROOT_DIR}/lib/trackingx.lib)
+	target_link_libraries(${ProjectName} debug ${TRACKINGX_ROOT_DIR}/lib/trackingxd.lib)
+	target_link_libraries(${ProjectName} debug  ${TRACKINGX_ROOT_DIR}/lib/GLUtilsd.lib )
+	target_link_libraries(${ProjectName} optimized  ${TRACKINGX_ROOT_DIR}/lib/GLUtils.lib )
+	target_link_libraries(${ProjectName} optimized  cudart.lib )
+	target_link_libraries(${ProjectName} debug  cudart.lib )
+else (WIN32)
+	target_link_libraries(${ProjectName} trackingx GLUtils cudart )
+  endif(WIN32)
 target_link_libraries(${ProjectName} ${GLEW_LIBS} ${GLEW_LIBS} ${GLFW3_LIBS} ${OPENGL_LIBS} ${OPENGL_LIBRARIES} )
 #target_link_libraries(${ProjectName} ${STRUCTURE_LIBRARY} )
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang )
+  target_link_libraries(${ProjectName} stdc++fs )  # support std::experimental::filesystem
+endif()
 
 if(${ENABLE_AZURE_KINECT} STREQUAL  ON )
 	target_link_libraries(${ProjectName}  ${AZUREKINECT_LIBRARY})
@@ -164,13 +172,9 @@ endif()
 # Pre-processor definitions
 
 # add a "d" to all debug libraries
-SET_TARGET_PROPERTIES(${ProjectName} PROPERTIES  DEBUG_POSTFIX "d")
-SET_TARGET_PROPERTIES(${ProjectName} PROPERTIES LINK_FLAGS_RELEASE " /FORCE:MULTIPLE")
-SET_TARGET_PROPERTIES(${ProjectName} PROPERTIES LINK_FLAGS_DEBUG "/FORCE:MULTIPLE ")
-SET_TARGET_PROPERTIES(${ProjectName} PROPERTIES LINK_FLAGS "/FORCE:MULTIPLE")
-
-
-
-
-
-
+if (WIN32)
+  SET_TARGET_PROPERTIES(${ProjectName} PROPERTIES  DEBUG_POSTFIX "d")
+  SET_TARGET_PROPERTIES(${ProjectName} PROPERTIES LINK_FLAGS_RELEASE " /FORCE:MULTIPLE")
+  SET_TARGET_PROPERTIES(${ProjectName} PROPERTIES LINK_FLAGS_DEBUG "/FORCE:MULTIPLE ")
+  SET_TARGET_PROPERTIES(${ProjectName} PROPERTIES LINK_FLAGS "/FORCE:MULTIPLE")
+endif(WIN32)

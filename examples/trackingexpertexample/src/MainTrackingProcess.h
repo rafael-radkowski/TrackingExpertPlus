@@ -45,7 +45,11 @@ Last edits:
 // STL
 #include <iostream>
 #include <string>
+#ifdef _WIN32
 #include <Windows.h>
+#else
+#include <unistd.h>
+#endif
 #include <fstream>
 #include <algorithm>
 #include <functional>
@@ -240,5 +244,3 @@ private:
 	// the global pose of the model 
 	Eigen::Matrix4f						m_model_pose;
 };
-
-
