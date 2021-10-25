@@ -108,6 +108,7 @@ set(test_SRC
 	registration_test.cpp
 	registration_analysis.h
 	registration_analysis.cpp
+	ArgParser.cpp
 )
 
 
