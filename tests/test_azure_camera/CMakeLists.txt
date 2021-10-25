@@ -149,6 +149,10 @@ add_dependencies(${ProjectName} GLUtils)
 
 # preporcessor properties
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
+  # G++ < 9 needs libstdc++fs.a for std::[expermental::]filesystem
+  target_link_libraries(${ProjectName} stdc++fs)
+endif()
 target_link_libraries(${ProjectName}  ${OpenCV_LIBS})
 target_link_libraries(${ProjectName}  ${OpenCV_WORLD_DEBUG})
 target_link_libraries(${ProjectName}  ${TBB_LIBS})

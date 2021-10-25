@@ -402,6 +402,10 @@ add_library(trackingx
 
 # preporcessor properties
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
+  # G++ < 9 needs libstdc++fs.a for std::[expermental::]filesystem
+  target_link_libraries(trackingx stdc++fs)
+endif()
 target_link_libraries(trackingx  ${OpenCV_LIBS})
 target_link_libraries(trackingx  ${TBB_LIBS})
 target_link_libraries(trackingx  ${GLEW_LIBS})
