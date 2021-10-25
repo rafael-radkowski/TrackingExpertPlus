@@ -157,7 +157,6 @@ set(Header_SRC
 	${PROJECT_SOURCE_DIR}/include/utils/RandomGenerator.h
 	${PROJECT_SOURCE_DIR}/include/utils/LogTypes.h
 	${PROJECT_SOURCE_DIR}/include/utils/LogReaderWriter.h
-	${PROJECT_SOURCE_DIR}/include/utils/ArgParser.h
 	${PROJECT_SOURCE_DIR}/include/utils/FileUtilsX.h
 	${PROJECT_SOURCE_DIR}/include/utils/MSVerCheck.h
 	${PROJECT_SOURCE_DIR}/include/utils/MatrixConv.h
@@ -330,7 +329,6 @@ set( Utils_SRC
 	utils/TimeUtils.cpp
 	utils/RandomGenerator.cpp
 	utils/LogReaderWriter.cpp
-	utils/ArgParser.cpp
 	utils/FileUtilsX.cpp
 	utils/MatrixConv.cpp
 )
