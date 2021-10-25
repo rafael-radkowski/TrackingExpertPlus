@@ -7,7 +7,8 @@ using namespace texpert_experimental;
 Constructor
 */
 CPFModelData::CPFModelData():
-	m_points(PointCloud()), m_label("")
+  // Note: Memory leak, as this new pointcloud never gets deleted
+        m_points(*(new PointCloud())), m_label("")
 {
 
 }
