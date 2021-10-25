@@ -11,10 +11,7 @@ MatrixConv* MatrixConv::getInstance()
 	{
 		singleton = new MatrixConv();
 	}
-	else
-	{
-		return singleton;
-	}
+	return singleton;
 }
 
 void MatrixConv::printColMjr(float* mat, int row, int col)
