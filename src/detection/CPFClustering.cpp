@@ -26,7 +26,7 @@ int CPFClustering::Clustering(CPFMatchingData& src_data, CPFClusteringData& dst_
 		Eigen::Affine3f pose = src_data.getPoseCandidates()[i];
 
 		// check whether the new pose fits into an existing cluster
-		for (int j = 0; j < src_data.getPoseCandidates().size(); j++) {
+		for (int j = 0; j < dst_clustering.getPoseCluster().size(); j++) {
 
 			if (similarPose(pose, dst_clustering.getPoseCluster()[j].front(), params)) {
 				cluster_found = true;
